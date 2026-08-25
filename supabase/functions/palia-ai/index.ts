@@ -10,7 +10,7 @@ const CORS = {
 
 const GEMINI_KEY = Deno.env.get("GEMINI_API_KEY") || "";
 const TEXT_MODEL = Deno.env.get("TEXT_MODEL") || "gemini-3.6-flash";
-const IMAGE_MODEL = Deno.env.get("IMAGE_MODEL") || "";
+const IMAGE_MODEL = Deno.env.get("IMAGE_MODEL") || "gemini-3.1-flash-image";
 const DAILY_LIMIT = 7200;
 
 type UsageRow = { date: string; used: number };
@@ -200,19 +200,7 @@ When an image is requested, do not substitute a prompt, SVG, ASCII art, or desig
     if (action === "search") payload.tools = [{ google_search: {} }];
 
     if (action === "image") {
-      if (!IMAGE_MODEL) {
-        return response(
-          {
-            success: false,
-            error:
-              "Actual image generation is not configured. Add an image-capable model name to the Supabase secret IMAGE_MODEL, then redeploy this function.",
-            usage,
-          },
-          503,
-        );
-      }
-
-      // Image-capable Gemini models use image output alongside text.
+      // Current stable Gemini image model. It accepts text + image inputs and returns image + text.
       payload.generationConfig = {
         temperature: 0.7,
         responseModalities: ["TEXT", "IMAGE"],
@@ -228,6 +216,15 @@ When an image is requested, do not substitute a prompt, SVG, ASCII art, or desig
 
     const text = extractText(data);
     const imageUrl = extractImage(data);
+
+    if (action === "image" && !imageUrl) {
+      return response({
+        success: false,
+        error: "The image model returned no image. Check that your Gemini API key has access to the configured image model.",
+        text,
+        usage: getUsage(userId),
+      }, 502);
+    }
 
     return response({
       success: true,

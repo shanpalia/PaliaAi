@@ -71,3 +71,18 @@ Do not put `GEMINI_API_KEY` in `index.html`.
 ## Important
 
 The included two-hour usage counter is an in-memory fallback. For strict production quota enforcement across Edge Function restarts/instances, move usage records to a Supabase table with server-side writes.
+
+
+## Important image-generation fix
+
+The image action defaults to the current stable Gemini image model:
+`gemini-3.1-flash-image`
+
+You may override it with the Supabase secret:
+`IMAGE_MODEL`
+
+Text chat remains on:
+`gemini-3.6-flash`
+
+Deploy:
+`supabase functions deploy palia-ai --no-verify-jwt`

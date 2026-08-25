@@ -24,7 +24,54 @@
 .toolpage{padding:20px}.toolgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:12px}.toolcard{border:1px solid var(--line);border-radius:14px;padding:15px}.toolcard h3{margin:0 0 6px}.primary{background:#0f172a;color:#fff;border:0;border-radius:9px;padding:8px 11px}.confirm{position:fixed;inset:0;background:rgba(15,23,42,.35);z-index:100;display:grid;place-items:center}.confirmbox{background:#fff;border-radius:16px;padding:20px;width:min(380px,90vw);box-shadow:0 20px 60px rgba(0,0,0,.2)}.confirm-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:18px}.confirm-actions button{padding:9px 14px;border-radius:9px;border:1px solid var(--line);background:#fff;cursor:pointer}.confirm-actions .danger{background:#dc2626;color:#fff;border-color:#dc2626}
 @media(max-width:760px){.sidebar{transform:translateX(-100%);transition:.2s}.sidebar.mobileopen{transform:translateX(0)}.main{margin-left:0}.composer-wrap{left:0}.chat{padding:24px 12px 170px}.bubble{max-width:92%}.welcome h1{font-size:30px}.tabs .tab{display:none}}
 @media(min-width:761px){.hamb{display:none}}
-</style></head><body>
+</style>
+<style id="palia-final-ui">
+:root{--palia-green:#10b981;--palia-blue:#2563eb;--text:#111827;--muted:#6b7280;--line:#e5e7eb;--soft:#f7f8fa}
+html,body{height:100%;overflow:hidden}
+body{background:#fff;color:var(--text)}
+.sidebar{width:260px;padding:14px 12px;background:#f7f7f8;border-right:1px solid #e5e7eb}
+.brand{height:48px;padding:0 10px;font-size:19px}
+.logo{width:34px;height:34px;border-radius:10px;background:linear-gradient(135deg,#10b981,#14b8a6)}
+.newchat{width:100%;height:44px;margin:12px 0 9px;border-color:#dfe3e8;background:#fff;font-weight:600}
+.side-search{height:40px;background:#fff}
+.side-title{margin:20px 8px 8px;text-transform:uppercase;letter-spacing:.08em;font-size:10px;font-weight:700}
+.history{padding:0 2px}
+.history-item{min-height:42px;padding:1px 3px}
+.history-title{font-size:13px;padding:9px 8px}
+.chat-menu-btn{opacity:.65}
+.chat-menu-btn:hover{opacity:1}
+.main{margin-left:260px}
+.header{height:58px;padding:0 18px;border-bottom:1px solid #eceef1}
+.tabs{gap:2px}
+.tab{font-size:13px;font-weight:600;color:#667085}
+.tab.active{background:#ecfdf5;color:#047857;box-shadow:inset 0 -2px 0 #10b981}
+.righthead{gap:4px}
+.content{height:calc(100vh - 58px);max-width:none}
+.chat{padding:34px max(18px,calc((100vw - 920px)/2)) 165px;scrollbar-width:thin}
+.messages{max-width:900px;margin:0 auto}
+.msg{width:100%}
+.msg.user .bubble{background:#f0fdf4;border:1px solid #d9f7e9}
+.msg.ai .bubble{background:transparent;padding-left:0;padding-right:0}
+.bubble{font-size:15px;line-height:1.65;max-width:760px}
+.welcome{margin:17vh auto 0}
+.welcome h1{font-size:36px;letter-spacing:-.02em}
+.composer-wrap{left:260px;padding:22px max(14px,calc((100vw - 940px)/2)) 18px;background:linear-gradient(transparent,#fff 32%)}
+.composer{max-width:900px;border:1px solid #d9dde3;border-radius:18px;padding:8px 10px;box-shadow:0 5px 22px rgba(0,0,0,.06)}
+.textarea{font-size:15px}
+.send{width:42px;height:42px;border-radius:12px;background:#111827}
+.attach{background:#f1f3f5}
+.drawer{backdrop-filter:blur(2px)}
+.palia-file-chip{background:#f8fafc!important}
+@media(max-width:760px){
+ .sidebar{width:285px}
+ .main{margin-left:0}
+ .composer-wrap{left:0;padding:12px 10px 10px}
+ .chat{padding:24px 12px 150px}
+ .welcome{margin-top:12vh}
+ .welcome h1{font-size:30px}
+}
+</style>
+</head><body>
 <div id="app"></div>
 <script>
 const CONFIG={
@@ -91,6 +138,7 @@ function render(){
       <div class="history" id="history"></div>
       <div class="bottomside">
         <button class="navbtn" id="tools">⚙ Tools</button>
+        <button class="navbtn" id="archived">📁 Archived Chats</button>
         <button class="navbtn" id="about">ⓘ About Palia AI</button>
       </div>
     </aside>
@@ -261,6 +309,13 @@ async function addFiles(fileList){
 
 function renderHistory(){
   state.conversations=JSON.parse(localStorage.getItem("palia_chats")||"[]");
+  for(const c of state.conversations){
+    const first=(c.messages||[]).find(m=>m.role==="user");
+    if(first && (!c.title || c.title.trim().length<3 || /^[A-Za-z]\s*:$/.test(c.title.trim()))){
+      c.title=String(first.text||"New Chat").replace(/\\s+/g," ").trim().slice(0,42)||"New Chat";
+    }
+  }
+  persistChats();
   const h=$("#history"); if(!h)return;
   const q=($("#chatSearch")?.value||"").toLowerCase();
   const list=state.conversations.filter(x=>!x.archived&&String(x.title||"").toLowerCase().includes(q))
@@ -354,6 +409,16 @@ function bind(){
   $("#settings")?.addEventListener("click",()=>{state.drawer=true;renderDrawer();refreshUsage()});
   $("#share")?.addEventListener("click",()=>navigator.share?navigator.share({title:"Palia AI",text:"Chat with Palia AI"}):alert("Share is not available in this browser."));
   $("#tools")?.addEventListener("click",()=>{state.mode="tools";renderHeader();renderChat();bind()});
+  $("#archived")?.addEventListener("click",()=>{
+    const archived=JSON.parse(localStorage.getItem("palia_chats")||"[]").filter(x=>x.archived);
+    if(!archived.length){alert("No archived chats.");return;}
+    const names=archived.map(x=>"• "+(x.title||"Archived Chat")).join("\n");
+    if(confirm(names+"\n\nRestore all archived chats?")){
+      const all=JSON.parse(localStorage.getItem("palia_chats")||"[]");
+      all.forEach(x=>{if(x.archived)x.archived=false;});
+      localStorage.setItem("palia_chats",JSON.stringify(all));renderHistory();
+    }
+  });
   $("#about")?.addEventListener("click",()=>alert("Palia AI — AI assistant developed by ShanPalia."));
   document.querySelectorAll(".suggest").forEach(b=>b.onclick=()=>{
     state.mode=b.dataset.search?"search":"chat";
@@ -389,9 +454,10 @@ async function send(){
 
   try{
     const wantsImage =
-      (/\b(create|generate|make|draw|design|edit|transform|remove|replace|turn|convert|bana|banao|bana do|de do|karo)\b/i.test(text) &&
+      (/\b(create|generate|make|draw|design|edit|transform|remove|replace|turn|convert|bana|banao|bana do|de do|karo|chahiye|dikhao|do)\b/i.test(text) &&
        /\b(image|icon|logo|picture|photo|background|png|svg|cartoon|3d|avatar|tasveer|photo|icon|logo)\b/i.test(text)) ||
-      (/\b(icon|logo|image|photo)\b/i.test(text) && /\b(bana|banao|de|do|generate|create|make)\b/i.test(text));
+      (/\b(icon|logo|image|photo|tasveer)\b/i.test(text) &&
+       /\b(bana|banao|de|do|generate|create|make|chahiye|dikhao)\b/i.test(text));
 
     const d=await callAI({
       action:state.mode==="search"?"search":wantsImage?"image":"chat",
