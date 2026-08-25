@@ -1,6 +1,6 @@
 import { serve } from "https://deno.land/std@0.224.0/http/server.ts";
 
-const corsHeaders = {
+const CORS = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
   "Access-Control-Allow-Methods": "POST, OPTIONS",
@@ -9,223 +9,143 @@ const corsHeaders = {
 };
 
 const GEMINI_KEY = Deno.env.get("GEMINI_API_KEY") || "";
-const MODEL = "gemini-2.5-flash";
+const MODEL = Deno.env.get("TEXT_MODEL") || "gemini-3.6-flash";
+const IMAGE_MODEL = Deno.env.get("IMAGE_MODEL") || MODEL;
 const LIMIT = 7200;
 
-// Temporary in-memory usage fallback.
-// For persistent enforcement, connect this function to a Supabase table.
-const mem = new Map<string, { date: string; used: number }>();
+const mem = new Map<string,{date:string,used:number}>();
 
-function indiaDate() {
-  return new Intl.DateTimeFormat("en-CA", {
-    timeZone: "Asia/Kolkata",
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-  }).format(new Date());
+function indiaDate(){
+  return new Intl.DateTimeFormat("en-CA",{timeZone:"Asia/Kolkata",year:"numeric",month:"2-digit",day:"2-digit"}).format(new Date());
 }
 
-function usage(userId: string) {
-  const date = indiaDate();
-  let row = mem.get(userId);
-
-  if (!row || row.date !== date) {
-    row = { date, used: 0 };
-    mem.set(userId, row);
-  }
-
-  const remaining = Math.max(0, LIMIT - row.used);
-
+function usage(userId:string){
+  const date=indiaDate();
+  let r=mem.get(userId);
+  if(!r||r.date!==date){r={date,used:0};mem.set(userId,r);}
+  const remaining=Math.max(0,LIMIT-r.used);
   return {
-    user_id: userId,
-    usage_date: date,
-    used_seconds: row.used,
-    daily_limit_seconds: LIMIT,
-    remaining_seconds: remaining,
-    is_limit_reached: remaining <= 0,
-    allowed: remaining > 0,
-    formatted_remaining:
-      remaining >= 3600
-        ? `${Math.floor(remaining / 3600)}h ${Math.floor((remaining % 3600) / 60)}m remaining`
-        : remaining >= 60
-          ? `${Math.floor(remaining / 60)}m remaining`
-          : `${remaining}s remaining`,
+    user_id:userId,usage_date:date,used_seconds:r.used,daily_limit_seconds:LIMIT,
+    remaining_seconds:remaining,is_limit_reached:remaining<=0,allowed:remaining>0,
+    formatted_remaining:remaining>=3600
+      ? `${Math.floor(remaining/3600)}h ${Math.floor((remaining%3600)/60)}m remaining`
+      : remaining>=60 ? `${Math.floor(remaining/60)}m remaining` : `${remaining}s remaining`
   };
 }
 
-async function gemini(payload: any) {
-  if (!GEMINI_KEY) throw new Error("Palia AI backend is not configured: GEMINI_API_KEY is missing.");
+function json(body:any,status=200){
+  return new Response(JSON.stringify(body),{status,headers:CORS});
+}
 
-  const url =
-    `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent?key=` +
-    encodeURIComponent(GEMINI_KEY);
-
-  const r = await fetch(url, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(payload),
-  });
-
-  const d = await r.json();
-
-  if (!r.ok) {
-    throw new Error(d?.error?.message || `AI API error ${r.status}`);
-  }
-
+async function gemini(model:string,payload:any){
+  if(!GEMINI_KEY)throw new Error("GEMINI_API_KEY is not configured.");
+  const url=`https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent?key=${encodeURIComponent(GEMINI_KEY)}`;
+  const r=await fetch(url,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(payload)});
+  const d=await r.json();
+  if(!r.ok)throw new Error(d?.error?.message||`AI API error ${r.status}`);
   return d;
 }
 
-function extract(d: any) {
-  return (
-    d?.candidates?.[0]?.content?.parts
-      ?.filter((p: any) => p.text)
-      .map((p: any) => p.text)
-      .join("\n") || ""
-  );
+function textOf(d:any){
+  return d?.candidates?.[0]?.content?.parts?.filter((p:any)=>p.text).map((p:any)=>p.text).join("\n")||"";
 }
 
-function sources(d: any) {
-  const out: any[] = [];
-
-  for (const c of d?.candidates?.[0]?.groundingMetadata?.groundingChunks || []) {
-    if (c.web?.uri) {
-      out.push({
-        title: c.web.title || c.web.uri,
-        url: c.web.uri,
-        uri: c.web.uri,
-      });
-    }
+function sourcesOf(d:any){
+  const out:any[]=[];
+  for(const c of d?.candidates?.[0]?.groundingMetadata?.groundingChunks||[]){
+    if(c.web?.uri)out.push({title:c.web.title||c.web.uri,url:c.web.uri,uri:c.web.uri});
   }
-
   return out;
 }
 
-serve(async (req) => {
-  // This MUST run before any auth/body handling.
-  if (req.method === "OPTIONS") {
-    return new Response(null, {
-      status: 204,
-      headers: corsHeaders,
-    });
+function partsFromAttachments(attachments:any[]){
+  const parts:any[]=[];
+  for(const a of Array.isArray(attachments)?attachments:[]){
+    if(!a?.data||!String(a.data).startsWith("data:"))continue;
+    const match=String(a.data).match(/^data:([^;]+);base64,(.*)$/s);
+    if(!match)continue;
+    const mime=match[1];
+    const base64=match[2];
+    if(base64.length>140_000_000)continue;
+    parts.push({inlineData:{mimeType:mime,data:base64}});
   }
+  return parts;
+}
 
-  if (req.method !== "POST") {
-    return new Response(JSON.stringify({
-      success: false,
-      error: "Method not allowed",
-    }), {
-      status: 405,
-      headers: corsHeaders,
-    });
-  }
+serve(async(req)=>{
+  if(req.method==="OPTIONS")return new Response(null,{status:204,headers:CORS});
+  if(req.method!=="POST")return json({success:false,error:"Method not allowed"},405);
 
-  try {
-    const b = await req.json();
-    const userId = String(b.userId || "guest");
-    const action = String(b.action || "chat");
-    const u = usage(userId);
+  try{
+    const b=await req.json();
+    const userId=String(b.userId||"guest");
+    const action=String(b.action||"chat");
+    const u=usage(userId);
 
-    if (action === "usage") {
-      return new Response(JSON.stringify({
-        success: true,
-        usage: u,
-      }), {
-        status: 200,
-        headers: corsHeaders,
-      });
-    }
+    if(action==="usage")return json({success:true,usage:u});
+    if(!u.allowed)return json({success:false,isLimitReached:true,error:"Daily AI limit reached. Your 2-hour allowance resets tomorrow.",usage:u},429);
 
-    if (!u.allowed) {
-      return new Response(JSON.stringify({
-        success: false,
-        isLimitReached: true,
-        error: "Daily AI limit reached. Your 2-hour allowance resets tomorrow.",
-        usage: u,
-      }), {
-        status: 429,
-        headers: corsHeaders,
-      });
-    }
+    const prompt=String(b.message||b.query||"").trim();
+    const attachments=Array.isArray(b.attachments)?b.attachments:[];
+    const attachmentParts=partsFromAttachments(attachments);
 
-    const prompt = String(b.message || b.query || "").trim();
+    if(!prompt && !attachmentParts.length)return json({success:false,error:"Please enter a message or attach a file.",usage:u},400);
 
-    if (!prompt) {
-      return new Response(JSON.stringify({
-        success: false,
-        error: "Please enter a message.",
-        usage: u,
-      }), {
-        status: 400,
-        headers: corsHeaders,
-      });
-    }
+    const system="You are Palia AI, a helpful, accurate, friendly multimodal AI assistant developed by ShanPalia. Never mention the underlying model or provider name. Be honest about what you can and cannot do.";
 
-    const system =
-      "You are Palia AI, a helpful, accurate and friendly AI assistant developed by ShanPalia. " +
-      "Never mention or expose the underlying AI model/provider name. " +
-      "Do not fabricate sources or claim an operation was completed when it was not.";
-
-    const contents: any[] = [];
-
-    if (Array.isArray(b.history)) {
-      for (const h of b.history.slice(-20)) {
-        const text = String(h.text || h.content || "").trim();
-        if (!text) continue;
-
-        contents.push({
-          role: h.role === "assistant" || h.role === "model" ? "model" : "user",
-          parts: [{ text }],
-        });
+    const history:any[]=[];
+    if(Array.isArray(b.history)){
+      for(const h of b.history.slice(-20)){
+        const t=String(h.text||h.content||"").trim();
+        if(t)history.push({role:h.role==="assistant"||h.role==="model"?"model":"user",parts:[{text:t}]});
       }
     }
 
-    contents.push({
-      role: "user",
-      parts: [{ text: prompt }],
-    });
-
-    const payload: any = {
-      contents,
-      generationConfig: {
-        temperature: 0.7,
-      },
-      systemInstruction: {
-        parts: [{ text: system }],
-      },
+    const currentParts:any[]=[{text:prompt||"Analyze the attached content and help the user."},...attachmentParts];
+    const payload:any={
+      contents:[...history,{role:"user",parts:currentParts}],
+      generationConfig:{temperature:0.7},
+      systemInstruction:{parts:[{text:system}]}
     };
 
-    if (action === "search") {
-      payload.tools = [{ google_search: {} }];
+    if(action==="search")payload.tools=[{google_search:{}}];
+
+    const start=Date.now();
+
+    if(action==="image"){
+      payload.generationConfig={temperature:0.7,responseModalities:["TEXT","IMAGE"]};
     }
 
-    const start = Date.now();
-    const data = await gemini(payload);
-    const elapsed = Math.max(1, Math.round((Date.now() - start) / 1000));
+    const data=await gemini(action==="image"?IMAGE_MODEL:MODEL,payload);
+    const elapsed=Math.max(1,Math.round((Date.now()-start)/1000));
+    const r=mem.get(userId);if(r)r.used=Math.min(LIMIT,r.used+elapsed);
 
-    const row = mem.get(userId);
-    if (row) row.used = Math.min(LIMIT, row.used + elapsed);
+    let text=textOf(data);
+    let imageUrl="";
 
-    const text = extract(data);
+    for(const p of data?.candidates?.[0]?.content?.parts||[]){
+      const id=p?.inlineData;
+      if(id?.data&&String(id.mimeType||"").startsWith("image/")){
+        imageUrl=`data:${id.mimeType};base64,${id.data}`;
+        break;
+      }
+    }
 
-    return new Response(JSON.stringify({
-      success: true,
-      text: text || "No response generated.",
-      reply: text || "No response generated.",
-      sources: sources(data),
-      searchQueries: action === "search" ? [prompt] : [],
-      modelUsed: "Palia AI",
-      usage: usage(userId),
-    }), {
-      status: 200,
-      headers: corsHeaders,
+    if(action==="image"&&!imageUrl&&!text){
+      text="The configured image-generation model did not return an image. Set IMAGE_MODEL to an image-capable model in Supabase Function secrets.";
+    }
+
+    return json({
+      success:true,
+      text:text||"Done.",
+      reply:text||"Done.",
+      imageUrl,
+      sources:sourcesOf(data),
+      searchQueries:action==="search"?[prompt]:[],
+      modelUsed:"Palia AI",
+      usage:usage(userId)
     });
-  } catch (e) {
-    return new Response(JSON.stringify({
-      success: false,
-      error: e instanceof Error ? e.message : "Palia AI request failed",
-    }), {
-      status: 500,
-      headers: corsHeaders,
-    });
+  }catch(e){
+    return json({success:false,error:e instanceof Error?e.message:"Palia AI request failed"},500);
   }
 });

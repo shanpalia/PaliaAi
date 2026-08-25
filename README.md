@@ -1,34 +1,80 @@
-# Palia AI
+# Palia AI — Complete Multimodal Build
 
-GitHub Pages frontend + Supabase Edge Function backend.
+## What is included
+
+- AI chat
+- Web Search
+- Image understanding
+- Image/file/video attachment UI
+- Image/icon/logo editing requests
+- Optional image generation through `IMAGE_MODEL`
+- Voice input
+- Conversation history
+- Daily 2-hour usage
+- Profile drawer
+- GitHub Pages static frontend
+- Supabase Edge Function backend
+- No Gemini/provider branding in the UI
 
 ## GitHub Pages
-Upload the website files to the repository root and use normal GitHub Pages branch deployment.
+
+Upload the website files to the repository root and use the normal GitHub Pages branch deployment.
 
 ## Supabase
-Deploy `supabase/functions/palia-ai/index.ts` as the `palia-ai` Edge Function.
 
-`supabase/config.toml` contains:
+This repository includes:
+
+`supabase/config.toml`
+
+with:
 
 ```toml
 [functions.palia-ai]
 verify_jwt = false
 ```
 
-Set the Supabase Function Secret:
+Deploy:
 
-`GEMINI_API_KEY`
+```bash
+supabase link --project-ref ralinnuegsbuvlhwpzln
+supabase functions deploy palia-ai --no-verify-jwt
+```
 
-Do NOT put a Gemini secret or Supabase service-role key in `index.html`.
+Set the secret:
 
-In `index.html`, set `window.PALIA_CONFIG.SUPABASE_ANON_KEY` to the Supabase publishable/anon key if the site needs to send it with the function request.
+```bash
+supabase secrets set GEMINI_API_KEY="YOUR_KEY"
+```
 
-The website endpoint is:
-`https://ralinnuegsbuvlhwpzln.supabase.co/functions/v1/palia-ai`
+The current working text model defaults to:
 
-The Edge Function handles:
-- CORS preflight
-- AI chat
-- Web search
-- usage checks
-- 2-hour daily quota (in-memory fallback)
+`gemini-3.6-flash`
+
+You can override it:
+
+```bash
+supabase secrets set TEXT_MODEL="gemini-3.6-flash"
+```
+
+For actual image generation, configure an image-capable Gemini model available to your API key:
+
+```bash
+supabase secrets set IMAGE_MODEL="YOUR_IMAGE_CAPABLE_MODEL"
+```
+
+The image action uses `responseModalities: ["TEXT","IMAGE"]`. If the configured model does not support image output, the function returns a clear configuration error instead of faking an image.
+
+## Security
+
+Do not put:
+
+- GEMINI_API_KEY
+- Supabase service-role key
+
+in `index.html` or GitHub.
+
+The browser only calls the public Edge Function. The Gemini secret stays in Supabase.
+
+## Important usage note
+
+The included 2-hour quota uses Edge Function memory as a simple fallback. For strict production enforcement across function restarts/instances, store usage in a Supabase table with RLS/server-side writes.

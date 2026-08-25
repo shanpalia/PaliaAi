@@ -11,221 +11,383 @@
 <style>
 :root{font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:#0f172a;background:#fff;font-synthesis:none;text-rendering:optimizeLegibility}
 *{box-sizing:border-box}body{margin:0;height:100vh;overflow:hidden;background:#fff}button,input,textarea{font:inherit}button{cursor:pointer}#app{height:100vh;display:flex}.sidebar{width:270px;border-right:1px solid #e5e7eb;background:#fff;display:flex;flex-direction:column;padding:14px;gap:10px}.brand{display:flex;align-items:center;gap:10px;font-weight:800;font-size:17px;padding:8px}.logo{width:34px;height:34px;border-radius:11px;background:#2563eb;color:#fff;display:grid;place-items:center;font-weight:900}.newchat{border:1px solid #dbe2ea;background:#fff;border-radius:12px;padding:11px 13px;text-align:left;font-weight:700}.newchat:hover,.navbtn:hover,.history button:hover{background:#f8fafc}.side-search{padding:10px 11px;border:1px solid #e5e7eb;border-radius:11px;outline:0}.side-title{font-size:11px;color:#94a3b8;font-weight:700;text-transform:uppercase;letter-spacing:.08em;padding:10px 7px 4px}.history{overflow:auto;flex:1}.history button{display:block;width:100%;border:0;background:transparent;text-align:left;padding:10px 9px;border-radius:10px;color:#475569;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.bottomside{border-top:1px solid #eef2f7;padding-top:8px}.navbtn{width:100%;border:0;background:transparent;text-align:left;padding:10px 9px;border-radius:10px;color:#475569}.main{flex:1;min-width:0;display:flex;flex-direction:column}.header{height:58px;border-bottom:1px solid #eef2f7;display:flex;align-items:center;justify-content:space-between;padding:0 18px;background:rgba(255,255,255,.96)}.lefthead,.righthead{display:flex;align-items:center;gap:14px}.hamb{border:0;background:transparent;padding:8px;border-radius:9px}.hamb:hover{background:#f1f5f9}.tabs{display:flex;gap:20px}.tab{border:0;background:transparent;color:#64748b;font-size:13px;font-weight:700;padding:8px 0}.tab.active{color:#2563eb;border-bottom:2px solid #2563eb}.iconbtn{width:36px;height:36px;border:0;background:transparent;border-radius:10px;display:grid;place-items:center;color:#64748b}.iconbtn:hover{background:#f8fafc;color:#0f172a}.avatar{width:34px;height:34px;border-radius:50%;border:1px solid #dbe2ea;background:#eff6ff;color:#2563eb;font-weight:800;display:grid;place-items:center}.content{flex:1;min-height:0;display:flex;flex-direction:column}.chat{flex:1;overflow:auto}.welcome{max-width:850px;margin:auto;padding:60px 24px 20px;text-align:center}.welcome h1{font-size:34px;letter-spacing:-.04em;margin:0 0 10px}.welcome p{color:#64748b;margin:0 0 28px}.suggestions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;text-align:left}.suggest{border:1px solid #e5e7eb;background:#fff;border-radius:14px;padding:14px}.suggest:hover{border-color:#bfdbfe;background:#f8fbff}.messages{max-width:850px;margin:0 auto;padding:24px}.msg{display:flex;gap:12px;margin:0 0 22px}.msg.user{justify-content:flex-end}.bubble{max-width:min(78%,720px);padding:12px 15px;border-radius:16px;line-height:1.55;white-space:pre-wrap;overflow-wrap:anywhere}.msg.user .bubble{background:#2563eb;color:#fff;border-bottom-right-radius:5px}.msg.ai .bubble{background:#f8fafc;border:1px solid #eef2f7;border-bottom-left-radius:5px}.sources{margin-top:10px;display:flex;flex-direction:column;gap:5px}.sources a{font-size:12px;color:#2563eb;text-decoration:none}.composer-wrap{padding:12px 18px 18px;background:#fff}.composer{max-width:850px;margin:auto;border:1px solid #dbe2ea;border-radius:18px;padding:10px;box-shadow:0 6px 30px rgba(15,23,42,.05)}.attachrow{display:flex;gap:8px;align-items:center;margin-bottom:6px}.mode{border:0;background:#f8fafc;border-radius:9px;padding:7px 10px;font-size:12px;color:#475569}.mode.active{background:#eff6ff;color:#2563eb}.inputrow{display:flex;align-items:flex-end;gap:8px}.textarea{flex:1;resize:none;border:0;outline:0;padding:9px;max-height:160px;min-height:42px}.send{width:42px;height:42px;border:0;border-radius:12px;background:#2563eb;color:#fff;display:grid;place-items:center}.send:disabled{opacity:.45;cursor:not-allowed}.attach{width:38px;height:38px;border:0;background:transparent;border-radius:10px;color:#64748b}.attach:hover{background:#f1f5f9}.drawer{position:fixed;inset:0;z-index:50;background:rgba(15,23,42,.28);display:none}.drawer.open{display:block}.panel{position:absolute;right:0;top:0;height:100%;width:min(400px,90vw);background:#fff;box-shadow:-12px 0 40px rgba(15,23,42,.16);padding:18px;overflow:auto}.panelhead{display:flex;align-items:center;justify-content:space-between}.close{border:0;background:#f1f5f9;border-radius:9px;width:34px;height:34px}.profile{margin-top:20px;border:1px solid #e5e7eb;border-radius:18px;padding:16px}.profile h3{margin:0 0 4px}.muted{color:#64748b;font-size:13px}.usage{margin-top:14px;border:1px solid #e5e7eb;border-radius:18px;padding:16px;background:#f8fafc}.usagehead{display:flex;justify-content:space-between;gap:10px;font-size:13px;font-weight:800}.bar{height:9px;background:#e2e8f0;border-radius:999px;overflow:hidden;margin:12px 0}.fill{height:100%;background:#2563eb;border-radius:999px}.statrow{display:flex;justify-content:space-between;color:#64748b;font-size:12px}.panelnav{margin-top:18px;border-top:1px solid #eef2f7}.panelnav button{width:100%;border:0;background:transparent;text-align:left;padding:13px 4px;color:#334155;border-bottom:1px solid #f1f5f9}.toolpage{max-width:1000px;margin:auto;padding:30px 24px;overflow:auto}.toolgrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}.toolcard{border:1px solid #e5e7eb;border-radius:16px;padding:18px;background:#fff}.toolcard h3{margin:0 0 6px}.toolcard p{margin:0;color:#64748b;font-size:13px}.modal{position:fixed;inset:0;background:rgba(15,23,42,.3);display:none;z-index:60;place-items:center;padding:18px}.modal.open{display:grid}.modalbox{background:#fff;width:min(560px,100%);border-radius:20px;padding:20px;box-shadow:0 20px 60px rgba(15,23,42,.18)}.field{width:100%;border:1px solid #dbe2ea;border-radius:11px;padding:11px;outline:0;margin-top:8px}.primary{border:0;background:#2563eb;color:#fff;border-radius:11px;padding:11px 14px;font-weight:700}.typing{display:inline-flex;gap:4px}.typing i{width:6px;height:6px;background:#94a3b8;border-radius:50%;animation:b .9s infinite alternate}.typing i:nth-child(2){animation-delay:.15s}.typing i:nth-child(3){animation-delay:.3s}@keyframes b{to{opacity:.25;transform:translateY(-2px)}}@media(max-width:800px){.sidebar{display:none}.header{padding:0 10px}.tabs{gap:12px}.tabs .tab{font-size:12px}.righthead .iconbtn{display:none}.welcome{padding-top:40px}.welcome h1{font-size:29px}.suggestions{grid-template-columns:1fr}.messages{padding:18px 12px}.bubble{max-width:88%}.composer-wrap{padding:10px}.toolgrid{grid-template-columns:1fr}.panel{width:92vw}}
-</style>
-<style id="palia-attachment-styles">
-.palia-attach-wrap{position:relative;display:inline-flex;align-items:center}
-.palia-plus-btn{width:42px;height:42px;border:0;border-radius:50%;background:#f3f4f6;color:#111827;font-size:25px;line-height:1;cursor:pointer;display:inline-flex;align-items:center;justify-content:center}
-.palia-plus-btn:hover{background:#e5e7eb}
-.palia-attach-menu{position:absolute;left:0;bottom:50px;width:190px;background:#fff;border:1px solid #e5e7eb;border-radius:14px;box-shadow:0 12px 35px rgba(0,0,0,.12);padding:7px;z-index:9999}
-.palia-attach-menu[hidden]{display:none}
-.palia-attach-item{width:100%;display:flex;align-items:center;gap:10px;padding:11px 12px;border:0;background:transparent;border-radius:10px;text-align:left;cursor:pointer;font:inherit;color:#111827}
-.palia-attach-item:hover{background:#f3f4f6}
-.palia-attach-icon{width:28px;text-align:center;font-size:18px}
-#palia-attachment-preview{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 8px}
-.palia-file-chip{position:relative;display:flex;align-items:center;gap:7px;max-width:260px;background:#f8fafc;border:1px solid #e5e7eb;border-radius:11px;padding:6px 8px}
-.palia-file-thumb{width:42px;height:42px;object-fit:cover;border-radius:8px;background:#e5e7eb}
-.palia-file-name{font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:170px}
-.palia-file-remove{width:24px;height:24px;border:0;border-radius:50%;background:#e5e7eb;cursor:pointer;line-height:1}
-.palia-file-error{font-size:12px;color:#b91c1c;margin:4px 0 8px}
-.palia-hidden-input{display:none!important}
-</style>
-
-</head>
-<body><div id="app"></div>
+</style></head><body>
+<div id="app"></div>
 <script>
-const CONFIG={SUPABASE_URL:'https://ralinnuegsbuvlhwpzln.supabase.co',SUPABASE_ANON_KEY:'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJhbGlubnVlZ3NidXZsaHdwemxuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAyOTU2NDIsImV4cCI6MjA5NTg3MTY0Mn0.hIec6UxRx5gzSMTi5oJ3_xXw3d1QKCmKsPF-stBwIFE',FUNCTION_NAME:'palia-ai'};
-const state={messages:[],mode:'chat',query:'',usage:{used_seconds:0,daily_limit_seconds:7200,remaining_seconds:7200},drawer:false,loading:false,userId:'',conversations:[]};
-const $=s=>document.querySelector(s); const esc=s=>String(s??'').replace(/[&<>\"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','\\':'&bsol;','"':'&quot;'}[m]));
-function uid(){let k='palia_user_id';let v=localStorage.getItem(k);if(!v){v='guest_'+crypto.randomUUID();localStorage.setItem(k,v)}return v}
+const CONFIG={
+  SUPABASE_URL:"https://ralinnuegsbuvlhwpzln.supabase.co",
+  FUNCTION_NAME:"palia-ai"
+};
+
+const state={
+  messages:[],
+  mode:"chat",
+  loading:false,
+  drawer:false,
+  userId:"",
+  usage:{used_seconds:0,daily_limit_seconds:7200,remaining_seconds:7200},
+  pendingFiles:[],
+  conversations:[]
+};
+
+const $=s=>document.querySelector(s);
+const esc=s=>String(s??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]));
+
+function uid(){
+  let id=localStorage.getItem("palia_user_id");
+  if(!id){
+    id="guest_"+crypto.randomUUID();
+    localStorage.setItem("palia_user_id",id);
+  }
+  return id;
+}
 state.userId=uid();
-function endpoint(){return CONFIG.SUPABASE_URL.replace(/\/$/,'')+'/functions/v1/'+CONFIG.FUNCTION_NAME}
-async function callAI(payload){if(!CONFIG.SUPABASE_ANON_KEY) throw new Error('Supabase publishable key is not configured. Add it in index.html.');const r=await fetch(endpoint(),{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+CONFIG.SUPABASE_ANON_KEY,'apikey':CONFIG.SUPABASE_ANON_KEY},body:JSON.stringify({...payload,userId:state.userId,timezone:'Asia/Kolkata'})});let d={};try{d=await r.json()}catch{}if(!r.ok)throw Object.assign(new Error(d.error||'AI request failed'),{data:d,status:r.status});return d}
-function fmt(sec){sec=Math.max(0,Math.floor(sec));if(sec<60)return sec+'s';let m=Math.floor(sec/60);let h=Math.floor(m/60);m%=60;return h?`${h}h ${m}m`:m+'m'}
-async function refreshUsage(){try{const d=await callAI({action:'usage'});if(d.usage){state.usage=d.usage;renderHeader();renderDrawer()}}catch(e){console.warn(e)}}
-function render(){document.getElementById('app').innerHTML=`<aside class="sidebar"><div class="brand"><div class="logo">P</div>Palia AI</div><button class="newchat" id="new">＋ New Chat</button><input class="side-search" id="chatSearch" placeholder="Search chats"><div class="side-title">Recent chats</div><div class="history" id="history"></div><div class="bottomside"><button class="navbtn" id="tools">⚙ Tools</button><button class="navbtn" id="about">ⓘ About Palia AI</button></div></aside><main class="main"><header class="header" id="header"></header><section class="content"><div class="chat" id="chat"></div><div class="composer-wrap" id="composer"></div></section></main><div class="drawer" id="drawer"></div><div class="modal" id="modal"></div>`;bind();renderHeader();renderChat();renderHistory();renderDrawer();}
-function renderHeader(){$('#header').innerHTML=`<div class="lefthead"><button class="hamb" id="hamb">☰</button><div class="tabs"><button class="tab ${state.mode==='chat'?'active':''}" data-mode="chat">Chat</button><button class="tab ${state.mode==='tools'?'active':''}" data-mode="tools">Tools</button><button class="tab ${state.mode==='search'?'active':''}" data-mode="search">Web Search</button></div></div><div class="righthead"><button class="iconbtn" id="share" title="Share">↗</button><button class="iconbtn" id="settings" title="Settings">⚙</button><button class="avatar" id="profile" title="Profile">P</button></div>`}
-function renderChat(){const c=$('#chat');if(state.mode==='tools'){c.innerHTML=`<div class="toolpage"><h1>AI Tools</h1><p class="muted">Palia AI tools, all powered by the same assistant.</p><div class="toolgrid"><div class="toolcard"><h3>🧠 AI Chat</h3><p>Ask questions, write, explain and code.</p></div><div class="toolcard"><h3>🌐 Web Search</h3><p>Get fresh answers with live web grounding.</p></div><div class="toolcard"><h3>🖼️ Image AI</h3><p>Upload an image and ask Palia AI to analyze it.</p></div><div class="toolcard"><h3>📄 Document AI</h3><p>Paste document text and summarize or explain it.</p></div><div class="toolcard"><h3>🌍 Translator</h3><p>Translate text into any requested language.</p></div><div class="toolcard"><h3>💻 Coding Assistant</h3><p>Generate, debug and explain code.</p></div><div class="toolcard"><h3>📝 Resume Builder</h3><p>Create professional resume content.</p></div><div class="toolcard"><h3>🎙️ Voice</h3><p>Use your browser microphone and speech synthesis.</p></div><div class="toolcard"><h3>🎨 Image Generation</h3><p>Ask Palia AI to create an image when image generation is enabled.</p></div></div></div>`;$('#composer').innerHTML='';return}
-if(!state.messages.length){c.innerHTML=`<div class="welcome"><h1>Hello, I'm Palia AI</h1><p>How can I help you today?</p><div class="suggestions"><button class="suggest" data-p="Explain something simply">Explain something</button><button class="suggest" data-p="Help me write something professional">Write something</button><button class="suggest" data-p="Help me debug this code">Help me code</button><button class="suggest" data-p="Translate this into Hindi: Hello, how are you?">Translate</button><button class="suggest" data-p="What is the latest news today?" data-search="1">Search the web</button><button class="suggest" data-p="Give me ideas for a professional resume">Build a resume</button></div></div>`}else{c.innerHTML='<div class="messages">'+state.messages.map((m,i)=>`<div class="msg ${m.role==='user'?'user':'ai'}"><div class="bubble">${esc(m.text)}${m.sources?.length?'<div class="sources">'+m.sources.map(s=>`<a href="${esc(s.url||s.uri)}" target="_blank" rel="noopener">${esc(s.title||s.url)}</a>`).join('')+'</div>':''}</div></div>`).join('')+(state.loading?'<div class="msg ai"><div class="bubble"><span class="typing"><i></i><i></i><i></i></span></div></div>':'')+'</div>'}renderComposer();c.scrollTop=c.scrollHeight}
-function renderComposer(){$('#composer').innerHTML=`<div class="composer"><div class="attachrow"><button class="mode ${state.mode==='search'?'active':''}" id="searchMode">${state.mode==='search'?'✓ Web Search':'Web Search'}</button><label class="mode">📎 Image <input id="file" type="file" accept="image/*,.txt,.md" hidden></label></div><div class="inputrow"><textarea class="textarea" id="input" rows="1" placeholder="Message Palia AI..."></textarea><button class="attach" id="mic" title="Voice input">🎙</button><button class="send" id="send">➤</button></div></div>`;$('#input').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();send()}});$('#send').onclick=send;$('#searchMode').onclick=()=>{state.mode=state.mode==='search'?'chat':'search';renderHeader();renderChat();bind()};$('#mic').onclick=voiceInput;$('#file').onchange=e=>handleFile(e.target.files?.[0])}
-function renderHistory(){const h=$('#history');h.innerHTML=state.conversations.map((x,i)=>`<button data-i="${i}">${esc(x.slice(0,38))}</button>`).join('');h.querySelectorAll('button').forEach(b=>b.onclick=()=>{state.messages=[{role:'assistant',text:'Previous conversation loading is not available in this static build yet.'}];renderChat()})}
-function saveConversation(){const first=state.messages.find(m=>m.role==='user');if(!first)return;let arr=JSON.parse(localStorage.getItem('palia_history')||'[]');arr=[first.text,...arr.filter(x=>x!==first.text)].slice(0,30);localStorage.setItem('palia_history',JSON.stringify(arr));state.conversations=arr;renderHistory()}
-function renderDrawer(){const d=$('#drawer');d.innerHTML=`<div class="panel"><div class="panelhead"><strong>Account & Settings</strong><button class="close" id="closeDrawer">×</button></div><div class="profile"><h3>Palia AI</h3><div class="muted">Guest user · ${esc(state.userId.slice(0,18))}</div></div><div class="usage"><div class="usagehead"><span>Daily AI Usage</span><span>${fmt(state.usage.remaining_seconds)} remaining</span></div><div class="bar"><div class="fill" style="width:${Math.min(100,(state.usage.used_seconds/state.usage.daily_limit_seconds)*100)}%"></div></div><div class="statrow"><span>${fmt(state.usage.used_seconds)} used</span><span>2h daily limit</span></div><p class="muted">Resets every day at 12:00 AM (Asia/Kolkata).</p></div><div class="panelnav"><button id="clear">Clear chat history</button><button id="export">Export conversations</button><button id="settings2">Settings</button><button id="about2">About Palia AI</button></div></div>`;d.classList.toggle('open',state.drawer);$('#closeDrawer').onclick=()=>{state.drawer=false;renderDrawer()};d.onclick=e=>{if(e.target===d){state.drawer=false;renderDrawer()}};$('#clear').onclick=()=>{state.messages=[];localStorage.removeItem('palia_history');state.conversations=[];state.drawer=false;renderChat();renderHistory();renderDrawer()};$('#export').onclick=()=>{const blob=new Blob([JSON.stringify(state.messages,null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='palia-ai-chat.json';a.click();URL.revokeObjectURL(a.href)}}
-function bind(){document.querySelectorAll('[data-mode]').forEach(b=>b.onclick=()=>{state.mode=b.dataset.mode;renderHeader();renderChat();bind()});$('#new')?.addEventListener('click',()=>{state.messages=[];state.mode='chat';renderHeader();renderChat();renderHistory()});$('#hamb')?.addEventListener('click',()=>document.querySelector('.sidebar').classList.toggle('mobileopen'));$('#profile')?.addEventListener('click',()=>{state.drawer=true;renderDrawer();refreshUsage()});$('#share')?.addEventListener('click',()=>navigator.share?navigator.share({title:'Palia AI',text:'Chat with Palia AI'}):alert('Share is not available in this browser.'));$('#settings')?.addEventListener('click',()=>{state.drawer=true;renderDrawer()});$('#tools')?.addEventListener('click',()=>{state.mode='tools';renderHeader();renderChat();bind()});$('#about')?.addEventListener('click',()=>alert('Palia AI — AI assistant developed by ShanPalia.'));document.querySelectorAll('.suggest').forEach(b=>b.onclick=()=>{state.mode=b.dataset.search?'search':'chat';renderHeader();renderChat();bind();setTimeout(()=>{$('#input').value=b.dataset.p;send()},0)})}
-async function send(){if(state.loading)return;const input=$('#input');const text=(input?.value||'').trim();if(!text){alert('Please enter a message.');return}state.messages.push({role:'user',text});saveConversation();renderChat();state.loading=true;renderChat();try{const d=await callAI({action:state.mode==='search'?'search':'chat',message:text,history:state.messages.slice(0,-1).map(m=>({role:m.role,text:m.text}))});state.usage=d.usage||state.usage;if(!d.success)throw new Error(d.error||'Palia AI could not answer.');state.messages.push({role:'assistant',text:d.text||d.reply||'No response.',sources:d.sources||[]});}catch(e){state.messages.push({role:'assistant',text:'⚠️ '+e.message});}finally{state.loading=false;renderChat();renderDrawer();}}
-async function handleFile(file){if(!file)return;const input=$('#input');if(file.type.startsWith('image/')){const data=await new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(r.result);r.onerror=rej;r.readAsDataURL(file)});input.value='Analyze this image and explain everything important you can see.';state.pendingImage=data}else if(file.type==='text/plain'||file.name.endsWith('.md')){const text=await file.text();input.value='Analyze this document:\n\n'+text.slice(0,60000)}else alert('For documents, upload TXT/MD in this static version. PDF support can be added with a PDF parser backend.');}
-async function voiceInput(){const SR=window.SpeechRecognition||window.webkitSpeechRecognition;if(!SR){alert('Voice input is not supported in this browser.');return}const r=new SR();r.lang='hi-IN';r.interimResults=false;r.onresult=e=>{$('#input').value=e.results[0][0].transcript};r.start()}
-render();refreshUsage();
+
+function endpoint(){
+  return CONFIG.SUPABASE_URL.replace(/\/$/,"")+"/functions/v1/"+CONFIG.FUNCTION_NAME;
+}
+
+async function callAI(payload){
+  const r=await fetch(endpoint(),{
+    method:"POST",
+    mode:"cors",
+    headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({...payload,userId:state.userId,timezone:"Asia/Kolkata"})
+  });
+  let d={};
+  try{d=await r.json()}catch{}
+  if(!r.ok) throw new Error(d.error||`Palia AI request failed (${r.status})`);
+  return d;
+}
+
+function fmt(sec){
+  sec=Math.max(0,Math.floor(sec||0));
+  if(sec<60)return sec+"s";
+  const m=Math.floor(sec/60), h=Math.floor(m/60), mm=m%60;
+  return h?`${h}h ${mm}m`:m+"m";
+}
+
+function render(){
+  document.getElementById("app").innerHTML=`
+    <aside class="sidebar">
+      <div class="brand"><div class="logo">P</div>Palia AI</div>
+      <button class="newchat" id="new">＋ New Chat</button>
+      <input class="side-search" id="chatSearch" placeholder="Search chats">
+      <div class="side-title">Recent chats</div>
+      <div class="history" id="history"></div>
+      <div class="bottomside">
+        <button class="navbtn" id="tools">⚙ Tools</button>
+        <button class="navbtn" id="about">ⓘ About Palia AI</button>
+      </div>
+    </aside>
+    <main class="main">
+      <header class="header" id="header"></header>
+      <section class="content">
+        <div class="chat" id="chat"></div>
+        <div class="composer-wrap" id="composer"></div>
+      </section>
+    </main>
+    <div class="drawer" id="drawer"></div>
+    <div class="modal" id="modal"></div>`;
+  bind();
+  renderHeader();
+  renderChat();
+  renderHistory();
+  renderDrawer();
+}
+
+function renderHeader(){
+  $("#header").innerHTML=`
+    <div class="lefthead">
+      <button class="hamb" id="hamb">☰</button>
+      <div class="tabs">
+        <button class="tab ${state.mode==="chat"?"active":""}" data-mode="chat">Chat</button>
+        <button class="tab ${state.mode==="tools"?"active":""}" data-mode="tools">Tools</button>
+        <button class="tab ${state.mode==="search"?"active":""}" data-mode="search">Web Search</button>
+      </div>
+    </div>
+    <div class="righthead">
+      <button class="iconbtn" id="share" title="Share">↗</button>
+      <button class="iconbtn" id="settings" title="Settings">⚙</button>
+      <button class="avatar" id="profile" title="Profile">P</button>
+    </div>`;
+}
+
+function renderChat(){
+  const c=$("#chat");
+  if(state.mode==="tools"){
+    c.innerHTML=`
+      <div class="toolpage">
+        <h1>AI Tools</h1>
+        <p class="muted">Use Palia AI naturally. Upload files or simply tell it what you want.</p>
+        <div class="toolgrid">
+          <div class="toolcard"><h3>🧠 AI Chat</h3><p>Ask, write, explain, plan, code and reason.</p></div>
+          <div class="toolcard"><h3>🌐 Web Search</h3><p>Ask for current information with web sources.</p></div>
+          <div class="toolcard"><h3>🖼️ Image Understanding</h3><p>Upload an image and ask what is in it or extract information.</p></div>
+          <div class="toolcard"><h3>🎨 Image Creation</h3><p>Ask Palia AI to create an image when the configured image model supports generation.</p></div>
+          <div class="toolcard"><h3>✏️ Image Editing</h3><p>Upload an image and ask for an icon, logo, background removal or restyle.</p></div>
+          <div class="toolcard"><h3>📄 Files</h3><p>Upload text, PDF, DOC, DOCX and supported files for analysis.</p></div>
+          <div class="toolcard"><h3>🎙️ Voice</h3><p>Use your browser microphone for speech input.</p></div>
+          <div class="toolcard"><h3>🌍 Translator</h3><p>Translate text and uploaded content.</p></div>
+          <div class="toolcard"><h3>💻 Coding</h3><p>Generate, debug and explain code.</p></div>
+        </div>
+      </div>`;
+    $("#composer").innerHTML="";
+    return;
+  }
+
+  if(!state.messages.length){
+    c.innerHTML=`
+      <div class="welcome">
+        <h1>Hello, I'm Palia AI</h1>
+        <p>Ask anything, upload an image or file, search the web, or create something.</p>
+        <div class="suggestions">
+          <button class="suggest" data-p="Explain something simply">Explain something</button>
+          <button class="suggest" data-p="Help me write something professional">Write something</button>
+          <button class="suggest" data-p="Help me debug this code">Help me code</button>
+          <button class="suggest" data-p="Translate this into Hindi: Hello, how are you?">Translate</button>
+          <button class="suggest" data-p="What is the latest news today?" data-search="1">Search the web</button>
+          <button class="suggest" data-p="Give me ideas for a professional resume">Build a resume</button>
+        </div>
+      </div>`;
+  }else{
+    c.innerHTML=`<div class="messages">
+      ${state.messages.map(m=>{
+        const attachments=(m.attachments||[]).map(a=>{
+          if(a.type==="image"){
+            return `<div style="margin-top:8px"><img src="${esc(a.data)}" alt="${esc(a.name)}" style="max-width:280px;max-height:240px;border-radius:12px;display:block"></div>`;
+          }
+          return `<div style="margin-top:8px;padding:8px 10px;border:1px solid #e2e8f0;border-radius:10px;font-size:12px">📄 ${esc(a.name)}</div>`;
+        }).join("");
+        const imageResult=m.imageUrl?`<div style="margin-top:10px"><img src="${esc(m.imageUrl)}" alt="Palia AI generated image" style="max-width:100%;border-radius:14px;display:block"><div style="display:flex;gap:8px;margin-top:8px"><a class="primary" style="text-decoration:none;display:inline-block" href="${esc(m.imageUrl)}" download="palia-ai-image.png">Download</a><button class="mode" onclick="regenerateLast()">Regenerate</button></div></div>`:"";
+        const sources=m.sources?.length?`<div class="sources">${m.sources.map(s=>`<a href="${esc(s.url||s.uri)}" target="_blank" rel="noopener">${esc(s.title||s.url)}</a>`).join("")}</div>`:"";
+        return `<div class="msg ${m.role==="user"?"user":"ai"}"><div class="bubble">${esc(m.text)}${attachments}${imageResult}${sources}</div></div>`;
+      }).join("")}
+      ${state.loading?'<div class="msg ai"><div class="bubble"><span class="typing"><i></i><i></i><i></i></span></div></div>':""}
+    </div>`;
+  }
+  renderComposer();
+  c.scrollTop=c.scrollHeight;
+}
+
+function renderComposer(){
+  $("#composer").innerHTML=`
+    <div class="composer">
+      <div id="attachmentPreview" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:${state.pendingFiles.length?8:0}px">
+        ${state.pendingFiles.map((f,i)=>`
+          <div class="palia-file-chip" style="display:flex;align-items:center;gap:7px;border:1px solid #e2e8f0;border-radius:11px;padding:6px 8px;background:#f8fafc">
+            ${f.type.startsWith("image/")?`<img src="${esc(f.data)}" style="width:42px;height:42px;object-fit:cover;border-radius:8px">`:`<div style="width:42px;height:42px;border-radius:8px;background:#eef2f7;display:grid;place-items:center">📄</div>`}
+            <span style="font-size:12px;max-width:170px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(f.name)}</span>
+            <button type="button" class="palia-file-remove" data-remove="${i}" style="border:0;border-radius:50%;width:24px;height:24px">×</button>
+          </div>`).join("")}
+      </div>
+      <div class="attachrow">
+        <button class="attach" id="plus" title="Add image, video or file" style="font-size:22px">+</button>
+        <button class="mode ${state.mode==="search"?"active":""}" id="searchMode">${state.mode==="search"?"✓ Web Search":"Web Search"}</button>
+        <div id="plusMenu" style="display:none;position:absolute;bottom:86px;margin-left:0;background:#fff;border:1px solid #e5e7eb;border-radius:14px;box-shadow:0 12px 35px rgba(0,0,0,.12);padding:7px;z-index:20">
+          <button class="palia-attach-item" data-kind="image" style="display:block;width:170px;padding:10px;border:0;background:transparent;text-align:left">🖼️ Image</button>
+          <button class="palia-attach-item" data-kind="video" style="display:block;width:170px;padding:10px;border:0;background:transparent;text-align:left">🎥 Video</button>
+          <button class="palia-attach-item" data-kind="file" style="display:block;width:170px;padding:10px;border:0;background:transparent;text-align:left">📄 File</button>
+          <button class="palia-attach-item" data-kind="camera" style="display:block;width:170px;padding:10px;border:0;background:transparent;text-align:left">📷 Camera</button>
+        </div>
+        <input id="imageInput" type="file" accept="image/*" multiple hidden>
+        <input id="videoInput" type="file" accept="video/*" multiple hidden>
+        <input id="fileInput" type="file" accept=".pdf,.doc,.docx,.txt,.md,.csv,image/*,video/*" multiple hidden>
+        <input id="cameraInput" type="file" accept="image/*" capture="environment" hidden>
+      </div>
+      <div class="inputrow">
+        <textarea class="textarea" id="input" rows="1" placeholder="Message Palia AI..."></textarea>
+        <button class="attach" id="mic" title="Voice input">🎙</button>
+        <button class="send" id="send">➤</button>
+      </div>
+    </div>`;
+
+  $("#input").addEventListener("keydown",e=>{
+    if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();send();}
+  });
+  $("#send").onclick=send;
+  $("#mic").onclick=voiceInput;
+  $("#searchMode").onclick=()=>{
+    state.mode=state.mode==="search"?"chat":"search";
+    renderHeader();renderChat();bind();
+  };
+
+  $("#plus").onclick=e=>{
+    e.stopPropagation();
+    const m=$("#plusMenu");
+    m.style.display=m.style.display==="none"?"block":"none";
+  };
+  document.querySelectorAll(".palia-attach-item").forEach(b=>b.onclick=()=>{
+    $("#plusMenu").style.display="none";
+    const k=b.dataset.kind;
+    if(k==="image")$("#imageInput").click();
+    if(k==="video")$("#videoInput").click();
+    if(k==="file")$("#fileInput").click();
+    if(k==="camera")$("#cameraInput").click();
+  });
+  $("#imageInput").onchange=e=>addFiles(e.target.files);
+  $("#videoInput").onchange=e=>addFiles(e.target.files);
+  $("#fileInput").onchange=e=>addFiles(e.target.files);
+  $("#cameraInput").onchange=e=>addFiles(e.target.files);
+  document.querySelectorAll("[data-remove]").forEach(b=>b.onclick=()=>{
+    state.pendingFiles.splice(Number(b.dataset.remove),1);renderComposer();
+  });
+}
+
+async function addFiles(fileList){
+  for(const file of [...fileList]){
+    if(file.size>100*1024*1024){alert(`${file.name} is too large. Maximum 100 MB.`);continue;}
+    const data=await new Promise((resolve,reject)=>{
+      const r=new FileReader();r.onload=()=>resolve(r.result);r.onerror=reject;r.readAsDataURL(file);
+    });
+    state.pendingFiles.push({name:file.name,type:file.type||"application/octet-stream",data:String(data)});
+  }
+  renderComposer();
+}
+
+function renderHistory(){
+  state.conversations=JSON.parse(localStorage.getItem("palia_history")||"[]");
+  const h=$("#history");
+  h.innerHTML=state.conversations.map((x,i)=>`<button data-i="${i}">${esc(x.slice(0,38))}</button>`).join("");
+  h.querySelectorAll("button").forEach(b=>b.onclick=()=>{
+    state.messages=[{role:"assistant",text:"Conversation history is stored locally. Start a new chat to continue from here."}];
+    renderChat();
+  });
+}
+
+function saveConversation(){
+  const first=state.messages.find(m=>m.role==="user");
+  if(!first)return;
+  let arr=JSON.parse(localStorage.getItem("palia_history")||"[]");
+  arr=[first.text,...arr.filter(x=>x!==first.text)].slice(0,30);
+  localStorage.setItem("palia_history",JSON.stringify(arr));
+  renderHistory();
+}
+
+function renderDrawer(){
+  const d=$("#drawer");
+  const pct=state.usage.daily_limit_seconds?Math.min(100,(state.usage.used_seconds/state.usage.daily_limit_seconds)*100):0;
+  d.innerHTML=`
+    <div class="panel">
+      <div class="panelhead"><strong>Account & Settings</strong><button class="close" id="closeDrawer">×</button></div>
+      <div class="profile"><h3>Palia AI</h3><div class="muted">Guest user · ${esc(state.userId.slice(0,18))}</div></div>
+      <div class="usage">
+        <div class="usagehead"><span>Daily AI Usage</span><span>${fmt(state.usage.remaining_seconds)} remaining</span></div>
+        <div class="bar"><div class="fill" style="width:${pct}%"></div></div>
+        <div class="statrow"><span>${fmt(state.usage.used_seconds)} used</span><span>2h daily limit</span></div>
+        <p class="muted">Resets every day at 12:00 AM (Asia/Kolkata).</p>
+      </div>
+      <div class="panelnav">
+        <button id="clear">Clear chat history</button>
+        <button id="export">Export conversation</button>
+        <button id="about2">About Palia AI</button>
+      </div>
+    </div>`;
+  d.classList.toggle("open",state.drawer);
+  $("#closeDrawer").onclick=()=>{state.drawer=false;renderDrawer()};
+  d.onclick=e=>{if(e.target===d){state.drawer=false;renderDrawer()}};
+  $("#clear").onclick=()=>{state.messages=[];localStorage.removeItem("palia_history");state.drawer=false;render();};
+  $("#export").onclick=()=>{
+    const blob=new Blob([JSON.stringify(state.messages,null,2)],{type:"application/json"});
+    const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="palia-ai-chat.json";a.click();
+  };
+  $("#about2").onclick=()=>alert("Palia AI — AI assistant developed by ShanPalia.");
+}
+
+function bind(){
+  document.querySelectorAll("[data-mode]").forEach(b=>b.onclick=()=>{
+    state.mode=b.dataset.mode;renderHeader();renderChat();bind();
+  });
+  $("#new")?.addEventListener("click",()=>{state.messages=[];state.pendingFiles=[];state.mode="chat";renderHeader();renderChat();renderHistory()});
+  $("#hamb")?.addEventListener("click",()=>document.querySelector(".sidebar").classList.toggle("mobileopen"));
+  $("#profile")?.addEventListener("click",()=>{state.drawer=true;renderDrawer();refreshUsage()});
+  $("#settings")?.addEventListener("click",()=>{state.drawer=true;renderDrawer();refreshUsage()});
+  $("#share")?.addEventListener("click",()=>navigator.share?navigator.share({title:"Palia AI",text:"Chat with Palia AI"}):alert("Share is not available in this browser."));
+  $("#tools")?.addEventListener("click",()=>{state.mode="tools";renderHeader();renderChat();bind()});
+  $("#about")?.addEventListener("click",()=>alert("Palia AI — AI assistant developed by ShanPalia."));
+  document.querySelectorAll(".suggest").forEach(b=>b.onclick=()=>{
+    state.mode=b.dataset.search?"search":"chat";
+    renderHeader();renderChat();bind();
+    setTimeout(()=>{$("#input").value=b.dataset.p;send()},0);
+  });
+}
+
+async function refreshUsage(){
+  try{
+    const d=await callAI({action:"usage"});
+    if(d.usage){state.usage=d.usage;renderHeader();renderDrawer();}
+  }catch(e){console.warn("Usage:",e.message);}
+}
+
+function makeHistory(){
+  return state.messages.filter(m=>m.role==="user"||m.role==="assistant").slice(-20).map(m=>({role:m.role,text:m.text}));
+}
+
+async function send(){
+  if(state.loading)return;
+  const input=$("#input");
+  const text=(input?.value||"").trim();
+  if(!text && !state.pendingFiles.length){alert("Please enter a message or attach a file.");return;}
+
+  const attachments=state.pendingFiles.map(x=>({...x}));
+  state.messages.push({role:"user",text:text||"Please analyze the attached file(s).",attachments});
+  saveConversation();
+  state.pendingFiles=[];
+  renderChat();
+  state.loading=true;
+  renderChat();
+
+  try{
+    const wantsImage=/\b(create|generate|make|draw|design|edit|transform|remove|replace|turn|convert)\b/i.test(text) &&
+      /\b(image|icon|logo|picture|photo|background|png|svg|cartoon|3d|avatar)\b/i.test(text);
+
+    const d=await callAI({
+      action:state.mode==="search"?"search":wantsImage?"image":"chat",
+      message:text,
+      history:makeHistory().slice(0,-1),
+      attachments
+    });
+
+    if(!d.success)throw new Error(d.error||"Palia AI could not answer.");
+    state.usage=d.usage||state.usage;
+
+    state.messages.push({
+      role:"assistant",
+      text:d.text||d.reply||"",
+      sources:d.sources||[],
+      imageUrl:d.imageUrl||""
+    });
+  }catch(e){
+    state.messages.push({role:"assistant",text:"⚠️ "+e.message});
+  }finally{
+    state.loading=false;
+    renderChat();
+    renderDrawer();
+  }
+}
+
+async function regenerateLast(){
+  const last=state.messages.filter(m=>m.role==="user").pop();
+  if(!last)return;
+  const original=[...state.messages];
+  state.messages=state.messages.slice(0,-1);
+  state.pendingFiles=last.attachments||[];
+  const input=$("#input");
+  if(input)input.value=last.text;
+  await send();
+  if(!state.messages.length)state.messages=original;
+}
+
+async function voiceInput(){
+  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+  if(!SR){alert("Voice input is not supported in this browser.");return;}
+  const r=new SR();
+  r.lang="hi-IN";r.interimResults=false;
+  r.onresult=e=>{$("#input").value=e.results[0][0].transcript};
+  r.start();
+}
+
+render();
+refreshUsage();
 </script>
-<script id="palia-attachment-system">
-(function(){
-  if(window.__paliaAttachmentSystemLoaded) return;
-  window.__paliaAttachmentSystemLoaded=true;
-
-  function makeEl(tag, attrs, text){
-    const e=document.createElement(tag);
-    if(attrs) Object.keys(attrs).forEach(k=>{
-      if(k==="class") e.className=attrs[k];
-      else if(k==="html") e.innerHTML=attrs[k];
-      else e.setAttribute(k,attrs[k]);
-    });
-    if(text!==undefined) e.textContent=text;
-    return e;
-  }
-
-  function findComposer(){
-    const inputs=[...document.querySelectorAll("textarea,input[type='text'],[contenteditable='true']")];
-    return inputs.find(e=>{
-      const r=e.getBoundingClientRect();
-      return r.width>180 && r.height>25;
-    }) || inputs[0];
-  }
-
-  function findSendButton(){
-    const buttons=[...document.querySelectorAll("button")];
-    return buttons.find(b=>{
-      const t=(b.getAttribute("aria-label")||b.title||b.textContent||"").toLowerCase();
-      return /send/.test(t);
-    });
-  }
-
-  function setup(){
-    if(document.getElementById("palia-attach-root")) return;
-
-    const composer=findComposer();
-    if(!composer) return;
-
-    const host=composer.closest("form") || composer.parentElement;
-    if(!host) return;
-
-    const root=makeEl("div",{id:"palia-attach-root",class:"palia-attach-wrap"});
-    const plus=makeEl("button",{type:"button",class:"palia-plus-btn","aria-label":"Add attachment","title":"Add attachment"},"+");
-    const menu=makeEl("div",{class:"palia-attach-menu"});
-    menu.hidden=true;
-
-    const preview=makeEl("div",{id:"palia-attachment-preview"});
-    const error=makeEl("div",{class:"palia-file-error"});
-    error.hidden=true;
-
-    const inputImage=makeEl("input",{type:"file",accept:"image/jpeg,image/png,image/webp",multiple:""});
-    const inputVideo=makeEl("input",{type:"file",accept:"video/mp4,video/quicktime,video/webm",multiple:""});
-    const inputFile=makeEl("input",{type:"file",accept:".pdf,.doc,.docx,.txt,.md,.csv,application/pdf,text/plain",multiple:""});
-    const inputCamera=makeEl("input",{type:"file",accept:"image/*","capture":"environment"});
-
-    [inputImage,inputVideo,inputFile,inputCamera].forEach(x=>x.className="palia-hidden-input");
-
-    const options=[
-      ["🖼️","Image",inputImage],
-      ["🎥","Video",inputVideo],
-      ["📄","File",inputFile],
-      ["📷","Camera",inputCamera]
-    ];
-
-    options.forEach(([icon,label,input])=>{
-      const b=makeEl("button",{type:"button",class:"palia-attach-item"});
-      b.append(makeEl("span",{class:"palia-attach-icon"},icon),document.createTextNode(label));
-      b.addEventListener("click",()=>{menu.hidden=true;input.click()});
-      menu.appendChild(b);
-    });
-
-    root.append(plus,menu,inputImage,inputVideo,inputFile,inputCamera);
-
-    // Put preview above the input area, and plus immediately before the input.
-    const parent=composer.parentElement;
-    if(parent){
-      parent.insertBefore(preview,composer);
-      parent.insertBefore(error,composer);
-    }
-    composer.parentElement.insertBefore(root,composer);
-
-    const attachments=[];
-    function render(){
-      preview.innerHTML="";
-      attachments.forEach((file,i)=>{
-        const chip=makeEl("div",{class:"palia-file-chip"});
-        if(file.type.startsWith("image/")){
-          const img=makeEl("img",{class:"palia-file-thumb",alt:file.name});
-          img.src=URL.createObjectURL(file);
-          chip.appendChild(img);
-        } else {
-          chip.appendChild(makeEl("div",{class:"palia-file-thumb","aria-hidden":"true",html:
-            file.type.startsWith("video/")?"🎥":"📄"
-          }));
-        }
-        chip.appendChild(makeEl("span",{class:"palia-file-name",title:file.name},file.name));
-        const rm=makeEl("button",{type:"button",class:"palia-file-remove","aria-label":"Remove "+file.name},"×");
-        rm.addEventListener("click",()=>{
-          attachments.splice(i,1); render();
-        });
-        chip.appendChild(rm);
-        preview.appendChild(chip);
-      });
-      window.paliaAttachments=attachments.slice();
-      window.dispatchEvent(new CustomEvent("palia-attachments-changed",{detail:{files:attachments.slice()}}));
-    }
-
-    function addFiles(files, kind){
-      error.hidden=true; error.textContent="";
-      const max={
-        image:10*1024*1024,
-        video:100*1024*1024,
-        file:25*1024*1024
-      }[kind] || 25*1024*1024;
-
-      [...files].forEach(file=>{
-        if(file.size>max){
-          error.textContent=file.name+" is too large.";
-          error.hidden=false;
-          return;
-        }
-        attachments.push(file);
-      });
-      render();
-    }
-
-    inputImage.addEventListener("change",e=>addFiles(e.target.files,"image"));
-    inputVideo.addEventListener("change",e=>addFiles(e.target.files,"video"));
-    inputFile.addEventListener("change",e=>addFiles(e.target.files,"file"));
-    inputCamera.addEventListener("change",e=>addFiles(e.target.files,"image"));
-
-    plus.addEventListener("click",e=>{
-      e.stopPropagation();
-      menu.hidden=!menu.hidden;
-    });
-    document.addEventListener("click",e=>{
-      if(!root.contains(e.target)) menu.hidden=true;
-    });
-    document.addEventListener("keydown",e=>{
-      if(e.key==="Escape") menu.hidden=true;
-    });
-
-    // Expose helper for the existing chat send handler.
-    window.getPaliaAttachments=function(){return attachments.slice()};
-    window.clearPaliaAttachments=function(){
-      attachments.splice(0,attachments.length);
-      [inputImage,inputVideo,inputFile,inputCamera].forEach(x=>x.value="");
-      render();
-    };
-
-    // Add a subtle event hook for existing forms; do not intercept normal sending.
-    const form=composer.closest("form");
-    if(form){
-      form.addEventListener("submit",()=>{
-        window.dispatchEvent(new CustomEvent("palia-send-with-attachments",{
-          detail:{files:attachments.slice()}
-        }));
-      },true);
-    }
-
-    render();
-  }
-
-  const observer=new MutationObserver(()=>setup());
-  observer.observe(document.documentElement,{childList:true,subtree:true});
-  if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",setup);
-  else setup();
-  setTimeout(setup,500);
-  setTimeout(setup,1500);
-})();
-</script>
-
 </body></html>
