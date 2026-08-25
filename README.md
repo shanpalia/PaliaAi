@@ -38,15 +38,38 @@ After changing the Edge Function, **redeploy it**. Updating only GitHub Pages do
 After changing `index.html`, commit/push the new root `index.html` to GitHub Pages.
 
 
-## V2 critical image fix
+## FINAL MULTIMODAL ARCHITECTURE
 
-The Edge Function now independently detects image requests such as:
-- "PaliaAPK HUB ka icon chahiye"
-- "PaliaAPK HUB ke liye icon bana do"
-- "is photo ko edit karo"
+Image generation is now a **separate Supabase Edge Function**:
+`palia-ai-image`
 
-It forces the image-capable Gemini model even if the browser sends `action=chat`.
-Primary image model: `gemini-3.1-flash-image`.
-Fallback: `gemini-3.1-flash-lite-image`.
+This is intentional: it prevents the old text-only `palia-ai` deployment from ever handling image-generation requests.
 
-Deploy both the frontend and the Edge Function after replacing the old files.
+### Deploy BOTH functions
+
+```bash
+supabase functions deploy palia-ai --no-verify-jwt
+supabase functions deploy palia-ai-image --no-verify-jwt
+```
+
+### Secret
+
+The same existing secret is used:
+
+```bash
+supabase secrets set GEMINI_API_KEY="YOUR_EXISTING_KEY"
+```
+
+Optional model override:
+
+```bash
+supabase secrets set IMAGE_MODEL="gemini-3.1-flash-image"
+```
+
+The frontend automatically sends image requests to:
+`/functions/v1/palia-ai-image`
+
+Normal chat/search continues to use:
+`/functions/v1/palia-ai`
+
+Google's current Gemini API documentation confirms `gemini-3.1-flash-image` supports native image generation with `responseModalities: ["TEXT","IMAGE"]`.

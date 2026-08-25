@@ -1,2 +1,5 @@
 [functions.palia-ai]
 verify_jwt = false
+
+[functions.palia-ai-image]
+verify_jwt = false

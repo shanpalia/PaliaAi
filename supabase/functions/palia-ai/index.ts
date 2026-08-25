@@ -27,18 +27,13 @@ serve(async req=>{
   if(req.method==="OPTIONS")return new Response(null,{status:204,headers:CORS});
   if(req.method!=="POST")return json({success:false,error:"Method not allowed."},405);
   try{
-    const b=await req.json();const userId=String(b.userId||"guest");const requestedAction=String(b.action||"chat");
-    const prompt=String(b.message||b.query||"").trim();
-    const imageRequest=/\b(image|icon|logo|photo|picture|background|png|svg|cartoon|3d|avatar|tasveer)\b/i.test(prompt) &&
-      /\b(create|generate|make|draw|design|edit|transform|remove|replace|turn|convert|bana|banao|bana do|de do|karo|chahiye|dikhao|do)\b/i.test(prompt);
-    const action=imageRequest?"image":requestedAction;
-    const usage=getUsage(userId);
+    const b=await req.json();const userId=String(b.userId||"guest");const action=String(b.action||"chat");const usage=getUsage(userId);
     if(action==="usage")return json({success:true,usage});
     if(!usage.allowed)return json({success:false,isLimitReached:true,error:"Daily AI limit reached. Your 2-hour allowance resets tomorrow.",usage},429);
-    const fileParts=attachmentsToParts(b.attachments);
+    const prompt=String(b.message||b.query||"").trim();const fileParts=attachmentsToParts(b.attachments);
     if(!prompt&&!fileParts.length)return json({success:false,error:"Please enter a message or attach a file.",usage},400);
 
-    const system=`You are Palia AI, a helpful, accurate, friendly multimodal AI assistant developed by ShanPalia. Never reveal the underlying model/provider name. If an image request is being processed, create the actual requested image and do not answer with a prompt, SVG, ASCII art, design instructions, or a claim that you are text-only. Be concise.`;
+    const system=`You are Palia AI, a helpful, accurate, friendly multimodal AI assistant developed by ShanPalia. Never reveal the underlying model/provider name. When the user asks for an image, do not answer with a prompt, SVG, ASCII art or instructions: the server is handling the actual image generation. Be honest and concise.`;
     const contents:any[]=[];
     for(const h of Array.isArray(b.history)?b.history.slice(-20):[]){const t=String(h?.text||h?.content||"").trim();if(t)contents.push({role:h.role==="assistant"||h.role==="model"?"model":"user",parts:[{text:t}]})}
     contents.push({role:"user",parts:[{text:prompt||"Analyze the attached file(s) and answer the user."},...fileParts]});
@@ -47,29 +42,10 @@ serve(async req=>{
     if(action==="search")payload.tools=[{google_search:{}}];
     if(action==="image"){
       // Gemini 3.1 Flash Image (Nano Banana 2) supports native image output.
-      payload.generationConfig={
-        responseModalities:["TEXT","IMAGE"],
-        responseFormat:{image:{aspectRatio:"1:1",imageSize:"2K"}}
-      };
+      payload.generationConfig={responseModalities:["IMAGE"],responseFormat:{image:{aspectRatio:"1:1",imageSize:"2K"}}};
     }
 
-    const started=Date.now();
-    let data:any;
-    if(action==="image"){
-      try{
-        data=await generateContent(IMAGE_MODEL,payload);
-      }catch(firstErr){
-        const msg=firstErr instanceof Error?firstErr.message:String(firstErr);
-        if(/not found|not supported|not available|unknown model|404/i.test(msg)){
-          data=await generateContent("gemini-3.1-flash-lite-image",payload);
-        }else{
-          throw firstErr;
-        }
-      }
-    }else{
-      data=await generateContent(TEXT_MODEL,payload);
-    }
-    const elapsed=Math.max(1,Math.round((Date.now()-started)/1000));const row=usageMap.get(userId);if(row)row.used=Math.min(DAILY_LIMIT,row.used+elapsed);
+    const started=Date.now();const data=await generateContent(action==="image"?IMAGE_MODEL:TEXT_MODEL,payload);const elapsed=Math.max(1,Math.round((Date.now()-started)/1000));const row=usageMap.get(userId);if(row)row.used=Math.min(DAILY_LIMIT,row.used+elapsed);
     const text=textFrom(data);const imageUrl=imageFrom(data);
     if(action==="image"&&!imageUrl)return json({success:false,error:"Image generation returned no image. The Gemini API key may not have image generation access, or the image model is unavailable for this key.",details:text||"No image data returned.",usage:getUsage(userId)},502);
     return json({success:true,text:text||"",reply:text||"",imageUrl,sources:sourcesFrom(data),searchQueries:action==="search"?[prompt]:[],modelUsed:"Palia AI",usage:getUsage(userId)});
