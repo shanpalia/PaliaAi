@@ -78,3 +78,16 @@ The browser only calls the public Edge Function. The Gemini secret stays in Supa
 ## Important usage note
 
 The included 2-hour quota uses Edge Function memory as a simple fallback. For strict production enforcement across function restarts/instances, store usage in a Supabase table with RLS/server-side writes.
+
+## Final setup
+
+Deploy:
+`supabase functions deploy palia-ai --no-verify-jwt`
+
+Set:
+`supabase secrets set GEMINI_API_KEY="YOUR_KEY"`
+
+For actual image generation, set an image-capable model available to your API key:
+`supabase secrets set IMAGE_MODEL="YOUR_IMAGE_MODEL"`
+
+The browser never receives GEMINI_API_KEY.

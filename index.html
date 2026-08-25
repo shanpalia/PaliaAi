@@ -11,6 +11,19 @@
 <style>
 :root{font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:#0f172a;background:#fff;font-synthesis:none;text-rendering:optimizeLegibility}
 *{box-sizing:border-box}body{margin:0;height:100vh;overflow:hidden;background:#fff}button,input,textarea{font:inherit}button{cursor:pointer}#app{height:100vh;display:flex}.sidebar{width:270px;border-right:1px solid #e5e7eb;background:#fff;display:flex;flex-direction:column;padding:14px;gap:10px}.brand{display:flex;align-items:center;gap:10px;font-weight:800;font-size:17px;padding:8px}.logo{width:34px;height:34px;border-radius:11px;background:#2563eb;color:#fff;display:grid;place-items:center;font-weight:900}.newchat{border:1px solid #dbe2ea;background:#fff;border-radius:12px;padding:11px 13px;text-align:left;font-weight:700}.newchat:hover,.navbtn:hover,.history button:hover{background:#f8fafc}.side-search{padding:10px 11px;border:1px solid #e5e7eb;border-radius:11px;outline:0}.side-title{font-size:11px;color:#94a3b8;font-weight:700;text-transform:uppercase;letter-spacing:.08em;padding:10px 7px 4px}.history{overflow:auto;flex:1}.history button{display:block;width:100%;border:0;background:transparent;text-align:left;padding:10px 9px;border-radius:10px;color:#475569;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.bottomside{border-top:1px solid #eef2f7;padding-top:8px}.navbtn{width:100%;border:0;background:transparent;text-align:left;padding:10px 9px;border-radius:10px;color:#475569}.main{flex:1;min-width:0;display:flex;flex-direction:column}.header{height:58px;border-bottom:1px solid #eef2f7;display:flex;align-items:center;justify-content:space-between;padding:0 18px;background:rgba(255,255,255,.96)}.lefthead,.righthead{display:flex;align-items:center;gap:14px}.hamb{border:0;background:transparent;padding:8px;border-radius:9px}.hamb:hover{background:#f1f5f9}.tabs{display:flex;gap:20px}.tab{border:0;background:transparent;color:#64748b;font-size:13px;font-weight:700;padding:8px 0}.tab.active{color:#2563eb;border-bottom:2px solid #2563eb}.iconbtn{width:36px;height:36px;border:0;background:transparent;border-radius:10px;display:grid;place-items:center;color:#64748b}.iconbtn:hover{background:#f8fafc;color:#0f172a}.avatar{width:34px;height:34px;border-radius:50%;border:1px solid #dbe2ea;background:#eff6ff;color:#2563eb;font-weight:800;display:grid;place-items:center}.content{flex:1;min-height:0;display:flex;flex-direction:column}.chat{flex:1;overflow:auto}.welcome{max-width:850px;margin:auto;padding:60px 24px 20px;text-align:center}.welcome h1{font-size:34px;letter-spacing:-.04em;margin:0 0 10px}.welcome p{color:#64748b;margin:0 0 28px}.suggestions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;text-align:left}.suggest{border:1px solid #e5e7eb;background:#fff;border-radius:14px;padding:14px}.suggest:hover{border-color:#bfdbfe;background:#f8fbff}.messages{max-width:850px;margin:0 auto;padding:24px}.msg{display:flex;gap:12px;margin:0 0 22px}.msg.user{justify-content:flex-end}.bubble{max-width:min(78%,720px);padding:12px 15px;border-radius:16px;line-height:1.55;white-space:pre-wrap;overflow-wrap:anywhere}.msg.user .bubble{background:#2563eb;color:#fff;border-bottom-right-radius:5px}.msg.ai .bubble{background:#f8fafc;border:1px solid #eef2f7;border-bottom-left-radius:5px}.sources{margin-top:10px;display:flex;flex-direction:column;gap:5px}.sources a{font-size:12px;color:#2563eb;text-decoration:none}.composer-wrap{padding:12px 18px 18px;background:#fff}.composer{max-width:850px;margin:auto;border:1px solid #dbe2ea;border-radius:18px;padding:10px;box-shadow:0 6px 30px rgba(15,23,42,.05)}.attachrow{display:flex;gap:8px;align-items:center;margin-bottom:6px}.mode{border:0;background:#f8fafc;border-radius:9px;padding:7px 10px;font-size:12px;color:#475569}.mode.active{background:#eff6ff;color:#2563eb}.inputrow{display:flex;align-items:flex-end;gap:8px}.textarea{flex:1;resize:none;border:0;outline:0;padding:9px;max-height:160px;min-height:42px}.send{width:42px;height:42px;border:0;border-radius:12px;background:#2563eb;color:#fff;display:grid;place-items:center}.send:disabled{opacity:.45;cursor:not-allowed}.attach{width:38px;height:38px;border:0;background:transparent;border-radius:10px;color:#64748b}.attach:hover{background:#f1f5f9}.drawer{position:fixed;inset:0;z-index:50;background:rgba(15,23,42,.28);display:none}.drawer.open{display:block}.panel{position:absolute;right:0;top:0;height:100%;width:min(400px,90vw);background:#fff;box-shadow:-12px 0 40px rgba(15,23,42,.16);padding:18px;overflow:auto}.panelhead{display:flex;align-items:center;justify-content:space-between}.close{border:0;background:#f1f5f9;border-radius:9px;width:34px;height:34px}.profile{margin-top:20px;border:1px solid #e5e7eb;border-radius:18px;padding:16px}.profile h3{margin:0 0 4px}.muted{color:#64748b;font-size:13px}.usage{margin-top:14px;border:1px solid #e5e7eb;border-radius:18px;padding:16px;background:#f8fafc}.usagehead{display:flex;justify-content:space-between;gap:10px;font-size:13px;font-weight:800}.bar{height:9px;background:#e2e8f0;border-radius:999px;overflow:hidden;margin:12px 0}.fill{height:100%;background:#2563eb;border-radius:999px}.statrow{display:flex;justify-content:space-between;color:#64748b;font-size:12px}.panelnav{margin-top:18px;border-top:1px solid #eef2f7}.panelnav button{width:100%;border:0;background:transparent;text-align:left;padding:13px 4px;color:#334155;border-bottom:1px solid #f1f5f9}.toolpage{max-width:1000px;margin:auto;padding:30px 24px;overflow:auto}.toolgrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}.toolcard{border:1px solid #e5e7eb;border-radius:16px;padding:18px;background:#fff}.toolcard h3{margin:0 0 6px}.toolcard p{margin:0;color:#64748b;font-size:13px}.modal{position:fixed;inset:0;background:rgba(15,23,42,.3);display:none;z-index:60;place-items:center;padding:18px}.modal.open{display:grid}.modalbox{background:#fff;width:min(560px,100%);border-radius:20px;padding:20px;box-shadow:0 20px 60px rgba(15,23,42,.18)}.field{width:100%;border:1px solid #dbe2ea;border-radius:11px;padding:11px;outline:0;margin-top:8px}.primary{border:0;background:#2563eb;color:#fff;border-radius:11px;padding:11px 14px;font-weight:700}.typing{display:inline-flex;gap:4px}.typing i{width:6px;height:6px;background:#94a3b8;border-radius:50%;animation:b .9s infinite alternate}.typing i:nth-child(2){animation-delay:.15s}.typing i:nth-child(3){animation-delay:.3s}@keyframes b{to{opacity:.25;transform:translateY(-2px)}}@media(max-width:800px){.sidebar{display:none}.header{padding:0 10px}.tabs{gap:12px}.tabs .tab{font-size:12px}.righthead .iconbtn{display:none}.welcome{padding-top:40px}.welcome h1{font-size:29px}.suggestions{grid-template-columns:1fr}.messages{padding:18px 12px}.bubble{max-width:88%}.composer-wrap{padding:10px}.toolgrid{grid-template-columns:1fr}.panel{width:92vw}}
+</style><style>
+:root{--line:#e5e7eb;--muted:#64748b}
+*{box-sizing:border-box}body{margin:0;font-family:Inter,system-ui,Arial,sans-serif;background:#fff;color:#0f172a}button,input,textarea{font:inherit}
+.sidebar{width:280px;border-right:1px solid var(--line);height:100vh;position:fixed;left:0;top:0;padding:18px;display:flex;flex-direction:column;z-index:30;background:#fff}
+.brand{font-weight:800;font-size:20px;display:flex;align-items:center;gap:10px}.logo,.avatar{background:linear-gradient(135deg,#10b981,#06b6d4);color:#fff;border:0}.logo{width:38px;height:38px;border-radius:12px;display:grid;place-items:center;font-weight:900}
+.newchat,.side-search{padding:11px;border:1px solid var(--line);background:#fff;border-radius:11px}.newchat{margin:20px 0 10px;cursor:pointer}.side-title{font-size:12px;color:var(--muted);margin:18px 4px 8px}.history{overflow:auto;display:flex;flex-direction:column;gap:3px}.history-item{position:relative;display:flex;align-items:center;border-radius:10px}.history-item.active{background:#f0fdf4}.history-title{flex:1;min-width:0;text-align:left;border:0;background:transparent;padding:10px 7px;cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.chat-menu-btn{width:36px;height:36px;border:0;background:transparent;border-radius:8px;cursor:pointer}.chat-menu-btn:hover{background:#e2e8f0}.chat-menu{position:absolute;right:5px;top:38px;background:#fff;border:1px solid var(--line);border-radius:11px;box-shadow:0 12px 30px rgba(15,23,42,.15);padding:5px;min-width:145px;z-index:60}.chat-menu button{width:100%;text-align:left;padding:9px;border:0;background:#fff;border-radius:8px;cursor:pointer}.chat-menu button:hover{background:#f1f5f9}
+.main{margin-left:280px;min-height:100vh}.header{height:64px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;padding:0 22px;position:sticky;top:0;background:#fff;z-index:10}.lefthead,.righthead,.tabs{display:flex;align-items:center;gap:8px}.hamb,.iconbtn,.avatar{border:0;background:transparent;width:38px;height:38px;border-radius:10px;cursor:pointer}.avatar{display:grid;place-items:center;font-weight:800}.tab{border:0;background:transparent;padding:9px 12px;border-radius:9px;cursor:pointer}.tab.active{background:#ecfdf5;color:#047857}
+.content{max-width:980px;margin:auto;min-height:calc(100vh - 64px);display:flex;flex-direction:column}.chat{flex:1;overflow:auto;padding:36px 20px 180px}.welcome{text-align:center;max-width:720px;margin:14vh auto}.welcome h1{font-size:38px;margin:0 0 10px}.muted{color:var(--muted)}.suggestions{display:flex;flex-wrap:wrap;justify-content:center;gap:9px;margin-top:24px}.suggest{border:1px solid var(--line);background:#fff;border-radius:999px;padding:9px 13px;cursor:pointer}.messages{display:flex;flex-direction:column;gap:18px}.msg{display:flex}.msg.user{justify-content:flex-end}.bubble{max-width:80%;padding:12px 15px;border-radius:16px;white-space:pre-wrap;line-height:1.5}.msg.user .bubble{background:#ecfdf5}.msg.ai .bubble{background:#f8fafc}.sources{display:flex;flex-wrap:wrap;gap:7px;margin-top:10px}.sources a{font-size:12px;border:1px solid var(--line);padding:5px 8px;border-radius:8px;text-decoration:none;color:#334155;background:#fff}
+.composer-wrap{position:fixed;bottom:0;left:280px;right:0;background:linear-gradient(transparent,#fff 22%);padding:28px 20px 20px;z-index:15}.composer{max-width:900px;margin:auto;background:#fff;border:1px solid #dbe2e8;border-radius:18px;padding:10px;box-shadow:0 10px 35px rgba(15,23,42,.08);position:relative}.inputrow{display:flex;align-items:flex-end;gap:8px}.textarea{flex:1;border:0;outline:0;resize:none;min-height:44px;max-height:150px;padding:11px}.attach,.send,.mode{border:0;background:#f1f5f9;border-radius:10px;min-width:40px;height:40px;cursor:pointer}.send{background:#0f172a;color:#fff}.mode{padding:0 10px}.mode.active{background:#ecfdf5;color:#047857}.attachrow{display:flex;gap:7px;align-items:center;position:relative}
+.drawer{position:fixed;inset:0;background:rgba(15,23,42,.25);z-index:80;display:none}.drawer.open{display:block}.panel{position:absolute;right:0;top:0;height:100%;width:min(380px,92vw);background:#fff;padding:20px;box-shadow:-10px 0 35px rgba(0,0,0,.12)}.panelhead{display:flex;justify-content:space-between;align-items:center}.close{border:0;background:#f1f5f9;border-radius:8px;width:34px;height:34px}.usage{margin-top:24px;padding:14px;border:1px solid var(--line);border-radius:14px}.usagehead,.statrow{display:flex;justify-content:space-between;gap:10px;font-size:13px}.bar{height:8px;background:#e2e8f0;border-radius:99px;margin:12px 0;overflow:hidden}.fill{height:100%;background:linear-gradient(90deg,#10b981,#06b6d4)}.panelnav{display:grid;gap:8px;margin-top:15px}.panelnav button{padding:11px;border:1px solid var(--line);background:#fff;border-radius:10px;text-align:left;cursor:pointer}
+.toolpage{padding:20px}.toolgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:12px}.toolcard{border:1px solid var(--line);border-radius:14px;padding:15px}.toolcard h3{margin:0 0 6px}.primary{background:#0f172a;color:#fff;border:0;border-radius:9px;padding:8px 11px}.confirm{position:fixed;inset:0;background:rgba(15,23,42,.35);z-index:100;display:grid;place-items:center}.confirmbox{background:#fff;border-radius:16px;padding:20px;width:min(380px,90vw);box-shadow:0 20px 60px rgba(0,0,0,.2)}.confirm-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:18px}.confirm-actions button{padding:9px 14px;border-radius:9px;border:1px solid var(--line);background:#fff;cursor:pointer}.confirm-actions .danger{background:#dc2626;color:#fff;border-color:#dc2626}
+@media(max-width:760px){.sidebar{transform:translateX(-100%);transition:.2s}.sidebar.mobileopen{transform:translateX(0)}.main{margin-left:0}.composer-wrap{left:0}.chat{padding:24px 12px 170px}.bubble{max-width:92%}.welcome h1{font-size:30px}.tabs .tab{display:none}}
+@media(min-width:761px){.hamb{display:none}}
 </style></head><body>
 <div id="app"></div>
 <script>
@@ -21,6 +34,7 @@ const CONFIG={
 
 const state={
   messages:[],
+  currentChatId:null,
   mode:"chat",
   loading:false,
   drawer:false,
@@ -246,22 +260,58 @@ async function addFiles(fileList){
 }
 
 function renderHistory(){
-  state.conversations=JSON.parse(localStorage.getItem("palia_history")||"[]");
-  const h=$("#history");
-  h.innerHTML=state.conversations.map((x,i)=>`<button data-i="${i}">${esc(x.slice(0,38))}</button>`).join("");
-  h.querySelectorAll("button").forEach(b=>b.onclick=()=>{
-    state.messages=[{role:"assistant",text:"Conversation history is stored locally. Start a new chat to continue from here."}];
-    renderChat();
+  state.conversations=JSON.parse(localStorage.getItem("palia_chats")||"[]");
+  const h=$("#history"); if(!h)return;
+  const q=($("#chatSearch")?.value||"").toLowerCase();
+  const list=state.conversations.filter(x=>!x.archived&&String(x.title||"").toLowerCase().includes(q))
+    .sort((a,b)=>(b.pinned-a.pinned)||(b.updated_at||0)-(a.updated_at||0));
+  h.innerHTML=list.map(x=>`
+    <div class="history-item ${x.id===state.currentChatId?"active":""}">
+      <button class="history-title" data-open="${esc(x.id)}">${x.pinned?"📌 ":""}${esc(x.title||"New Chat")}</button>
+      <button class="chat-menu-btn" data-menu="${esc(x.id)}">⋮</button>
+      <div class="chat-menu" data-box="${esc(x.id)}" style="display:none">
+        <button data-action="rename" data-id="${esc(x.id)}">✏️ Rename</button>
+        <button data-action="pin" data-id="${esc(x.id)}">${x.pinned?"📌 Unpin":"📌 Pin"}</button>
+        <button data-action="archive" data-id="${esc(x.id)}">📁 Archive</button>
+        <button data-action="delete" data-id="${esc(x.id)}">🗑 Delete</button>
+      </div>
+    </div>`).join("");
+  h.querySelectorAll("[data-menu]").forEach(b=>b.onclick=e=>{
+    e.stopPropagation();h.querySelectorAll(".chat-menu").forEach(x=>x.style.display="none");
+    h.querySelector(`[data-box="${CSS.escape(b.dataset.menu)}"]`).style.display="block";
   });
+  h.querySelectorAll("[data-open]").forEach(b=>b.onclick=()=>{
+    const x=state.conversations.find(c=>c.id===b.dataset.open);
+    if(x){state.currentChatId=x.id;state.messages=x.messages||[];state.mode="chat";render();}
+  });
+  h.querySelectorAll("[data-action]").forEach(b=>b.onclick=()=>{
+    const x=state.conversations.find(c=>c.id===b.dataset.id); if(!x)return;
+    if(b.dataset.action==="rename"){const n=prompt("Chat name:",x.title||"New Chat");if(n?.trim())x.title=n.trim();}
+    if(b.dataset.action==="pin")x.pinned=!x.pinned;
+    if(b.dataset.action==="archive"){x.archived=true;if(state.currentChatId===x.id){state.currentChatId=null;state.messages=[];}}
+    if(b.dataset.action==="delete"){showConfirm("Delete this chat?","This conversation will be permanently removed.",()=>{state.conversations=state.conversations.filter(c=>c.id!==x.id);if(state.currentChatId===x.id){state.currentChatId=null;state.messages=[];}persistChats();render();});return;}
+    persistChats();renderHistory();
+  });
+  $("#chatSearch")?.addEventListener("input",renderHistory);
 }
-
+function persistChats(){localStorage.setItem("palia_chats",JSON.stringify(state.conversations));}
+function ensureChat(title){
+  if(!state.currentChatId){
+    state.currentChatId=crypto.randomUUID();
+    state.conversations.unshift({id:state.currentChatId,title:title||"New Chat",messages:[],pinned:false,archived:false,updated_at:Date.now()});
+  }
+  return state.conversations.find(x=>x.id===state.currentChatId);
+}
+function showConfirm(title,text,yes){
+  const m=document.createElement("div");m.className="confirm";
+  m.innerHTML=`<div class="confirmbox"><h3>${esc(title)}</h3><p class="muted">${esc(text)}</p><div class="confirm-actions"><button id="cancelC">Cancel</button><button class="danger" id="yesC">Delete</button></div></div>`;
+  document.body.appendChild(m);$("#cancelC").onclick=()=>m.remove();$("#yesC").onclick=()=>{m.remove();yes()};
+}
 function saveConversation(){
   const first=state.messages.find(m=>m.role==="user");
-  if(!first)return;
-  let arr=JSON.parse(localStorage.getItem("palia_history")||"[]");
-  arr=[first.text,...arr.filter(x=>x!==first.text)].slice(0,30);
-  localStorage.setItem("palia_history",JSON.stringify(arr));
-  renderHistory();
+  const c=ensureChat(first?first.text.replace(/\s+/g," ").slice(0,42):"New Chat");
+  if(first&&(!c.title||c.title==="New Chat"))c.title=first.text.replace(/\s+/g," ").slice(0,42);
+  c.messages=state.messages;c.updated_at=Date.now();persistChats();renderHistory();
 }
 
 function renderDrawer(){
@@ -298,7 +348,7 @@ function bind(){
   document.querySelectorAll("[data-mode]").forEach(b=>b.onclick=()=>{
     state.mode=b.dataset.mode;renderHeader();renderChat();bind();
   });
-  $("#new")?.addEventListener("click",()=>{state.messages=[];state.pendingFiles=[];state.mode="chat";renderHeader();renderChat();renderHistory()});
+  $("#new")?.addEventListener("click",()=>{state.messages=[];state.pendingFiles=[];state.currentChatId=null;state.mode="chat";render();});
   $("#hamb")?.addEventListener("click",()=>document.querySelector(".sidebar").classList.toggle("mobileopen"));
   $("#profile")?.addEventListener("click",()=>{state.drawer=true;renderDrawer();refreshUsage()});
   $("#settings")?.addEventListener("click",()=>{state.drawer=true;renderDrawer();refreshUsage()});
@@ -338,8 +388,10 @@ async function send(){
   renderChat();
 
   try{
-    const wantsImage=/\b(create|generate|make|draw|design|edit|transform|remove|replace|turn|convert)\b/i.test(text) &&
-      /\b(image|icon|logo|picture|photo|background|png|svg|cartoon|3d|avatar)\b/i.test(text);
+    const wantsImage =
+      (/\b(create|generate|make|draw|design|edit|transform|remove|replace|turn|convert|bana|banao|bana do|de do|karo)\b/i.test(text) &&
+       /\b(image|icon|logo|picture|photo|background|png|svg|cartoon|3d|avatar|tasveer|photo|icon|logo)\b/i.test(text)) ||
+      (/\b(icon|logo|image|photo)\b/i.test(text) && /\b(bana|banao|de|do|generate|create|make)\b/i.test(text));
 
     const d=await callAI({
       action:state.mode==="search"?"search":wantsImage?"image":"chat",
@@ -357,6 +409,7 @@ async function send(){
       sources:d.sources||[],
       imageUrl:d.imageUrl||""
     });
+    saveConversation();
   }catch(e){
     state.messages.push({role:"assistant",text:"⚠️ "+e.message});
   }finally{
