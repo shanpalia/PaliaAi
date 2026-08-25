@@ -36,3 +36,17 @@ The response must contain a non-empty `imageUrl` beginning with `data:image/`.
 After changing the Edge Function, **redeploy it**. Updating only GitHub Pages does not update Supabase Edge Functions.
 
 After changing `index.html`, commit/push the new root `index.html` to GitHub Pages.
+
+
+## V2 critical image fix
+
+The Edge Function now independently detects image requests such as:
+- "PaliaAPK HUB ka icon chahiye"
+- "PaliaAPK HUB ke liye icon bana do"
+- "is photo ko edit karo"
+
+It forces the image-capable Gemini model even if the browser sends `action=chat`.
+Primary image model: `gemini-3.1-flash-image`.
+Fallback: `gemini-3.1-flash-lite-image`.
+
+Deploy both the frontend and the Edge Function after replacing the old files.
