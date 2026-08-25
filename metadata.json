@@ -1,0 +1,6 @@
+{
+  "name": "Palia AI",
+  "description": "A production-grade modern AI assistant web application developed by ShanPalia, featuring AI Chat, Image AI, Document AI, Translation, Coding Assistant, Resume Builder, Voice Assistant, and Web Search.",
+  "requestFramePermissions": ["microphone"],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
