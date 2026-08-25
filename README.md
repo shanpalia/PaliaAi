@@ -1,93 +1,73 @@
-# Palia AI — Complete Multimodal Build
+# Palia AI — Original Multimodal Build
 
-## What is included
+This is the Palia AI project based on the uploaded ZIP.
+
+## Included
 
 - AI chat
 - Web Search
-- Image understanding
 - Image/file/video attachment UI
-- Image/icon/logo editing requests
-- Optional image generation through `IMAGE_MODEL`
+- Multimodal image understanding
+- Image creation/editing request routing
+- Actual generated-image rendering when an image-capable model is configured
+- Download / Regenerate / Edit UI for generated images
 - Voice input
-- Conversation history
+- Recent Chats
+- Rename / Pin / Archive / Delete
+- Automatic chat titles
+- Guest local chat persistence
 - Daily 2-hour usage
-- Profile drawer
-- GitHub Pages static frontend
+- Profile/settings drawer
+- GitHub Pages compatible frontend
 - Supabase Edge Function backend
-- No Gemini/provider branding in the UI
+- CORS handling
+- No provider/model branding in the user-facing UI
 
-## GitHub Pages
+## Supabase deployment
 
-Upload the website files to the repository root and use the normal GitHub Pages branch deployment.
-
-## Supabase
-
-This repository includes:
-
-`supabase/config.toml`
-
-with:
-
-```toml
-[functions.palia-ai]
-verify_jwt = false
-```
-
-Deploy:
+From the project root:
 
 ```bash
 supabase link --project-ref ralinnuegsbuvlhwpzln
 supabase functions deploy palia-ai --no-verify-jwt
 ```
 
-Set the secret:
+Set the text API key:
 
 ```bash
-supabase secrets set GEMINI_API_KEY="YOUR_KEY"
+supabase secrets set GEMINI_API_KEY="YOUR_GEMINI_API_KEY"
 ```
 
-The current working text model defaults to:
+The default text model is:
 
-`gemini-3.6-flash`
+```text
+gemini-3.6-flash
+```
 
-You can override it:
+You can override it with:
 
 ```bash
-supabase secrets set TEXT_MODEL="gemini-3.6-flash"
+supabase secrets set TEXT_MODEL="YOUR_AVAILABLE_TEXT_MODEL"
 ```
 
-For actual image generation, configure an image-capable Gemini model available to your API key:
+### Actual image generation
 
-```bash
-supabase secrets set IMAGE_MODEL="YOUR_IMAGE_CAPABLE_MODEL"
-```
-
-The image action uses `responseModalities: ["TEXT","IMAGE"]`. If the configured model does not support image output, the function returns a clear configuration error instead of faking an image.
-
-## Security
-
-Do not put:
-
-- GEMINI_API_KEY
-- Supabase service-role key
-
-in `index.html` or GitHub.
-
-The browser only calls the public Edge Function. The Gemini secret stays in Supabase.
-
-## Important usage note
-
-The included 2-hour quota uses Edge Function memory as a simple fallback. For strict production enforcement across function restarts/instances, store usage in a Supabase table with RLS/server-side writes.
-
-## Final setup
-
-Deploy:
-`supabase functions deploy palia-ai --no-verify-jwt`
+The image-generation model must be an image-capable model that is available to the Google API key in your project.
 
 Set:
-`supabase secrets set GEMINI_API_KEY="YOUR_KEY"`
 
-For actual image generation, set an image-capable model available to your API key:
-`supabase secrets set IMAGE_MODEL="YOUR_IMAGE_MODEL"`
+```bash
+supabase secrets set IMAGE_MODEL="YOUR_AVAILABLE_IMAGE_MODEL"
+```
 
-The browser never receives GEMINI_API_KEY.
+Then redeploy:
+
+```bash
+supabase functions deploy palia-ai --no-verify-jwt
+```
+
+Do not put `GEMINI_API_KEY` in `index.html`.
+
+## Important
+
+The included two-hour usage counter is an in-memory fallback. For strict production quota enforcement across Edge Function restarts/instances, move usage records to a Supabase table with server-side writes.
