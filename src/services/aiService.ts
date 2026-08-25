@@ -1,6 +1,7 @@
 import { Attachment, ChatMessage, GroundingSource, SearchSource } from '../types';
 import { authService } from './authService';
 import { usageService } from './usageService';
+import { apiFetch } from './api';
 
 export interface ChatResponse {
   success: boolean;
@@ -26,7 +27,7 @@ function getRequestMeta() {
 export const aiService = {
   async checkHealth() {
     try {
-      const res = await fetch('/api/health');
+      const res = await apiFetch('/api/health');
       return await res.json();
     } catch {
       return { status: 'error', apiConfigured: false };
@@ -58,7 +59,7 @@ export const aiService = {
         enableSearchGrounding: Boolean(params.enableSearchGrounding),
       };
 
-      const res = await fetch('/api/chat', {
+      const res = await apiFetch('/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
@@ -129,7 +130,7 @@ export const aiService = {
       }
 
       const meta = getRequestMeta();
-      const res = await fetch('/api/search', {
+      const res = await apiFetch('/api/search', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ ...meta, query: cleanQuery }),
@@ -190,7 +191,7 @@ export const aiService = {
   }> {
     try {
       const meta = getRequestMeta();
-      const res = await fetch('/api/image/generate', {
+      const res = await apiFetch('/api/image/generate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ ...meta, ...params }),
@@ -231,7 +232,7 @@ export const aiService = {
   }): Promise<{ success: boolean; result?: string; error?: string; isLimitReached?: boolean }> {
     try {
       const meta = getRequestMeta();
-      const res = await fetch('/api/document/analyze', {
+      const res = await apiFetch('/api/document/analyze', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ ...meta, ...params }),
@@ -280,7 +281,7 @@ export const aiService = {
   }> {
     try {
       const meta = getRequestMeta();
-      const res = await fetch('/api/translate', {
+      const res = await apiFetch('/api/translate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ ...meta, ...params }),
@@ -321,7 +322,7 @@ export const aiService = {
   }): Promise<{ success: boolean; result?: string; error?: string; isLimitReached?: boolean }> {
     try {
       const meta = getRequestMeta();
-      const res = await fetch('/api/code/assist', {
+      const res = await apiFetch('/api/code/assist', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ ...meta, ...params }),
@@ -362,7 +363,7 @@ export const aiService = {
   }): Promise<{ success: boolean; result?: string; error?: string; isLimitReached?: boolean }> {
     try {
       const meta = getRequestMeta();
-      const res = await fetch('/api/resume/assist', {
+      const res = await apiFetch('/api/resume/assist', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ ...meta, ...params }),
@@ -398,7 +399,7 @@ export const aiService = {
   async speakText(text: string, voiceName: string = 'Kore'): Promise<void> {
     try {
       const meta = getRequestMeta();
-      const res = await fetch('/api/tts', {
+      const res = await apiFetch('/api/tts', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ ...meta, text: text.slice(0, 500), voiceName }),

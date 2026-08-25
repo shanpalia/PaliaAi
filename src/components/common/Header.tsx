@@ -49,7 +49,7 @@ export const Header: React.FC<HeaderProps> = ({
       className="h-14 border-b border-slate-100 bg-white px-3 sm:px-6 flex items-center justify-between sticky top-0 z-20"
     >
       {/* Left side: Hamburger menu button + Clean Navigation Tabs (Chat, Tools, Web Search) */}
-      <div className="flex items-center gap-3 sm:gap-6 min-w-0">
+      <div className="flex items-center gap-2 sm:gap-6 min-w-0">
         <button
           id="btn-toggle-sidebar"
           onClick={onToggleSidebar}
@@ -61,7 +61,7 @@ export const Header: React.FC<HeaderProps> = ({
         </button>
 
         {/* Clean, spacious navigation tabs */}
-        <nav className="flex items-center gap-4 sm:gap-6" aria-label="Main Navigation">
+        <nav className="flex items-center gap-3 sm:gap-6" aria-label="Main Navigation">
           <button
             id="nav-tab-chat"
             onClick={() => onSelectTool('chat')}
@@ -139,7 +139,7 @@ export const Header: React.FC<HeaderProps> = ({
               className="w-8 h-8 rounded-full bg-slate-100 border border-slate-200 object-cover"
             />
           ) : userInitial ? (
-            <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-blue-600 to-indigo-600 text-white font-bold text-xs flex items-center justify-center border border-blue-500/30 shadow-xs">
+            <div className="w-8 h-8 rounded-full bg-slate-900 text-white font-bold text-xs flex items-center justify-center border border-blue-500/30 shadow-xs">
               {userInitial}
             </div>
           ) : (

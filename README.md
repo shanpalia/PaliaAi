@@ -1,20 +1,47 @@
-<div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://ai.google.dev/static/site-assets/images/share-ais-513315318.png" />
-</div>
+# Palia AI
 
-# Run and deploy your AI Studio app
+Palia AI is a React + Vite + Express AI assistant by ShanPalia.
 
-This contains everything you need to run your app locally.
+## Production deployment
 
-View your app in AI Studio: https://ai.studio/apps/d875e1dc-a58c-4199-8ebd-0cd0ead4be56
+This project includes a server-side API, so **do not deploy it as GitHub Pages**. Use a Node-compatible host such as Render.
 
-## Run Locally
+### Render
 
-**Prerequisites:**  Node.js
+- Build command: `npm install --no-audit --no-fund && npm run build`
+- Start command: `npm start`
+- Health check: `/api/health`
+
+Required environment variables:
+
+- `GEMINI_API_KEY` — server-side AI API key
+- `SUPABASE_URL` — optional until Supabase auth/database is connected
+- `SUPABASE_ANON_KEY` — optional until Supabase auth/database is connected
+
+The server listens on the host-provided `PORT` environment variable.
+
+## Daily AI usage
+
+The default server-side allowance is **120 minutes (2 hours) per user per day**, using Asia/Kolkata as the default timezone. Usage is shown in the profile drawer, not the main chat header.
+
+## Local development
+
+```bash
+npm install
+npm run dev
+```
+
+Production build:
+
+```bash
+npm run build
+npm start
+```
 
 
-1. Install dependencies:
-   `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
-3. Run the app:
-   `npm run dev`
+## GitHub Pages (PC/mobile website)
+This project can also publish the frontend as a static site like a normal GitHub-hosted website. Enable GitHub Pages using **GitHub Actions**.
+
+If you want the AI API to work on GitHub Pages, set a GitHub repository variable named `VITE_API_BASE_URL` to the public URL of the deployed Palia AI backend (for example, a Render service URL). Never put `GEMINI_API_KEY` in the frontend or GitHub Pages.
+
+The same repository can still be deployed as a full Node/Express app on Render using the included `render.yaml`.

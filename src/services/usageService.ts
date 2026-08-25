@@ -1,5 +1,6 @@
 import { DailyUsageStatus, AdminUsageConfig } from '../types';
 import { authService } from './authService';
+import { apiFetch } from './api';
 
 type UsageListener = (status: DailyUsageStatus) => void;
 
@@ -113,7 +114,7 @@ class UsageService {
 
   public async getAdminConfig(): Promise<AdminUsageConfig | null> {
     try {
-      const res = await fetch('/api/admin/usage-config');
+      const res = await apiFetch('/api/admin/usage-config');
       if (res.ok) {
         const data = await res.json();
         return data;
@@ -126,7 +127,7 @@ class UsageService {
 
   public async updateAdminLimit(minutes: number, userId?: string): Promise<boolean> {
     try {
-      const res = await fetch('/api/admin/usage-config', {
+      const res = await apiFetch('/api/admin/usage-config', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ minutes, userId }),
@@ -145,7 +146,7 @@ class UsageService {
     try {
       const user = authService.getUser();
       const targetUserId = userId || user?.id || 'default_user';
-      const res = await fetch('/api/admin/reset-usage', {
+      const res = await apiFetch('/api/admin/reset-usage', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ userId: targetUserId, timezone: this.timezone }),

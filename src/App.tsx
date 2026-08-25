@@ -29,7 +29,7 @@ import { authService } from './services/authService';
 import { creditService } from './services/creditService';
 import { aiService } from './services/aiService';
 import { usageService } from './services/usageService';
-import { AlertTriangle, Clock, X } from 'lucide-react';
+
 
 export const App: React.FC = () => {
   // App Navigation & View State
@@ -52,7 +52,6 @@ export const App: React.FC = () => {
   const [credits, setCredits] = useState<number>(creditService.getBalance());
   const [isLoading, setIsLoading] = useState(false);
   const [dailyUsage, setDailyUsage] = useState<DailyUsageStatus>(usageService.getStatus());
-  const [dismissedWarning, setDismissedWarning] = useState<string | null>(null);
 
   // Initialize data on mount
   useEffect(() => {
@@ -142,16 +141,8 @@ export const App: React.FC = () => {
       return;
     }
 
-    // Deduct credits (2 for chat, 5 for search mode)
-    const cost = isSearchMode ? 5 : 2;
-    const desc = isSearchMode ? 'Grounded Web Search Chat' : 'Palia AI Message';
-    const hasCredits = await creditService.deductCredits(desc, cost);
-    if (!hasCredits) {
-      alert('Insufficient credits. Please top up in your profile.');
-      setIsProfileOpen(true);
-      return;
-    }
-    setCredits(creditService.getBalance());
+    // Daily AI access is governed by the server-side 2-hour usage allowance.
+    // Do not gate chat/search behind the legacy local credit counter.
 
     // 1. User Message
     const userMsg: ChatMessage = {
@@ -340,54 +331,7 @@ export const App: React.FC = () => {
           credits={credits}
         />
 
-        {/* Global Daily AI Limit Reached Banner */}
-        {dailyUsage.is_limit_reached && (
-          <div
-            id="banner-daily-limit-reached"
-            className="bg-rose-600 text-white px-4 py-2 text-xs flex items-center justify-between shadow-xs z-10 animate-in fade-in"
-          >
-            <div className="flex items-center gap-2 font-medium">
-              <AlertTriangle className="w-4 h-4 flex-shrink-0" />
-              <span>
-                <strong>Daily AI limit reached:</strong> You've used today's 2-hour AI allowance. Your AI access will reset tomorrow at midnight ({dailyUsage.timezone || 'Asia/Kolkata'}).
-              </span>
-            </div>
-            <button
-              onClick={() => setIsProfileOpen(true)}
-              className="px-2.5 py-1 rounded-md bg-white text-rose-700 font-bold hover:bg-rose-50 text-[11px] transition-colors ml-3 cursor-pointer whitespace-nowrap"
-            >
-              View Usage
-            </button>
-          </div>
-        )}
-
-        {/* Friendly Low Remaining Allowance Notification (e.g., 60m, 30m, 10m, 5m) */}
-        {!dailyUsage.is_limit_reached && dailyUsage.warning && dismissedWarning !== dailyUsage.warning && (
-          <div
-            id="banner-daily-usage-warning"
-            className="bg-amber-500 text-slate-950 px-4 py-1.5 text-xs flex items-center justify-between z-10 animate-in fade-in"
-          >
-            <div className="flex items-center gap-2 font-semibold">
-              <Clock className="w-3.5 h-3.5 flex-shrink-0" />
-              <span>{dailyUsage.warning} (Daily limit: 2 hours)</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <button
-                onClick={() => setIsProfileOpen(true)}
-                className="underline text-[11px] font-bold cursor-pointer"
-              >
-                Details
-              </button>
-              <button
-                onClick={() => setDismissedWarning(dailyUsage.warning)}
-                className="p-1 hover:bg-amber-600 rounded text-slate-900 cursor-pointer"
-                title="Dismiss"
-              >
-                <X className="w-3.5 h-3.5" />
-              </button>
-            </div>
-          </div>
-        )}
+        {/* Daily usage is available from the profile drawer to keep the chat header uncluttered. */}
 
         {/* View Switcher based on Active Tool */}
         <main className="flex-1 flex flex-col h-[calc(100vh-57px)] overflow-hidden">
