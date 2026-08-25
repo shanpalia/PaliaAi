@@ -1,47 +1,37 @@
-# Palia AI
+# Palia AI — GitHub Pages + Supabase
 
-Palia AI is a React + Vite + Express AI assistant by ShanPalia.
+This build is a **plain static website**. It does not use React/Vite at runtime, so GitHub Pages can serve it directly like a normal PaliaAPK HUB-style website.
 
-## Production deployment
+## 1. GitHub Pages
+Upload `index.html` to the repository root. In GitHub:
+Settings → Pages → Deploy from a branch → `main` → `/ (root)` → Save.
+No GitHub Actions are required.
 
-This project includes a server-side API, so **do not deploy it as GitHub Pages**. Use a Node-compatible host such as Render.
+## 2. Configure the AI backend
+The browser must NOT contain a Gemini secret key. The included Supabase Edge Function keeps `GEMINI_API_KEY` server-side.
 
-### Render
+In `index.html`, replace the empty `SUPABASE_ANON_KEY` with your Supabase publishable/anon key.
 
-- Build command: `npm install --no-audit --no-fund && npm run build`
-- Start command: `npm start`
-- Health check: `/api/health`
+Deploy `supabase/functions/palia-ai/index.ts` as the Edge Function named `palia-ai`.
 
-Required environment variables:
+Set this Supabase Function secret:
+`GEMINI_API_KEY=YOUR_GEMINI_API_KEY`
 
-- `GEMINI_API_KEY` — server-side AI API key
-- `SUPABASE_URL` — optional until Supabase auth/database is connected
-- `SUPABASE_ANON_KEY` — optional until Supabase auth/database is connected
+The frontend will call:
+`https://ralinnuegsbuvlhwpzln.supabase.co/functions/v1/palia-ai`
 
-The server listens on the host-provided `PORT` environment variable.
+## 3. What works
+- Palia AI chat
+- Multi-turn chat history in the current browser session
+- Live web search grounding with source links
+- Daily 2-hour usage counter
+- Profile drawer with usage slider/progress
+- Voice input through browser speech recognition
+- Image upload/analysis request path
+- TXT/MD document analysis path
+- Responsive desktop/mobile UI
+- No Gemini branding in the user UI
+- No GitHub Actions required
 
-## Daily AI usage
-
-The default server-side allowance is **120 minutes (2 hours) per user per day**, using Asia/Kolkata as the default timezone. Usage is shown in the profile drawer, not the main chat header.
-
-## Local development
-
-```bash
-npm install
-npm run dev
-```
-
-Production build:
-
-```bash
-npm run build
-npm start
-```
-
-
-## GitHub Pages (PC/mobile website)
-This project can also publish the frontend as a static site like a normal GitHub-hosted website. Enable GitHub Pages using **GitHub Actions**.
-
-If you want the AI API to work on GitHub Pages, set a GitHub repository variable named `VITE_API_BASE_URL` to the public URL of the deployed Palia AI backend (for example, a Render service URL). Never put `GEMINI_API_KEY` in the frontend or GitHub Pages.
-
-The same repository can still be deployed as a full Node/Express app on Render using the included `render.yaml`.
+## Security
+Never put `GEMINI_API_KEY` in `index.html`, GitHub, or any client-side JavaScript. Keep it as a Supabase Edge Function secret.
