@@ -1,37 +1,34 @@
-# Palia AI — GitHub Pages + Supabase
+# Palia AI
 
-This build is a **plain static website**. It does not use React/Vite at runtime, so GitHub Pages can serve it directly like a normal PaliaAPK HUB-style website.
+GitHub Pages frontend + Supabase Edge Function backend.
 
-## 1. GitHub Pages
-Upload `index.html` to the repository root. In GitHub:
-Settings → Pages → Deploy from a branch → `main` → `/ (root)` → Save.
-No GitHub Actions are required.
+## GitHub Pages
+Upload the website files to the repository root and use normal GitHub Pages branch deployment.
 
-## 2. Configure the AI backend
-The browser must NOT contain a Gemini secret key. The included Supabase Edge Function keeps `GEMINI_API_KEY` server-side.
+## Supabase
+Deploy `supabase/functions/palia-ai/index.ts` as the `palia-ai` Edge Function.
 
-In `index.html`, replace the empty `SUPABASE_ANON_KEY` with your Supabase publishable/anon key.
+`supabase/config.toml` contains:
 
-Deploy `supabase/functions/palia-ai/index.ts` as the Edge Function named `palia-ai`.
+```toml
+[functions.palia-ai]
+verify_jwt = false
+```
 
-Set this Supabase Function secret:
-`GEMINI_API_KEY=YOUR_GEMINI_API_KEY`
+Set the Supabase Function Secret:
 
-The frontend will call:
+`GEMINI_API_KEY`
+
+Do NOT put a Gemini secret or Supabase service-role key in `index.html`.
+
+In `index.html`, set `window.PALIA_CONFIG.SUPABASE_ANON_KEY` to the Supabase publishable/anon key if the site needs to send it with the function request.
+
+The website endpoint is:
 `https://ralinnuegsbuvlhwpzln.supabase.co/functions/v1/palia-ai`
 
-## 3. What works
-- Palia AI chat
-- Multi-turn chat history in the current browser session
-- Live web search grounding with source links
-- Daily 2-hour usage counter
-- Profile drawer with usage slider/progress
-- Voice input through browser speech recognition
-- Image upload/analysis request path
-- TXT/MD document analysis path
-- Responsive desktop/mobile UI
-- No Gemini branding in the user UI
-- No GitHub Actions required
-
-## Security
-Never put `GEMINI_API_KEY` in `index.html`, GitHub, or any client-side JavaScript. Keep it as a Supabase Edge Function secret.
+The Edge Function handles:
+- CORS preflight
+- AI chat
+- Web search
+- usage checks
+- 2-hour daily quota (in-memory fallback)
