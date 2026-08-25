@@ -1,18 +1,264 @@
-import { serve } from 'https://deno.land/std@0.224.0/http/server.ts';
+import { serve } from "https://deno.land/std@0.224.0/http/server.ts";
 
-const cors = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-  'Access-Control-Allow-Methods': 'POST, OPTIONS',
+const corsHeaders = {
+  "Access-Control-Allow-Origin": "https://shanpalia.github.io",
+  "Access-Control-Allow-Headers":
+    "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Methods": "POST, OPTIONS",
+  "Access-Control-Max-Age": "86400",
+  "Content-Type": "application/json",
 };
-const GEMINI_KEY = Deno.env.get('GEMINI_API_KEY') || '';
-const MODEL = 'gemini-2.5-flash';
-const SEARCH_MODEL = 'gemini-2.5-flash';
+
+const GEMINI_KEY = Deno.env.get("GEMINI_API_KEY") || "";
+const MODEL = "gemini-2.5-flash";
 const LIMIT = 7200;
-const mem = new Map<string,{date:string,used:number}>();
-function dateIndia(){return new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Kolkata',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date())}
-function usage(userId:string){const date=dateIndia();let r=mem.get(userId);if(!r||r.date!==date){r={date,used:0};mem.set(userId,r)}const rem=Math.max(0,LIMIT-r.used);return {user_id:userId,usage_date:date,used_seconds:r.used,daily_limit_seconds:LIMIT,remaining_seconds:rem,is_limit_reached:rem<=0,allowed:rem>0,formatted_remaining:rem>=3600?`${Math.floor(rem/3600)}h ${Math.floor((rem%3600)/60)}m remaining`:rem>=60?`${Math.floor(rem/60)}m remaining`:`${rem}s remaining`}}
-async function gemini(body:any){if(!GEMINI_KEY)throw new Error('Palia AI backend is not configured: GEMINI_API_KEY is missing.');const url=`https://generativelanguage.googleapis.com/v1beta/models/${body.model||MODEL}:generateContent?key=${encodeURIComponent(GEMINI_KEY)}`;const r=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body.payload)});const d=await r.json();if(!r.ok)throw new Error(d?.error?.message||`Gemini API error ${r.status}`);return d}
-function extract(d:any){return d?.candidates?.[0]?.content?.parts?.filter((p:any)=>p.text).map((p:any)=>p.text).join('\n')||''}
-function sources(d:any){const out:any[]=[];for(const c of d?.candidates?.[0]?.groundingMetadata?.groundingChunks||[]){if(c.web?.uri)out.push({title:c.web.title||c.web.uri,url:c.web.uri,uri:c.web.uri})}return out}
-serve(async req=>{if(req.method==='OPTIONS')return new Response('ok',{headers:cors});try{const b=await req.json();const userId=String(b.userId||'guest');const action=String(b.action||'chat');const u=usage(userId);if(action==='usage')return new Response(JSON.stringify({success:true,usage:u}),{headers:{...cors,'Content-Type':'application/json'}});if(!u.allowed)return new Response(JSON.stringify({success:false,isLimitReached:true,error:"Daily AI limit reached. Your 2-hour allowance resets tomorrow.",usage:u}),{status:429,headers:{...cors,'Content-Type':'application/json'}});const start=Date.now();let data:any;let prompt=String(b.message||b.query||'').trim();if(!prompt&&action!=='usage')throw new Error('Message content is required.');const system='You are Palia AI, a helpful, accurate, friendly AI assistant developed by ShanPalia. Never mention or expose the underlying model/provider name. Answer naturally and clearly.';let payload:any={contents:[],generationConfig:{temperature:0.7},systemInstruction:{parts:[{text:system}]}};if(action==='search'){payload.contents=[{role:'user',parts:[{text:prompt}]}];payload.tools=[{google_search:{}}];}else{const history=Array.isArray(b.history)?b.history:[];for(const h of history.slice(-20)){const t=String(h.text||h.content||'').trim();if(t)payload.contents.push({role:h.role==='assistant'||h.role==='model'?'model':'user',parts:[{text:t}]})}payload.contents.push({role:'user',parts:[{text:prompt}]});}data=await gemini({model:action==='search'?SEARCH_MODEL:MODEL,payload});const elapsed=Math.max(1,Math.round((Date.now()-start)/1000));const r=mem.get(userId)!;r.used=Math.min(LIMIT,r.used+elapsed);const out={success:true,text:extract(data)||'No response generated.',reply:extract(data),sources:sources(data),searchQueries:action==='search'?[prompt]:[],modelUsed:'Palia AI',usage:usage(userId)};return new Response(JSON.stringify(out),{headers:{...cors,'Content-Type':'application/json'}})}catch(e){return new Response(JSON.stringify({success:false,error:e instanceof Error?e.message:'Palia AI request failed'}),{status:400,headers:{...cors,'Content-Type':'application/json'}})}});
+
+const mem = new Map<string, { date: string; used: number }>();
+
+function indiaDate() {
+  return new Intl.DateTimeFormat("en-CA", {
+    timeZone: "Asia/Kolkata",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).format(new Date());
+}
+
+function getUsage(userId: string) {
+  const today = indiaDate();
+
+  let row = mem.get(userId);
+
+  if (!row || row.date !== today) {
+    row = {
+      date: today,
+      used: 0,
+    };
+    mem.set(userId, row);
+  }
+
+  const remaining = Math.max(0, LIMIT - row.used);
+
+  return {
+    user_id: userId,
+    usage_date: today,
+    used_seconds: row.used,
+    daily_limit_seconds: LIMIT,
+    remaining_seconds: remaining,
+    is_limit_reached: remaining <= 0,
+    allowed: remaining > 0,
+    formatted_remaining:
+      remaining >= 3600
+        ? `${Math.floor(remaining / 3600)}h ${Math.floor(
+            (remaining % 3600) / 60,
+          )}m remaining`
+        : remaining >= 60
+          ? `${Math.floor(remaining / 60)}m remaining`
+          : `${remaining}s remaining`,
+  };
+}
+
+async function callGemini(payload: any) {
+  if (!GEMINI_KEY) {
+    throw new Error("GEMINI_API_KEY missing");
+  }
+
+  const response = await fetch(
+    `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent?key=${encodeURIComponent(GEMINI_KEY)}`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(payload),
+    },
+  );
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(data?.error?.message || "Gemini request failed");
+  }
+
+  return data;
+}
+
+function extractText(data: any) {
+  return (
+    data?.candidates?.[0]?.content?.parts
+      ?.map((p: any) => p.text || "")
+      .join("") || ""
+  );
+}
+
+function extractSources(data: any) {
+  const list = [];
+
+  for (const item of data?.candidates?.[0]?.groundingMetadata
+    ?.groundingChunks || []) {
+    if (item.web?.uri) {
+      list.push({
+        title: item.web.title || item.web.uri,
+        url: item.web.uri,
+      });
+    }
+  }
+
+  return list;
+}
+
+serve(async (req) => {
+  if (req.method === "OPTIONS") {
+    return new Response(null, {
+      status: 204,
+      headers: corsHeaders,
+    });
+  }
+
+  if (req.method !== "POST") {
+    return new Response(
+      JSON.stringify({
+        success: false,
+        error: "Method not allowed",
+      }),
+      {
+        status: 405,
+        headers: corsHeaders,
+      },
+    );
+  }
+
+  try {
+    const body = await req.json();
+
+    const userId = String(body.userId || "guest");
+    const action = String(body.action || "chat");
+
+    const usage = getUsage(userId);
+
+    if (action === "usage") {
+      return new Response(
+        JSON.stringify({
+          success: true,
+          usage,
+        }),
+        {
+          status: 200,
+          headers: corsHeaders,
+        },
+      );
+    }
+
+    if (!usage.allowed) {
+      return new Response(
+        JSON.stringify({
+          success: false,
+          error: "Daily AI limit reached",
+          usage,
+        }),
+        {
+          status: 429,
+          headers: corsHeaders,
+        },
+      );
+    }
+
+    const message = String(
+      body.message || body.query || "",
+    ).trim();
+
+    if (!message) {
+      return new Response(
+        JSON.stringify({
+          success: false,
+          error: "Please enter a message",
+        }),
+        {
+          status: 400,
+          headers: corsHeaders,
+        },
+      );
+    }
+
+    const systemPrompt =
+      "You are Palia AI developed by ShanPalia. Never mention Gemini or Google. Answer naturally.";
+
+    const contents: any[] = [];
+
+    if (Array.isArray(body.history)) {
+      for (const h of body.history.slice(-20)) {
+        const text = String(h.content || h.text || "").trim();
+
+        if (text) {
+          contents.push({
+            role:
+              h.role === "assistant" || h.role === "model"
+                ? "model"
+                : "user",
+            parts: [{ text }],
+          });
+        }
+      }
+    }
+
+    contents.push({
+      role: "user",
+      parts: [{ text: message }],
+    });
+
+    const payload: any = {
+      contents,
+      generationConfig: {
+        temperature: 0.7,
+      },
+      systemInstruction: {
+        parts: [{ text: systemPrompt }],
+      },
+    };
+
+    if (action === "search") {
+      payload.tools = [
+        {
+          google_search: {},
+        },
+      ];
+    }
+
+    const start = Date.now();
+
+    const data = await callGemini(payload);
+
+    const elapsed = Math.max(
+      1,
+      Math.round((Date.now() - start) / 1000),
+    );
+
+    const record = mem.get(userId)!;
+    record.used = Math.min(LIMIT, record.used + elapsed);
+
+    return new Response(
+      JSON.stringify({
+        success: true,
+        text: extractText(data),
+        reply: extractText(data),
+        sources: extractSources(data),
+        usage: getUsage(userId),
+      }),
+      {
+        status: 200,
+        headers: corsHeaders,
+      },
+    );
+  } catch (err) {
+    return new Response(
+      JSON.stringify({
+        success: false,
+        error: err instanceof Error ? err.message : "Server error",
+      }),
+      {
+        status: 500,
+        headers: corsHeaders,
+      },
+    );
+  }
+});
