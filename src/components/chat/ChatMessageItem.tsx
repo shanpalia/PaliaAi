@@ -210,7 +210,7 @@ export const ChatMessageItem: React.FC<ChatMessageItemProps> = ({
                 {message.sources.map((source, idx) => (
                   <a
                     key={idx}
-                    href={source.url}
+                    href={'url' in source ? source.url : source.uri}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="flex items-center justify-between p-2 rounded-lg bg-white border border-slate-200 hover:border-indigo-300 hover:bg-indigo-50/30 transition-all text-xs group"
@@ -219,7 +219,7 @@ export const ChatMessageItem: React.FC<ChatMessageItemProps> = ({
                       <p className="font-medium text-slate-900 truncate group-hover:text-indigo-700">
                         {source.title}
                       </p>
-                      <p className="text-[10px] text-slate-400 truncate">{source.url}</p>
+                      <p className="text-[10px] text-slate-400 truncate">{'url' in source ? source.url : source.uri}</p>
                     </div>
                     <ExternalLink className="w-3.5 h-3.5 text-slate-400 group-hover:text-indigo-600 flex-shrink-0" />
                   </a>
