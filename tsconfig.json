@@ -21,6 +21,15 @@
       ]
     },
     "allowImportingTsExtensions": true,
-    "noEmit": true
-  }
+    "noEmit": true,
+    "types": [
+      "vite/client",
+      "node"
+    ]
+  },
+  "exclude": [
+    "node_modules",
+    "supabase/**",
+    "palia_ai_final/supabase/**"
+  ]
 }
