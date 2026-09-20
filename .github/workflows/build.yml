@@ -15,7 +15,6 @@ jobs:
       - uses: actions/setup-node@v5
         with:
           node-version: 22
-          cache: false
       - run: npm install --no-audit --no-fund
       - run: npm run lint
       - run: npm run build
