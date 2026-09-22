@@ -46,52 +46,57 @@ export const aiService = {
   }): Promise<ChatResponse> {
     try {
       const cleanMessage = (params.message || '').trim();
-      const meta = getRequestMeta();
-      const payload = {
-        ...meta,
-        message: cleanMessage,
-        messages: params.messages,
-        attachments: params.attachments,
-        history: params.history,
-        systemInstruction: params.systemInstruction,
-        temperature: params.temperature,
-        model: params.model || 'palia-ai-ultra',
-        enableSearchGrounding: Boolean(params.enableSearchGrounding),
-      };
+      const messages: Array<{ role: 'system' | 'user' | 'assistant'; content: string }> = [];
 
-      const res = await apiFetch('/api/chat', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-      });
-
-      const data = await res.json();
-      if (data.usage) {
-        usageService.updateFromApiResponse(data.usage);
+      if (params.systemInstruction?.trim()) {
+        messages.push({ role: 'system', content: params.systemInstruction.trim() });
       }
 
+      for (const item of params.history || []) {
+        const role =
+          item?.role === 'assistant' || item?.role === 'model' ? 'assistant' : 'user';
+        const content = String(item?.text || item?.content || '').trim();
+        if (content) messages.push({ role, content });
+      }
+
+      if (cleanMessage) messages.push({ role: 'user', content: cleanMessage });
+
+      const res = await workerFetch('/v1/chat/completions', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          model: params.model || 'gpt-5.6',
+          messages,
+        }),
+      });
+
+      let data: any = {};
+      try { data = await res.json(); } catch {}
+
       if (!res.ok) {
-        const isLimit = res.status === 429 || data.isLimitReached;
         return {
           success: false,
-          error:
-            data.error ||
-            (isLimit
-              ? "Daily AI limit reached: You've used today's 2-hour AI allowance. Your AI access will reset tomorrow."
-              : `Server error ${res.status}`),
-          isLimitReached: isLimit,
+          error: data?.error?.message || data?.error || `Palia AI Worker returned HTTP ${res.status}`,
         };
       }
 
-      const text = data.text || data.reply || '';
+      const content = data?.choices?.[0]?.message?.content;
+      const text = Array.isArray(content)
+        ? content.map((part: any) => part?.text || '').join('')
+        : String(content || data?.output_text || data?.text || data?.reply || '');
+
+      if (!text.trim()) {
+        return { success: false, error: 'Palia AI Worker returned an empty response.' };
+      }
+
       return {
         success: true,
         text,
         reply: text,
         answer: text,
-        sources: data.sources || [],
-        searchQueries: data.searchQueries || [],
-        modelUsed: data.modelUsed || 'Palia AI',
+        sources: data?.sources || [],
+        searchQueries: data?.searchQueries || [],
+        modelUsed: data?.model || params.model || 'gpt-5.6',
       };
     } catch (err: any) {
       console.error('aiService.sendMessage error:', err);
@@ -100,9 +105,7 @@ export const aiService = {
         text: '',
         reply: '',
         answer: '',
-        error:
-          err.message ||
-          'Palia AI is currently unable to connect to the assistant service. Please check your network and try again.',
+        error: err.message || 'Palia AI could not connect to the Cloudflare AI Worker.',
       };
     }
   },
