@@ -215,7 +215,7 @@ export const MessageComposer: React.FC<MessageComposerProps> = ({
   return (
     <div
       id="message-composer-wrapper"
-      className="max-w-4xl mx-auto w-full px-4 sm:px-8 pb-4 relative"
+      className="max-w-4xl mx-auto w-full px-3 sm:px-8 pb-3 sm:pb-4 relative"
       onDragOver={(e) => {
         e.preventDefault();
         setIsDragging(true);
@@ -239,7 +239,7 @@ export const MessageComposer: React.FC<MessageComposerProps> = ({
 
       {/* Main Composer Box */}
       <div
-        className={`relative flex flex-col bg-white border rounded-2xl shadow-xl shadow-slate-100 p-2 transition-all duration-200 ${
+        className={`relative flex flex-col bg-white border rounded-[28px] shadow-sm shadow-slate-200/60 p-2 transition-all duration-200 ${
           usage.is_limit_reached
             ? 'border-rose-200 bg-rose-50/20'
             : 'border-slate-200 hover:border-slate-300 focus-within:border-blue-500 focus-within:shadow-md'
