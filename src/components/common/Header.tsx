@@ -96,7 +96,7 @@ export const Header: React.FC<HeaderProps> = ({
         <button id="btn-header-profile" onClick={onOpenProfile} className="hidden sm:flex items-center justify-center p-0.5 rounded-full hover:ring-2 hover:ring-blue-500/20 focus:outline-none transition-all cursor-pointer" title={userName || 'User Profile'} aria-label="User Profile">
           {hasAvatarUrl ? <img src={user?.avatarUrl} alt={userName || 'User'} className="w-8 h-8 rounded-full bg-slate-100 border border-slate-200 object-cover" /> : userInitial ? <div className="w-8 h-8 rounded-full bg-slate-900 text-white font-bold text-xs flex items-center justify-center">{userInitial}</div> : <div className="w-8 h-8 rounded-full bg-slate-100 text-slate-600 flex items-center justify-center border border-slate-200"><UserIcon className="w-4 h-4" /></div>}
         </button>
-      </div>/div>
+      </div>
     </header>
   );
 };
