@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useRef } from 'react';
 import {
   Plus,
   Search,
@@ -77,6 +77,41 @@ export const Sidebar: React.FC<SidebarProps> = ({
 }) => {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editTitle, setEditTitle] = useState('');
+  const [dragX, setDragX] = useState(0);
+  const touchStartX = useRef<number | null>(null);
+  const touchStartY = useRef<number | null>(null);
+  const isDragging = useRef(false);
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    if (window.innerWidth >= 1024) return;
+    const touch = e.touches[0];
+    touchStartX.current = touch.clientX;
+    touchStartY.current = touch.clientY;
+    isDragging.current = false;
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    if (window.innerWidth >= 1024 || touchStartX.current === null || touchStartY.current === null) return;
+    const touch = e.touches[0];
+    const dx = touch.clientX - touchStartX.current;
+    const dy = touch.clientY - touchStartY.current;
+    if (!isDragging.current && Math.abs(dx) < 8) return;
+    if (Math.abs(dx) <= Math.abs(dy)) return;
+    isDragging.current = true;
+    if (dx < 0) {
+      e.preventDefault();
+      setDragX(Math.max(dx, -320));
+    }
+  };
+
+  const handleTouchEnd = () => {
+    if (window.innerWidth >= 1024) return;
+    if (isDragging.current && dragX < -70) onClose();
+    setDragX(0);
+    touchStartX.current = null;
+    touchStartY.current = null;
+    isDragging.current = false;
+  };
 
   // Filtered conversations based on search filter
   const filteredConversations = useMemo(() => {
@@ -139,9 +174,20 @@ export const Sidebar: React.FC<SidebarProps> = ({
       {/* Main Sidebar Container */}
       <aside
         id="palia-sidebar"
-        className={`fixed top-0 bottom-0 left-0 z-40 w-[260px] bg-slate-50 border-r border-slate-200 flex flex-col transition-transform duration-200 ease-in-out lg:static lg:translate-x-0 ${
+        className={`fixed top-0 bottom-0 left-0 z-40 w-[min(86vw,320px)] bg-white border-r border-slate-200 flex flex-col lg:static lg:translate-x-0 ${
           isOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
+        style={{
+          transform: window.innerWidth < 1024
+            ? 'translate3d(' + (isOpen ? dragX : -110) + '%,0,0)'
+            : undefined,
+          transition: isDragging.current ? 'none' : 'transform 300ms cubic-bezier(0.22,1,0.36,1)',
+          willChange: 'transform',
+          touchAction: 'pan-y',
+        }}
       >
         {/* Top Branding Section */}
         <div className="p-6 pb-4 flex items-center justify-between">
