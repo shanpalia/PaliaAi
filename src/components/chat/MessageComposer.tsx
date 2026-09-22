@@ -289,180 +289,54 @@ export const MessageComposer: React.FC<MessageComposerProps> = ({
           />
         </div>
 
-        {/* Action Controls Toolbar: [ + ] [ Mic ] | [ Model/Search ] [ Send ] */}
-        <div className="flex items-center justify-between px-2 pb-1 pt-1">
-          {/* Left Actions: Attachment Menu + Voice + Divider + Model tag */}
+        {/* ChatGPT-style composer controls */}
+        <div className="flex items-center justify-between px-1 pb-1 pt-1">
           <div className="flex items-center gap-1 relative" ref={menuRef}>
-            {/* Attachment Button */}
             <button
               id="btn-composer-attachment"
               type="button"
               disabled={usage.is_limit_reached}
               onClick={() => setShowAttachmentMenu(!showAttachmentMenu)}
-              className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-colors cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
-              title="Add attachments (Images, PDF, Documents)"
-              aria-label="Add attachments"
+              className="w-9 h-9 rounded-full flex items-center justify-center text-slate-700 hover:bg-slate-100 transition-colors cursor-pointer disabled:opacity-40"
+              title="Add photos and files"
+              aria-label="Add photos and files"
             >
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-                <polyline points="17 8 12 3 7 8" />
-                <line x1="12" y1="3" x2="12" y2="15" />
-              </svg>
+              <Plus className="w-6 h-6" />
             </button>
-
-            {/* Hidden File Input */}
-            <input
-              ref={fileInputRef}
-              type="file"
-              multiple
-              className="hidden"
-              onChange={(e) => handleFiles(e.target.files)}
-            />
-
-            {/* Attachment Popover Menu */}
+            <input ref={fileInputRef} type="file" multiple className="hidden" onChange={(e) => handleFiles(e.target.files)} />
             {showAttachmentMenu && (
-              <div
-                id="attachment-menu-dropdown"
-                className="absolute bottom-full left-0 mb-2 w-48 bg-white border border-slate-200 rounded-xl shadow-lg p-1 z-30 space-y-0.5"
-              >
-                <button
-                  type="button"
-                  onClick={() => {
-                    if (fileInputRef.current) {
-                      fileInputRef.current.accept = 'image/*';
-                      fileInputRef.current.click();
-                    }
-                    setShowAttachmentMenu(false);
-                  }}
-                  className="w-full flex items-center gap-2 px-2.5 py-2 rounded-lg text-xs font-medium text-slate-700 hover:bg-blue-50 hover:text-blue-700 transition-colors text-left cursor-pointer"
-                >
-                  <ImageIcon className="w-4 h-4 text-purple-500" />
-                  <span>Upload Image</span>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => {
-                    if (fileInputRef.current) {
-                      fileInputRef.current.accept = 'application/pdf,.pdf';
-                      fileInputRef.current.click();
-                    }
-                    setShowAttachmentMenu(false);
-                  }}
-                  className="w-full flex items-center gap-2 px-2.5 py-2 rounded-lg text-xs font-medium text-slate-700 hover:bg-blue-50 hover:text-blue-700 transition-colors text-left cursor-pointer"
-                >
-                  <FileText className="w-4 h-4 text-red-500" />
-                  <span>Upload PDF</span>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => {
-                    if (fileInputRef.current) {
-                      fileInputRef.current.accept = '.txt,.md,.doc,.docx';
-                      fileInputRef.current.click();
-                    }
-                    setShowAttachmentMenu(false);
-                  }}
-                  className="w-full flex items-center gap-2 px-2.5 py-2 rounded-lg text-xs font-medium text-slate-700 hover:bg-blue-50 hover:text-blue-700 transition-colors text-left cursor-pointer"
-                >
-                  <Paperclip className="w-4 h-4 text-amber-500" />
-                  <span>Upload Document</span>
-                </button>
+              <div id="attachment-menu-dropdown" className="absolute bottom-full left-0 mb-2 w-48 bg-white border border-slate-200 rounded-2xl shadow-xl p-1.5 z-30">
+                <button type="button" onClick={() => { if (fileInputRef.current) { fileInputRef.current.accept = "image/*"; fileInputRef.current.click(); } setShowAttachmentMenu(false); }} className="w-full flex items-center gap-2 px-3 py-2.5 rounded-xl text-sm text-slate-700 hover:bg-slate-50 text-left"><ImageIcon className="w-4 h-4" />Upload image</button>
+                <button type="button" onClick={() => { if (fileInputRef.current) { fileInputRef.current.accept = "application/pdf,.pdf"; fileInputRef.current.click(); } setShowAttachmentMenu(false); }} className="w-full flex items-center gap-2 px-3 py-2.5 rounded-xl text-sm text-slate-700 hover:bg-slate-50 text-left"><FileText className="w-4 h-4" />Upload PDF</button>
+                <button type="button" onClick={() => { if (fileInputRef.current) { fileInputRef.current.accept = ".txt,.md,.doc,.docx"; fileInputRef.current.click(); } setShowAttachmentMenu(false); }} className="w-full flex items-center gap-2 px-3 py-2.5 rounded-xl text-sm text-slate-700 hover:bg-slate-50 text-left"><Paperclip className="w-4 h-4" />Upload document</button>
               </div>
             )}
-
-            {/* Voice Dictation Button */}
             <button
               id="btn-composer-mic"
               type="button"
               disabled={usage.is_limit_reached}
               onClick={toggleSpeechRecognition}
-              className={`p-2 rounded-lg transition-colors cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed ${
-                isListening
-                  ? 'bg-rose-500 text-white animate-pulse shadow-md shadow-rose-200'
-                  : 'text-slate-400 hover:text-slate-600 hover:bg-slate-100'
-              }`}
-              title={isListening ? 'Stop listening' : 'Speak to Palia AI'}
+              className={`w-9 h-9 rounded-full flex items-center justify-center transition-colors cursor-pointer disabled:opacity-40 ${isListening ? "bg-rose-500 text-white animate-pulse" : "text-slate-700 hover:bg-slate-100"}`}
+              title={isListening ? "Stop listening" : "Voice input"}
               aria-label="Voice input"
             >
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z" />
-                <path d="M19 10v2a7 7 0 0 1-14 0v-2" />
-                <line x1="12" y1="19" x2="12" y2="23" />
-                <line x1="8" y1="23" x2="16" y2="23" />
-              </svg>
-            </button>
-
-            {/* Subtle Divider */}
-            <div className="h-6 w-[1px] bg-slate-200 mx-1 mt-0.5" />
-
-            {/* Web Search / Model tag */}
-            <button
-              id="btn-composer-search-toggle"
-              type="button"
-              disabled={usage.is_limit_reached}
-              onClick={() => setIsSearchMode(!isSearchMode)}
-              className={`px-3 py-1.5 text-[11px] font-bold rounded-lg transition-colors cursor-pointer disabled:opacity-40 ${
-                isSearchMode
-                  ? 'bg-blue-50 text-blue-700'
-                  : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
-              }`}
-              title="Toggle Live Web Grounding"
-            >
-              {isSearchMode ? 'Web Search ON' : 'Palia AI'}
+              <Mic className="w-5 h-5" />
             </button>
           </div>
-
-          {/* Right Action: Send / Stop Button */}
           <div>
             {isLoading ? (
-              <button
-                id="btn-composer-stop"
-                type="button"
-                onClick={onStop}
-                className="bg-slate-800 text-white p-2.5 rounded-xl shadow-md hover:bg-slate-900 transition-all cursor-pointer"
-                title="Stop generating"
-              >
+              <button id="btn-composer-stop" type="button" onClick={onStop} className="w-9 h-9 rounded-full bg-slate-900 text-white flex items-center justify-center shadow-sm hover:bg-slate-800" title="Stop generating">
                 <StopCircle className="w-4 h-4" />
               </button>
             ) : (
-              <button
-                id="btn-composer-send"
-                type="button"
-                onClick={handleSend}
-                disabled={usage.is_limit_reached || (!input.trim() && attachments.length === 0)}
-                className={`p-2.5 rounded-xl transition-all cursor-pointer ${
-                  !usage.is_limit_reached && (input.trim() || attachments.length > 0)
-                    ? 'bg-blue-600 text-white shadow-lg shadow-blue-200 hover:bg-blue-700'
-                    : 'bg-slate-100 text-slate-300 cursor-not-allowed'
-                }`}
-                title={usage.is_limit_reached ? 'Daily limit reached' : 'Send message (Enter)'}
-                aria-label="Send message"
-              >
-                <svg
-                  width="18"
-                  height="18"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2.5"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <line x1="22" y1="2" x2="11" y2="13" />
-                  <polygon points="22 2 15 22 11 13 2 9 22 2" />
-                </svg>
+              <button id="btn-composer-send" type="button" onClick={handleSend} disabled={usage.is_limit_reached || (!input.trim() && attachments.length === 0)} className={`w-9 h-9 rounded-full flex items-center justify-center transition-all ${!usage.is_limit_reached && (input.trim() || attachments.length > 0) ? "bg-blue-600 text-white hover:bg-blue-700 shadow-sm" : "bg-slate-200 text-slate-400 cursor-not-allowed"}`} title="Send message" aria-label="Send message">
+                <ArrowUp className="w-5 h-5" strokeWidth={2.5} />
               </button>
             )}
           </div>
-        </div>
-      </div>
+        </div>      </div>
 
-      {/* Footer disclaimer */}
-      <p className="text-[10px] text-center text-slate-400 mt-3 font-medium">
-        Palia AI can make mistakes. Check important info.
-      </p>
+      <p className="text-[10px] text-center text-slate-400 mt-2 font-medium">Palia AI can make mistakes. Check important info.</p>
     </div>
   );
 };
