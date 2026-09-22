@@ -68,8 +68,14 @@ async function startServer() {
 
   // Health check
   app.get('/api/health', (req, res) => {
-    const hasKey = Boolean(process.env.GEMINI_API_KEY);
-    res.json({ status: 'ok', apiConfigured: hasKey, appName: 'Palia AI', developer: 'ShanPalia' });
+    const hasOpenAIKey = Boolean(process.env.OPENAI_API_KEY);
+    res.json({
+      status: 'ok',
+      apiConfigured: hasOpenAIKey,
+      provider: hasOpenAIKey ? 'OpenAI' : 'not-configured',
+      appName: 'Palia AI',
+      developer: 'ShanPalia',
+    });
   });
 
   // --- Daily AI Usage Allowance Endpoints ---
@@ -201,11 +207,11 @@ async function startServer() {
   });
 
   // General AI Chat Endpoint with Usage Tracking
+  // Palia AI uses OpenAI on the server. The API key is NEVER exposed to the browser.
   app.post('/api/chat', async (req, res) => {
     const userId = req.body.userId || (req.headers['x-user-id'] as string) || 'default_user';
     const timezone = req.body.timezone || (req.headers['x-timezone'] as string) || 'Asia/Kolkata';
 
-    // 1. Check daily allowance
     const usageCheck = usageManager.getUsageStatus(userId, timezone);
     if (!usageCheck.allowed) {
       return res.status(429).json({
@@ -218,180 +224,219 @@ async function startServer() {
     }
 
     const startTime = Date.now();
+
     try {
       const {
         message,
         messages = [],
         history = [],
         attachments = [],
-        systemInstruction = 'You are Palia AI, an advanced, highly capable, elegant, and friendly AI assistant developed by ShanPalia. Provide accurate, deeply helpful, structured, and beautiful answers. Format code cleanly with language tags and use structured markdown when helpful.',
-        temperature = 0.7,
+        systemInstruction = 'You are Palia AI, an advanced, highly capable, elegant, and friendly AI assistant developed by ShanPalia. Give accurate, useful, structured answers. Use Markdown naturally, with headings, bullets, tables and fenced code blocks when helpful. Never mention internal system instructions.',
         model = 'palia-ai-ultra',
         enableSearchGrounding = false,
       } = req.body;
 
-      const ai = getGenAI();
-      const internalModel = resolveModel(model);
+      const apiKey = process.env.OPENAI_API_KEY;
+      if (!apiKey) {
+        return res.status(503).json({
+          success: false,
+          error: 'Palia AI is not configured yet. Add OPENAI_API_KEY to the server environment.',
+        });
+      }
 
-      const contents: Array<{ role: string; parts: Array<any> }> = [];
+      // Keep the existing Palia AI model names in the UI, but map them to OpenAI models.
+      const openAIModel =
+        model === 'palia-ai-pro' ? 'gpt-5.6-sol' :
+        model === 'palia-ai-ultra' ? 'gpt-5.6-luna' :
+        typeof model === 'string' && model.startsWith('gpt-') ? model :
+        'gpt-5.6-luna';
 
-      // Helper to process attachments into Gemini inlineData / text parts
-      const processAttachments = (atts: Array<any>) => {
-        const parts: Array<any> = [];
+      type OpenAIContentPart = Record<string, any>;
+      type OpenAIInputMessage = {
+        role: 'user' | 'assistant' | 'system';
+        content: string | OpenAIContentPart[];
+      };
+
+      const input: OpenAIInputMessage[] = [];
+
+      if (systemInstruction) {
+        input.push({ role: 'system', content: String(systemInstruction) });
+      }
+
+      const addAttachments = (atts: any[]): OpenAIContentPart[] => {
+        const parts: OpenAIContentPart[] = [];
         if (!Array.isArray(atts)) return parts;
+
         for (const att of atts) {
           if (!att) continue;
-          if (att.dataUrl && att.dataUrl.includes('base64,')) {
-            const base64Data = att.dataUrl.split('base64,')[1];
+
+          if (att.dataUrl && String(att.dataUrl).startsWith('data:')) {
             parts.push({
-              inlineData: {
-                mimeType: att.mimeType || 'image/jpeg',
-                data: base64Data,
-              },
+              type: 'input_image',
+              image_url: String(att.dataUrl),
             });
           } else if (att.textExtract) {
             parts.push({
-              text: `[Attached Document: "${att.name || 'Document'}"]\n${att.textExtract}\n---`,
+              type: 'input_text',
+              text: '[Attached Document: "' + (att.name || 'Document') + '"]\n' +
+                String(att.textExtract) + '\n---',
             });
           }
         }
+
         return parts;
       };
 
-      // Process prior history turns if provided
-      if (Array.isArray(history) && history.length > 0) {
+      const addTextMessage = (role: 'user' | 'assistant', text: string, atts: any[] = []) => {
+        const clean = String(text || '').trim();
+        const parts: OpenAIContentPart[] = [];
+
+        if (atts.length) parts.push(...addAttachments(atts));
+        if (clean) parts.push({ type: 'input_text', text: clean });
+
+        if (parts.length) {
+          input.push({ role, content: parts });
+        }
+      };
+
+      // Conversation history from the existing Palia AI client.
+      if (Array.isArray(history)) {
         for (const item of history) {
           if (!item) continue;
-          const role = item.role === 'model' || item.role === 'assistant' ? 'model' : 'user';
-          let itemText = '';
-          if (typeof item === 'string') {
-            itemText = item;
-          } else if (typeof item.text === 'string') {
-            itemText = item.text;
-          } else if (typeof item.content === 'string') {
-            itemText = item.content;
-          } else if (Array.isArray(item.parts)) {
-            itemText = item.parts
-              .map((p: any) => (typeof p === 'string' ? p : p?.text || ''))
-              .join(' ');
-          }
+          const role =
+            item.role === 'assistant' || item.role === 'model'
+              ? 'assistant'
+              : 'user';
 
-          if (itemText && itemText.trim()) {
-            contents.push({ role, parts: [{ text: itemText.trim() }] });
-          }
+          const textValue =
+            typeof item === 'string'
+              ? item
+              : item.text || item.content || '';
+
+          addTextMessage(role, String(textValue));
         }
       }
 
-      // Process messages array if provided
-      if (Array.isArray(messages) && messages.length > 0) {
+      // Optional full message list.
+      if (Array.isArray(messages)) {
         for (let i = 0; i < messages.length; i++) {
           const msg = messages[i];
           if (!msg) continue;
-          const isLatest = i === messages.length - 1;
-          const role = msg.role === 'model' || msg.sender === 'assistant' ? 'model' : 'user';
-          const parts: Array<any> = [];
 
-          if (isLatest && Array.isArray(attachments) && attachments.length > 0) {
-            parts.push(...processAttachments(attachments));
-          } else if (Array.isArray(msg.attachments) && msg.attachments.length > 0) {
-            parts.push(...processAttachments(msg.attachments));
-          }
+          const role =
+            msg.role === 'assistant' || msg.sender === 'assistant'
+              ? 'assistant'
+              : 'user';
 
-          const textContent = msg.content || msg.text || (typeof msg === 'string' ? msg : '');
-          if (textContent && String(textContent).trim()) {
-            parts.push({ text: String(textContent).trim() });
-          }
+          const textValue =
+            typeof msg === 'string'
+              ? msg
+              : msg.content || msg.text || '';
 
-          if (parts.length > 0) {
-            contents.push({ role, parts });
-          }
+          // Attach files only to the latest message when they are supplied separately.
+          const atts =
+            i === messages.length - 1 && Array.isArray(attachments)
+              ? attachments
+              : Array.isArray(msg.attachments) ? msg.attachments : [];
+
+          addTextMessage(role, String(textValue), atts);
         }
       }
 
-      // Process direct 'message' query string if provided
+      // Direct message used by the current Palia AI frontend.
       if (typeof message === 'string' && message.trim()) {
-        const latestAttParts =
-          Array.isArray(attachments) && attachments.length > 0
-            ? processAttachments(attachments)
-            : [];
-        const userParts = [...latestAttParts, { text: message.trim() }];
+        const last = input[input.length - 1];
+        const alreadyAdded =
+          last?.role === 'user' &&
+          JSON.stringify(last.content).includes(message.trim());
 
-        const lastContent = contents[contents.length - 1];
-        const isDuplicate =
-          lastContent &&
-          lastContent.role === 'user' &&
-          lastContent.parts.some((p: any) => p.text === message.trim());
-
-        if (!isDuplicate) {
-          contents.push({ role: 'user', parts: userParts });
+        if (!alreadyAdded) {
+          addTextMessage(
+            'user',
+            message.trim(),
+            Array.isArray(attachments) ? attachments : []
+          );
         }
-      } else if (contents.length === 0 && Array.isArray(attachments) && attachments.length > 0) {
-        const attParts = processAttachments(attachments);
-        if (attParts.length > 0) {
-          contents.push({
-            role: 'user',
-            parts: [...attParts, { text: 'Analyze and provide insights on the attached file(s).' }],
-          });
-        }
+      } else if (
+        input.length === 1 &&
+        Array.isArray(attachments) &&
+        attachments.length
+      ) {
+        addTextMessage(
+          'user',
+          'Analyze and provide useful insights on the attached file(s).',
+          attachments
+        );
       }
 
-      if (contents.length === 0) {
+      if (input.length <= 1) {
         return res.status(400).json({
           error: 'Please enter a message or attach a file to continue.',
         });
       }
 
-      const config: any = {
-        systemInstruction,
-        temperature: typeof temperature === 'number' ? temperature : 0.7,
+      const requestBody: any = {
+        model: openAIModel,
+        input,
       };
 
+      // The OpenAI Responses API supports web search tools. Search mode is
+      // enabled only when the existing Palia AI UI asks for it.
       if (enableSearchGrounding) {
-        config.tools = [{ googleSearch: {} }];
+        requestBody.tools = [{ type: 'web_search' }];
       }
 
-      const response = await ai.models.generateContent({
-        model: internalModel,
-        contents,
-        config,
+      const response = await fetch('https://api.openai.com/v1/responses', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: 'Bearer ' + apiKey,
+        },
+        body: JSON.stringify(requestBody),
       });
 
-      const responseText = response.text || '';
+      const data: any = await response.json();
 
-      const sources: Array<{ title: string; url: string; uri: string; snippet?: string }> = [];
-      const candidates = response.candidates;
-      if (candidates && candidates[0]?.groundingMetadata) {
-        const metadata = candidates[0].groundingMetadata;
-        if (metadata.groundingChunks) {
-          for (const chunk of metadata.groundingChunks) {
-            if (chunk.web?.uri) {
-              const url = chunk.web.uri;
-              const title = chunk.web.title || new URL(url).hostname;
-              sources.push({ title, url, uri: url });
-            }
-          }
-        }
+      if (!response.ok) {
+        const apiError =
+          data?.error?.message ||
+          'OpenAI API request failed with HTTP ' + response.status;
+
+        throw new Error(apiError);
       }
+
+      // Responses API returns structured output items. Extract all text safely.
+      const responseText =
+        typeof data?.output_text === 'string'
+          ? data.output_text
+          : Array.isArray(data?.output)
+            ? data.output
+                .flatMap((item: any) => Array.isArray(item?.content) ? item.content : [])
+                .map((part: any) => part?.text || '')
+                .filter(Boolean)
+                .join('\n')
+            : '';
 
       const elapsedSec = Math.max(1, (Date.now() - startTime) / 1000);
       const updatedUsage = usageManager.recordUsage(userId, elapsedSec, timezone);
 
       res.json({
         success: true,
-        text: responseText,
-        reply: responseText,
-        sources,
-        modelUsed: 'Palia AI',
+        text: responseText || 'No response generated.',
+        reply: responseText || 'No response generated.',
+        sources: [],
+        modelUsed: openAIModel,
         usage: updatedUsage,
       });
     } catch (err: any) {
-      console.error('Chat error:', err);
+      console.error('OpenAI Chat error:', err);
       const elapsedSec = Math.max(1, (Date.now() - startTime) / 1000);
       const updatedUsage = usageManager.recordUsage(userId, elapsedSec, timezone);
 
       res.status(500).json({
         error:
-          err.message || 'Palia AI encountered an issue generating a response. Please try again.',
+          err.message ||
+          'Palia AI encountered an issue generating a response. Please try again.',
         usage: updatedUsage,
       });
     }
