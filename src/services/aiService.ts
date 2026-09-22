@@ -1,7 +1,7 @@
 import { Attachment, ChatMessage, GroundingSource, SearchSource } from '../types';
 import { authService } from './authService';
 import { usageService } from './usageService';
-import { apiFetch } from './api';
+import { apiFetch, workerFetch } from './api';
 
 export interface ChatResponse {
   success: boolean;
