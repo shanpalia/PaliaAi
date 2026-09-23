@@ -25,7 +25,6 @@ jobs:
         uses: actions/setup-node@v5
         with:
           node-version: 22
-          cache: npm
 
       - name: Install dependencies
         run: npm install --no-audit --no-fund
@@ -39,6 +38,7 @@ jobs:
           test -f dist/palia-ai-icon.svg
           test -f dist/palia-ai-logo.svg
           ! grep -q 'src/main.tsx' dist/index.html
+          grep -q '/assets/' dist/index.html || grep -q './assets/' dist/index.html
 
       - name: Configure Pages
         uses: actions/configure-pages@v5
