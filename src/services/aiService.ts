@@ -19,8 +19,24 @@ export interface ChatResponse {
 
 function getRequestMeta() {
   const user = authService.getUser();
+
+  let clientId = '';
+  if (typeof window !== 'undefined') {
+    try {
+      clientId = localStorage.getItem('palia_ai_client_id') || '';
+      if (!clientId) {
+        clientId =
+          typeof crypto !== 'undefined' && 'randomUUID' in crypto
+            ? crypto.randomUUID()
+            : `palia-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+        localStorage.setItem('palia_ai_client_id', clientId);
+      }
+    } catch {}
+  }
+
   return {
-    userId: user?.id || 'default_user',
+    userId: user?.id || '',
+    clientId,
     timezone: usageService.getTimezone() || 'Asia/Kolkata',
   };
 }
@@ -152,6 +168,7 @@ export const aiService = {
           attachments,
           generateImage,
           intent,
+          ...getRequestMeta(),
         }),
       });
 
