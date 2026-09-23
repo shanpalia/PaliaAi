@@ -34,7 +34,7 @@ export const Header: React.FC<HeaderProps> = ({
   const hasAvatarUrl = Boolean(user?.avatarUrl?.trim());
 
   return (
-    <header id="palia-header" className="h-[68px] border-b border-slate-200/70 bg-white/95 backdrop-blur-xl px-3 sm:px-6 flex items-center justify-between sticky top-0 z-50">
+    <header id="palia-header" className="h-[64px] border-b border-slate-200/70 bg-white/95 backdrop-blur-xl px-3 sm:px-6 flex items-center justify-between sticky top-0 z-50">
       <div className="flex items-center gap-2 min-w-0">
         <button
           id="btn-toggle-sidebar"
@@ -51,13 +51,13 @@ export const Header: React.FC<HeaderProps> = ({
           className="flex items-center gap-2.5 min-w-0 rounded-xl px-2 py-1.5 hover:bg-slate-50 transition-all"
           aria-label="Palia AI home"
         >
-          <img src={`${import.meta.env.BASE_URL}palia-ai-icon.svg`} alt="Palia AI" className="w-8 h-8 rounded-[10px]" />
+          <img src={`${import.meta.env.BASE_URL}palia-ai-icon.svg`} alt="Palia AI" className="w-9 h-9 rounded-[12px] shadow-sm" />
           <div className="min-w-0 text-left">
             <div className="font-bold text-[15px] text-slate-950 leading-tight truncate max-w-[42vw]">
               {activeConversationTitle || 'Palia AI'}
             </div>
             <div className="hidden sm:flex items-center gap-1 text-[10px] font-medium text-slate-400 mt-0.5">
-              <Sparkles className="w-3 h-3 text-emerald-500" /> AI workspace
+              <Sparkles className="w-3 h-3 text-emerald-500" /> Palia AI
             </div>
           </div>
         </button>
@@ -67,7 +67,7 @@ export const Header: React.FC<HeaderProps> = ({
         <button
           id="btn-header-new-chat"
           onClick={onNewChat}
-          className="hidden sm:flex h-10 items-center gap-2 px-3 rounded-xl border border-slate-200 bg-white text-slate-700 hover:bg-slate-50 hover:border-slate-300 transition-all text-sm font-semibold"
+          className="hidden sm:flex h-10 items-center gap-2 px-3 rounded-xl border border-emerald-200 bg-emerald-50/60 text-emerald-800 hover:bg-emerald-50 hover:border-emerald-300 transition-all text-sm font-semibold"
           title="New chat"
         >
           <Pencil className="w-4 h-4" />
