@@ -99,7 +99,12 @@ class UsageService {
         this.timezone
       )}`;
 
-      const res = await fetch(url);
+      // GitHub Pages has no /api backend. Keep local usage state when no API base is configured.
+      if (!import.meta.env.VITE_API_BASE_URL) {
+        return this.status;
+      }
+      const base = String(import.meta.env.VITE_API_BASE_URL).replace(/\/$/, '');
+      const res = await fetch(`${base}${url}`);
       if (res.ok) {
         const data = await res.json();
         if (data.success) {
