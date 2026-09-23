@@ -61,6 +61,23 @@ export const aiService = {
 
       if (cleanMessage) messages.push({ role: 'user', content: cleanMessage });
 
+      // Keep image/file payloads attached to the same request so the Worker can
+      // pass them to Gemini's multimodal Interactions API.
+      const attachments = (params.attachments || [])
+        .filter((a) => a && a.dataUrl)
+        .map((a) => ({
+          name: a.name,
+          type: a.type,
+          mimeType: a.mimeType,
+          dataUrl: a.dataUrl,
+        }));
+
+      const lowerPrompt = cleanMessage.toLowerCase();
+      const generateImage =
+        attachments.length === 0 &&
+        /\\b(generate|create|make|draw|design|render)\\b/.test(lowerPrompt) &&
+        /\\b(image|photo|picture|poster|portrait|illustration|wallpaper|logo)\\b/.test(lowerPrompt);
+
       const res = await workerFetch('/v1/chat/completions', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -70,6 +87,8 @@ export const aiService = {
           prompt: cleanMessage,
           model: params.model || 'gpt-5.6',
           messages,
+          attachments,
+          generateImage,
         }),
       });
 
@@ -87,8 +106,9 @@ export const aiService = {
       const text = Array.isArray(content)
         ? content.map((part: any) => part?.text || '').join('')
         : String(content || data?.output_text || data?.text || data?.reply || '');
+      const imageUrl = data?.imageUrl || data?.generatedImageUrl || data?.image_url;
 
-      if (!text.trim()) {
+      if (!text.trim() && !imageUrl) {
         return { success: false, error: 'Palia AI Worker returned an empty response.' };
       }
 
@@ -99,7 +119,8 @@ export const aiService = {
         answer: text,
         sources: data?.sources || [],
         searchQueries: data?.searchQueries || [],
-        modelUsed: data?.model || params.model || 'gpt-5.6',
+        modelUsed: data?.model || params.model || 'Palia AI',
+        imageUrl,
       };
     } catch (err: any) {
       console.error('aiService.sendMessage error:', err);
