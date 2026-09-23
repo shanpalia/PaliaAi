@@ -189,7 +189,7 @@ export const App: React.FC = () => {
         attachments,
       });
 
-      if (res.success && (res.reply || res.text)) {
+      if (res.success && (res.reply || res.text || res.imageUrl)) {
         const replyText = res.reply || res.text || '';
         const botMsg: ChatMessage = {
           id: `msg_bot_${Date.now()}`,
@@ -199,6 +199,7 @@ export const App: React.FC = () => {
           sources: res.sources,
           searchQueries: res.searchQueries,
           modelUsed: 'Palia AI',
+          generatedImageUrl: res.imageUrl,
         };
 
         storageService.addMessage(activeConversationId, botMsg);
