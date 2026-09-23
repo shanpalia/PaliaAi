@@ -67,16 +67,13 @@ export const App: React.FC = () => {
     const currentUser = authService.getCurrentUser();
     setUser(currentUser);
 
-    const activeId = storageService.getActiveConversationId();
-    if (activeId && loadedConvs.some((c) => c.id === activeId)) {
-      setActiveConversationId(activeId);
-    } else if (loadedConvs.length > 0) {
-      setActiveConversationId(loadedConvs[0].id);
-      storageService.setActiveConversationId(loadedConvs[0].id);
-    } else {
-      // Create initial conversation
-      handleNewChat();
-    }
+    // Always start with a fresh chat when the page/app is opened.
+    // Previous conversations remain saved in the sidebar history.
+    const newConv = storageService.createConversation('New Chat', 'chat');
+    setConversations(storageService.getConversations());
+    setActiveConversationId(newConv.id);
+    setActiveTool('chat');
+
 
     // Subscribe to daily AI usage state
     const unsub = usageService.subscribe((u) => {
