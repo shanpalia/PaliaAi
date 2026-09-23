@@ -239,7 +239,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
           </div>
         </div>
 
-        {/* AI Tools Suite Navigation */}
+        {/* Palia AI Tools Suite Navigation */}
         <div className={`px-3 sm:px-5 py-3 border-b border-slate-200/60 ${collapsed ? "lg:px-2" : ""}`}>
           <p className={`text-[10px] font-bold text-slate-400 uppercase px-1 mb-2 tracking-wider ${collapsed ? "lg:hidden" : ""}`}>
             AI Tools
@@ -259,13 +259,13 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   }}
                   className={`flex items-center gap-1.5 px-2 py-2 rounded-lg text-xs font-medium text-left transition-all cursor-pointer active:scale-[0.98] ${collapsed ? "lg:justify-center lg:px-0" : ""} ${
                     isSelected
-                      ? 'bg-blue-50 text-blue-700 font-semibold border border-blue-100'
+                      ? 'bg-emerald-50 text-emerald-700 font-semibold border border-emerald-100'
                       : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/40'
                   }`}
                 >
                   <Icon
                     className={`w-3.5 h-3.5 flex-shrink-0 ${
-                      isSelected ? 'text-blue-600' : 'text-slate-400'
+                      isSelected ? 'text-emerald-600' : 'text-slate-400'
                     }`}
                   />
                   <span className={`truncate ${collapsed ? "lg:hidden" : ""}`}>{tool.name}</span>
@@ -338,17 +338,17 @@ export const Sidebar: React.FC<SidebarProps> = ({
         {/* Bottom Profile & Settings Area */}
         <div className={`mt-auto p-3 border-t border-slate-200 space-y-3 bg-slate-50 ${collapsed ? "lg:p-2" : "lg:p-4"}`}>
           {/* Quick Tools Link */}
-          <button type="button" title={collapsed ? "Tools" : undefined} onClick={() => { onSelectTool("dashboard"); onClose(); }} className={`w-full flex items-center gap-3 px-2 py-2 text-slate-600 hover:text-blue-600 hover:bg-white rounded-lg cursor-pointer transition-colors active:scale-[0.98] ${collapsed ? "lg:justify-center lg:px-0" : ""}`}>
+          <button type="button" title={collapsed ? "Tools" : undefined} onClick={() => { onSelectTool("dashboard"); onClose(); }} className={`w-full flex items-center gap-3 px-2 py-2 text-slate-600 hover:text-emerald-600 hover:bg-white rounded-lg cursor-pointer transition-colors active:scale-[0.98] ${collapsed ? "lg:justify-center lg:px-0" : ""}`}>
             <LayoutGrid className="w-4 h-4" />
             <span className={collapsed ? "lg:hidden text-sm font-medium" : "text-sm font-medium"}>Tools</span>
           </button>
 
           {/* AI Credits Badge */}
-          <button type="button" title={collapsed ? "AI Credits" : undefined} onClick={() => { onOpenProfile(); onClose(); }} className={`w-full flex items-center justify-between px-3 bg-blue-100/50 py-2 rounded-lg cursor-pointer hover:bg-blue-100/80 active:scale-[0.99] transition-colors ${collapsed ? "lg:justify-center lg:px-1" : ""}`}>
-            <span className={collapsed ? "lg:hidden text-[11px] font-bold text-blue-700 uppercase" : "text-[11px] font-bold text-blue-700 uppercase"}>
+          <button type="button" title={collapsed ? "AI Credits" : undefined} onClick={() => { onOpenProfile(); onClose(); }} className={`w-full flex items-center justify-between px-3 bg-emerald-50 py-2 rounded-lg cursor-pointer hover:bg-blue-100/80 active:scale-[0.99] transition-colors ${collapsed ? "lg:justify-center lg:px-1" : ""}`}>
+            <span className={collapsed ? "lg:hidden text-[11px] font-bold text-emerald-700 uppercase" : "text-[11px] font-bold text-blue-700 uppercase"}>
               AI Credits: {credits}
             </span>
-            <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse" />
+            <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse" />
           </button>
 
           {/* User Profile Card */}
@@ -372,7 +372,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   className="w-8 h-8 rounded-full bg-slate-200 border border-slate-300 object-cover flex-shrink-0"
                 />
               ) : (
-                <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-blue-600 to-indigo-600 text-white font-bold text-xs flex items-center justify-center flex-shrink-0 shadow-xs">
+                <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-emerald-500 to-teal-600 text-white font-bold text-xs flex items-center justify-center flex-shrink-0 shadow-xs">
                   {user?.name?.charAt(0).toUpperCase() || user?.email?.charAt(0).toUpperCase() || 'P'}
                 </div>
               )}
@@ -424,7 +424,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
           />
           <button
             type="submit"
-            className="p-0.5 text-indigo-600 hover:text-indigo-800 cursor-pointer"
+            className="p-0.5 text-emerald-600 hover:text-indigo-800 cursor-pointer"
             title="Save"
           >
             <Check className="w-3.5 h-3.5" />
