@@ -135,27 +135,32 @@ export const ChatContainer: React.FC<ChatContainerProps> = ({
         className="flex-1 overflow-y-auto overflow-x-hidden flex flex-col"
       >
         {isEmpty ? (
-          /* Empty / Landing Hero State */
-          <div className="flex-1 flex flex-col items-center justify-center px-6 sm:px-12 py-10">
-            {/* Professional Polish Greeting */}
-            <div className="text-center mb-8 sm:mb-12">
-              <div className="inline-flex items-center justify-center p-3 rounded-3xl bg-emerald-50 mb-5 shadow-sm">
+          /* Premium landing state */
+          <div className="flex-1 flex flex-col items-center justify-center px-5 sm:px-10 py-10 sm:py-14 relative overflow-hidden">
+            <div className="absolute inset-0 pointer-events-none">
+              <div className="absolute left-1/2 top-16 -translate-x-1/2 w-[520px] h-[260px] rounded-full bg-emerald-100/30 blur-3xl" />
+              <div className="absolute left-[12%] bottom-20 w-40 h-40 rounded-full bg-cyan-100/20 blur-3xl" />
+            </div>
+            <div className="relative z-10 text-center mb-8 sm:mb-10">
+              <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/80 border border-emerald-100 shadow-sm text-[11px] font-semibold text-emerald-700 mb-5">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" /> Palia AI
+              </div>
+              <div className="mb-5">
                 <img
                   src={`${import.meta.env.BASE_URL}palia-ai-icon.svg`}
                   alt="Palia AI"
-                  className="w-12 h-12 object-contain"
+                  className="w-[76px] h-[76px] mx-auto rounded-[24px] shadow-xl shadow-emerald-200/40"
                 />
               </div>
-              <h2 className="text-3xl sm:text-4xl font-bold text-slate-800 mb-2 sm:mb-3 tracking-tight">
-                Hello, I&apos;m Palia AI
+              <h2 className="text-[32px] sm:text-[46px] font-bold text-slate-950 tracking-[-0.04em] leading-tight">
+                What can I help you <span className="text-emerald-500">create?</span>
               </h2>
-              <p className="text-base sm:text-lg text-slate-500 font-normal">
-                How can I help you today?
+              <p className="mt-3 text-sm sm:text-base text-slate-500">
+                Ask anything, explore ideas, analyze files, search the web, or create images.
               </p>
             </div>
 
-            {/* 8 Suggestion Grid */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3.5 sm:gap-4 w-full max-w-4xl">
+            <div className="relative z-10 grid grid-cols-1 sm:grid-cols-2 gap-3 w-full max-w-[760px]">
               {suggestions.map((sug, idx) => {
                 const Icon = sug.icon;
                 return (
@@ -165,16 +170,17 @@ export const ChatContainer: React.FC<ChatContainerProps> = ({
                     onClick={() =>
                       onSelectSuggestion(sug.prompt, sug.tool, sug.uploadType)
                     }
-                    className="p-4 bg-white border border-slate-200 rounded-2xl cursor-pointer hover:border-blue-400 hover:shadow-md transition-all group select-none"
+                    className="p-4 sm:p-5 bg-white/90 backdrop-blur border border-slate-200/80 rounded-2xl cursor-pointer hover:-translate-y-0.5 hover:border-emerald-200 hover:shadow-lg hover:shadow-slate-200/50 transition-all group select-none text-left"
                   >
-                    <div
-                      className={`w-8 h-8 rounded-lg ${sug.color} flex items-center justify-center mb-3 transition-colors`}
-                    >
-                      <Icon className="w-4 h-4" />
+                    <div className="flex items-center gap-3">
+                      <div className={`w-10 h-10 rounded-xl ${sug.color} flex items-center justify-center transition-colors flex-shrink-0`}>
+                        <Icon className="w-[18px] h-[18px]" />
+                      </div>
+                      <div className="min-w-0">
+                        <p className="text-sm font-semibold text-slate-800 group-hover:text-emerald-700 transition-colors">{sug.title}</p>
+                        <p className="text-[11px] text-slate-400 mt-0.5">Start with Palia AI</p>
+                      </div>
                     </div>
-                    <p className="text-sm font-semibold text-slate-700 group-hover:text-blue-600 transition-colors">
-                      {sug.title}
-                    </p>
                   </div>
                 );
               })}
