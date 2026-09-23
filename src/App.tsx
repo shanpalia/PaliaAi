@@ -37,7 +37,13 @@ export const App: React.FC = () => {
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [activeConversationId, setActiveConversationId] = useState<string | null>(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [searchFilter, setSearchFilter] = useState('');
+
+  const handleToggleSidebar = () => {
+    if (window.innerWidth >= 1024) setSidebarCollapsed((v) => !v);
+    else setSidebarOpen((v) => !v);
+  };
 
   // Modals
   const [isAuthOpen, setIsAuthOpen] = useState(false);
@@ -279,6 +285,7 @@ export const App: React.FC = () => {
       {/* Responsive Collapsible Sidebar */}
       <Sidebar
         isOpen={sidebarOpen}
+        collapsed={sidebarCollapsed}
         onClose={() => setSidebarOpen(false)}
         activeTool={activeTool}
         onSelectTool={handleSelectTool}
@@ -316,7 +323,7 @@ export const App: React.FC = () => {
       <div className="flex-1 flex flex-col h-full min-w-0 overflow-hidden bg-white">
         {/* Navigation Header */}
         <Header
-          onToggleSidebar={() => setSidebarOpen(!sidebarOpen)}
+          onToggleSidebar={handleToggleSidebar}
           activeTool={activeTool}
           onSelectTool={handleSelectTool}
           onOpenSettings={() => setIsSettingsOpen(true)}
