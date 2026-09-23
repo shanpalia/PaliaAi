@@ -215,7 +215,7 @@ export const MessageComposer: React.FC<MessageComposerProps> = ({
   return (
     <div
       id="message-composer-wrapper"
-      className="max-w-4xl mx-auto w-full px-3 sm:px-8 pb-3 sm:pb-4 relative"
+      className="max-w-3xl mx-auto w-full px-3 sm:px-6 pb-4 sm:pb-6 relative"
       onDragOver={(e) => {
         e.preventDefault();
         setIsDragging(true);
@@ -239,10 +239,10 @@ export const MessageComposer: React.FC<MessageComposerProps> = ({
 
       {/* Main Composer Box */}
       <div
-        className={`relative flex flex-col bg-white border rounded-[28px] shadow-sm shadow-slate-200/60 p-2 transition-all duration-200 ${
+        className={`relative flex flex-col bg-white/95 backdrop-blur-xl border rounded-[24px] shadow-[0_12px_40px_rgba(15,23,42,0.10)] p-2 transition-all duration-200 ${
           usage.is_limit_reached
             ? 'border-rose-200 bg-rose-50/20'
-            : 'border-slate-200 hover:border-slate-300 focus-within:border-blue-500 focus-within:shadow-md'
+            : 'border-slate-200/90 hover:border-slate-300 focus-within:border-emerald-400 focus-within:shadow-[0_14px_45px_rgba(16,185,129,0.12)]'
         }`}
       >
         {/* Pending Attachment previews */}
@@ -297,7 +297,7 @@ export const MessageComposer: React.FC<MessageComposerProps> = ({
               type="button"
               disabled={usage.is_limit_reached}
               onClick={() => setShowAttachmentMenu(!showAttachmentMenu)}
-              className="w-9 h-9 rounded-full flex items-center justify-center text-slate-700 hover:bg-slate-100 transition-colors cursor-pointer disabled:opacity-40"
+              className="w-9 h-9 rounded-xl flex items-center justify-center text-slate-600 hover:bg-slate-100 transition-colors cursor-pointer disabled:opacity-40"
               title="Add photos and files"
               aria-label="Add photos and files"
             >
@@ -329,7 +329,7 @@ export const MessageComposer: React.FC<MessageComposerProps> = ({
                 <StopCircle className="w-4 h-4" />
               </button>
             ) : (
-              <button id="btn-composer-send" type="button" onClick={handleSend} disabled={usage.is_limit_reached || (!input.trim() && attachments.length === 0)} className={`w-9 h-9 rounded-full flex items-center justify-center transition-all ${!usage.is_limit_reached && (input.trim() || attachments.length > 0) ? "bg-blue-600 text-white hover:bg-blue-700 shadow-sm" : "bg-slate-200 text-slate-400 cursor-not-allowed"}`} title="Send message" aria-label="Send message">
+              <button id="btn-composer-send" type="button" onClick={handleSend} disabled={usage.is_limit_reached || (!input.trim() && attachments.length === 0)} className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all ${!usage.is_limit_reached && (input.trim() || attachments.length > 0) ? "bg-slate-950 text-white hover:bg-emerald-600 shadow-lg shadow-slate-900/10" : "bg-slate-100 text-slate-400 cursor-not-allowed"}`} title="Send message" aria-label="Send message">
                 <ArrowUp className="w-5 h-5" strokeWidth={2.5} />
               </button>
             )}
