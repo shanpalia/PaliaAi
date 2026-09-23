@@ -167,7 +167,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
         <div
           id="sidebar-backdrop"
           onClick={onClose}
-          className="fixed inset-0 bg-slate-900/30 backdrop-blur-xs z-30 lg:hidden transition-opacity"
+          className="fixed inset-0 bg-slate-900/30 backdrop-blur-[2px] z-30 lg:hidden transition-opacity duration-300"
         />
       )}
 
@@ -182,7 +182,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
         onTouchEnd={handleTouchEnd}
         style={{
           transform: window.innerWidth < 1024
-            ? 'translate3d(' + (isOpen ? dragX : -110) + '%,0,0)'
+            ? (isOpen ? `translate3d(${dragX}px,0,0)` : 'translate3d(-100%,0,0)')
             : undefined,
           transition: isDragging.current ? 'none' : 'transform 300ms cubic-bezier(0.22,1,0.36,1)',
           willChange: 'transform',
