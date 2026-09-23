@@ -73,8 +73,8 @@ export const aiService = {
         }));
 
       const lowerPrompt = cleanMessage.toLowerCase();
-      const imageEditIntent = /\\b(edit|enhance|improve|unblur|sharpen|restore|retouch|remove background|change background|fix|clean|clear|hd|high quality|quality improve|photo saaf|photo साफ|image saaf|image साफ|blur hata|blur remove|धुंधला|साफ|क्वालिटी|एडिट|एन्हांस|एचडी|बैकग्राउंड)\\b/i.test(lowerPrompt);
-      const imageCreateIntent = /\\b(generate|create|make|draw|design|render|image banao|photo banao|tasveer banao|picture banao|image bana|photo bana|तस्वीर बनाओ|फोटो बनाओ|इमेज बनाओ|पोस्टर बनाओ|लोगो बनाओ)\\b/i.test(lowerPrompt);
+      const imageEditIntent = /\b(edit|enhance|improve|unblur|sharpen|restore|retouch|remove background|change background|fix|clean|clear|hd|high quality|quality improve|photo saaf|photo साफ|image saaf|image साफ|blur hata|blur remove|धुंधला|साफ|क्वालिटी|एडिट|एन्हांस|एचडी|बैकग्राउंड)\b/i.test(lowerPrompt);
+      const imageCreateIntent = /\b(generate|create|make|draw|design|render|image banao|photo banao|tasveer banao|picture banao|image bana|photo bana|तस्वीर बनाओ|फोटो बनाओ|इमेज बनाओ|पोस्टर बनाओ|लोगो बनाओ)\b/i.test(lowerPrompt);
       const generateImage = (attachments.length > 0 && imageEditIntent) || (attachments.length === 0 && imageCreateIntent);
 
 
