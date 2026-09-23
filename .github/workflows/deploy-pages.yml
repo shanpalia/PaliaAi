@@ -25,12 +25,20 @@ jobs:
         uses: actions/setup-node@v5
         with:
           node-version: 22
+          cache: npm
 
       - name: Install dependencies
-        run: npm install
+        run: npm install --no-audit --no-fund
 
       - name: Build frontend
         run: npx vite build
+
+      - name: Verify production assets
+        run: |
+          test -f dist/index.html
+          test -f dist/palia-ai-icon.svg
+          test -f dist/palia-ai-logo.svg
+          ! grep -q 'src/main.tsx' dist/index.html
 
       - name: Configure Pages
         uses: actions/configure-pages@v5
