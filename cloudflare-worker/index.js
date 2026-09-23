@@ -62,6 +62,68 @@ async function geminiChat(env, input) {
  * HF's provider adapter converts image-to-image input to fal's image_url
  * format. The queue returns response_url; we poll its /status endpoint.
  */
+const IMAGE_LIMIT = 25;
+const IMAGE_WINDOW_SECONDS = 24 * 60 * 60;
+
+async function quotaKey(body, request) {
+  const userId = String(body?.userId || '').trim();
+  const clientId = String(body?.clientId || '').trim();
+  const ip = request.headers.get('CF-Connecting-IP') || 'unknown';
+  const identity = userId || clientId || 'anonymous';
+  const raw = `palia-image-limit:${identity}:${ip}`;
+  const bytes = new TextEncoder().encode(raw);
+  const digest = await crypto.subtle.digest('SHA-256', bytes);
+  return 'img:' + [...new Uint8Array(digest)].map((b) => b.toString(16).padStart(2, '0')).join('');
+}
+
+async function checkImageQuota(env, body, request) {
+  if (!env.PALIA_USAGE) {
+    throw new Error('PALIA_USAGE KV binding is not configured.');
+  }
+
+  const key = await quotaKey(body, request);
+  const now = Date.now();
+  const current = await env.PALIA_USAGE.get(key, 'json');
+
+  if (!current || !current.expiresAt || current.expiresAt <= now) {
+    return { allowed: true, count: 0, remaining: IMAGE_LIMIT, key };
+  }
+
+  const count = Number(current.count || 0);
+  return {
+    allowed: count < IMAGE_LIMIT,
+    count,
+    remaining: Math.max(0, IMAGE_LIMIT - count),
+    resetAt: current.expiresAt,
+    key,
+  };
+}
+
+async function recordImageUsage(env, quota) {
+  const now = Date.now();
+  const current = await env.PALIA_USAGE.get(quota.key, 'json');
+  const expiresAt =
+    current && Number(current.expiresAt) > now
+      ? Number(current.expiresAt)
+      : now + IMAGE_WINDOW_SECONDS * 1000;
+  const count =
+    current && Number(current.expiresAt) > now
+      ? Number(current.count || 0) + 1
+      : 1;
+
+  await env.PALIA_USAGE.put(
+    quota.key,
+    JSON.stringify({ count, expiresAt }),
+    { expirationTtl: Math.max(60, Math.ceil((expiresAt - now) / 1000)) },
+  );
+
+  return {
+    count,
+    remaining: Math.max(0, IMAGE_LIMIT - count),
+    resetAt: expiresAt,
+  };
+}
+
 async function hfEdit(env, image, prompt) {
   const submitUrl =
     "https://router.huggingface.co/fal-ai/fal-ai/qwen-image-edit?_subdomain=queue";
@@ -196,12 +258,32 @@ export default {
           throw new Error("HF_TOKEN is not configured.");
         }
 
+        const quota = await checkImageQuota(env, body, request);
+        if (!quota.allowed) {
+          const resetInHours = Math.max(
+            1,
+            Math.ceil((Number(quota.resetAt) - Date.now()) / 3600000),
+          );
+          return json({
+            error: {
+              message: `24-hour image limit reached. You can create another image in about ${resetInHours} hour(s).`,
+            },
+            isLimitReached: true,
+            imageLimit: IMAGE_LIMIT,
+            imagesUsed: quota.count,
+            imagesRemaining: 0,
+            resetAt: quota.resetAt,
+          }, 429);
+        }
+
         const edited = await hfEdit(
           env,
           image,
           prompt ||
             "Enhance this image naturally while preserving the original subject, face, identity and important details."
         );
+
+        const usage = await recordImageUsage(env, quota);
 
         return json({
           id: `palia-image-${Date.now()}`,
@@ -217,6 +299,10 @@ export default {
           }],
           imageUrl: edited,
           generatedImageUrl: edited,
+          imageLimit: IMAGE_LIMIT,
+          imagesUsed: usage.count,
+          imagesRemaining: usage.remaining,
+          resetAt: usage.resetAt,
         });
       }
 
