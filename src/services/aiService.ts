@@ -65,6 +65,9 @@ export const aiService = {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
+          // Keep both formats so the Worker can accept the simple prompt contract
+          // as well as the OpenAI-compatible chat format.
+          prompt: cleanMessage,
           model: params.model || 'gpt-5.6',
           messages,
         }),
