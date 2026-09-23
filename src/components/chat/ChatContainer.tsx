@@ -139,21 +139,12 @@ export const ChatContainer: React.FC<ChatContainerProps> = ({
           <div className="flex-1 flex flex-col items-center justify-center px-6 sm:px-12 py-10">
             {/* Professional Polish Greeting */}
             <div className="text-center mb-8 sm:mb-12">
-              <div className="inline-block p-4 rounded-3xl bg-blue-50 mb-5 shadow-xs">
-                <svg
-                  width="44"
-                  height="44"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="#2563EB"
-                  strokeWidth="1.75"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <circle cx="12" cy="12" r="10" />
-                  <path d="M12 16v-4" />
-                  <path d="M12 8h.01" />
-                </svg>
+              <div className="inline-flex items-center justify-center p-3 rounded-3xl bg-emerald-50 mb-5 shadow-sm">
+                <img
+                  src={`${import.meta.env.BASE_URL}palia-ai-icon.svg`}
+                  alt="Palia AI"
+                  className="w-12 h-12 object-contain"
+                />
               </div>
               <h2 className="text-3xl sm:text-4xl font-bold text-slate-800 mb-2 sm:mb-3 tracking-tight">
                 Hello, I&apos;m Palia AI
