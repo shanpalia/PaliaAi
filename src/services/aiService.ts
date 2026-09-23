@@ -178,12 +178,17 @@ export const aiService = {
       } catch {}
 
       if (!res.ok) {
+        const isLimit =
+          res.status === 429 ||
+          data?.isLimitReached === true;
+
         return {
           success: false,
           error:
             data?.error?.message ||
             data?.error ||
             `Palia AI Worker returned HTTP ${res.status}`,
+          isLimitReached: isLimit,
         };
       }
 
