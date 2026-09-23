@@ -349,7 +349,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
               AI Credits: {credits}
             </span>
             <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse" />
-          </div>
+          </button>
 
           {/* User Profile Card */}
           <div className={`flex items-center gap-3 p-2 bg-white rounded-xl border border-slate-200 shadow-2xs ${collapsed ? "lg:justify-center lg:p-1.5" : ""}`}>
