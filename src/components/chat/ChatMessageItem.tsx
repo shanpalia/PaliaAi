@@ -346,7 +346,12 @@ const CodeBlock: React.FC<{ language: string; code: string }> = ({ language, cod
 
 // Sub-component for displaying attachments inside messages
 const AttachmentItem: React.FC<{ attachment: Attachment }> = ({ attachment }) => {
-  if (attachment.type === 'image' && attachment.dataUrl) {
+  // Some uploads keep their original MIME type or extension but get a generic attachment type.
+  const looksLikeImage =
+    attachment.type === 'image' ||
+    String(attachment.mimeType || '').toLowerCase().startsWith('image/') ||
+    /\.(png|jpe?g|webp|gif|bmp|avif)$/i.test(attachment.name || '');
+  if (looksLikeImage && attachment.dataUrl) {
     return (
       <div className="relative group rounded-xl overflow-hidden border border-slate-200 max-w-full w-64 h-64 bg-slate-50 shadow-sm">
         <img
