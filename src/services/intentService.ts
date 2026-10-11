@@ -27,7 +27,10 @@ export function detectPaliaIntent(
 ): PaliaIntent {
   const text = (message || '').trim();
 
-  if (hasImage && editPatterns.some((p) => p.test(text))) {
+  // When a photo is attached, treat edit instructions as image edits instead of
+  // sending them to chat/document handling. Keep genuine questions conversational.
+  const asksAboutImage = /\\b(what is this|who is this|describe|explain this image|what can you see|identify|is this|ye kya hai|ye kaun|kya dikh raha|tasveer mein kya|image mein kya|photo mein kya)\\b/i.test(text);
+  if (hasImage && !asksAboutImage && editPatterns.some((p) => p.test(text))) {
     return 'image_edit';
   }
 
