@@ -161,12 +161,27 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                     onChange={(e) => setSettings({ ...settings, language: e.target.value })}
                     className="w-full p-2 rounded-xl bg-slate-50 border border-slate-200 text-xs font-medium"
                   >
-                    <option value="en">English (US)</option>
+                    <option value="en">English</option>
                     <option value="hi">हिन्दी (Hindi)</option>
-                    <option value="es">Español</option>
-                    <option value="fr">Français</option>
-                    <option value="de">Deutsch</option>
-                    <option value="ja">日本語</option>
+                    <option value="ur">اردو (Urdu)</option>
+                    <option value="bn">বাংলা (Bengali)</option>
+                    <option value="ta">தமிழ் (Tamil)</option>
+                    <option value="te">తెలుగు (Telugu)</option>
+                    <option value="mr">मराठी (Marathi)</option>
+                    <option value="gu">ગુજરાતી (Gujarati)</option>
+                    <option value="pa">ਪੰਜਾਬੀ (Punjabi)</option>
+                    <option value="es">Español (Spanish)</option>
+                    <option value="fr">Français (French)</option>
+                    <option value="de">Deutsch (German)</option>
+                    <option value="pt">Português (Portuguese)</option>
+                    <option value="it">Italiano (Italian)</option>
+                    <option value="ar">العربية (Arabic)</option>
+                    <option value="zh">中文 (Chinese)</option>
+                    <option value="ja">日本語 (Japanese)</option>
+                    <option value="ko">한국어 (Korean)</option>
+                    <option value="ru">Русский (Russian)</option>
+                    <option value="id">Bahasa Indonesia</option>
+                    <option value="tr">Türkçe (Turkish)</option>
                   </select>
                 </div>
 
