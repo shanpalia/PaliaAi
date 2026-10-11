@@ -199,7 +199,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
         </div>
 
         {/* New Chat & Search Input */}
-        <div className={`px-3 sm:px-4 space-y-3 ${collapsed ? "lg:px-3" : ""}`}>
+        <div className={`px-2.5 pt-1 space-y-1.5 ${collapsed ? "lg:px-2" : ""}`}>
           <button
             id="btn-sidebar-new-chat"
             title={collapsed ? "New chat" : undefined}
@@ -207,7 +207,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
               onNewChat();
               onClose();
             }}
-            className={`w-full flex items-center justify-center gap-2 bg-white border border-slate-200 py-2.5 rounded-xl text-sm font-semibold text-slate-700 shadow-xs hover:bg-slate-100/80 active:scale-[0.98] transition-all cursor-pointer ${collapsed ? "lg:px-0" : ""}`}
+            className={`w-full flex items-center justify-start gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-700 hover:bg-slate-100 active:scale-[0.99] transition-all cursor-pointer ${collapsed ? "lg:justify-center lg:px-0" : ""}`}
           >
             <Plus className="w-4 h-4 text-slate-600" />
             <span className={collapsed ? "lg:hidden" : ""}>New Chat</span>
@@ -222,7 +222,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
               value={searchFilter}
               onChange={(e) => onSearchChange(e.target.value)}
               placeholder="Search chats..."
-              className="w-full bg-slate-200/50 border-none rounded-lg py-2 pl-8 pr-7 text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-blue-500 transition-all"
+              className="w-full bg-slate-100 border border-transparent rounded-xl py-2.5 pl-8 pr-7 text-sm text-slate-900 placeholder:text-slate-500 focus:bg-white focus:border-slate-200 focus:outline-none focus:ring-2 focus:ring-slate-100 transition-all"
             />
             {searchFilter && (
               <button
@@ -236,11 +236,11 @@ export const Sidebar: React.FC<SidebarProps> = ({
         </div>
 
         {/* Palia AI Tools Suite Navigation */}
-        <div className={`px-3 sm:px-4 py-3 border-b border-slate-200/60 ${collapsed ? "lg:px-2" : ""}`}>
-          <p className={`text-[10px] font-bold text-slate-400 uppercase px-1 mb-2 tracking-wider ${collapsed ? "lg:hidden" : ""}`}>
+        <div className={`px-2.5 py-3 border-b border-slate-100 ${collapsed ? "lg:px-2" : ""}`}>
+          <p className={`text-[11px] font-semibold text-slate-500 px-3 mb-2 tracking-wide ${collapsed ? "lg:hidden" : ""}`}>
             AI Tools
           </p>
-          <div className={`grid gap-1 ${collapsed ? "lg:grid-cols-1" : "grid-cols-2"}`}>
+          <div className="flex flex-col gap-0.5">
             {toolsList.map((tool) => {
               const Icon = tool.icon;
               const isSelected = activeTool === tool.id;
@@ -253,10 +253,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
                     onSelectTool(tool.id);
                     onClose();
                   }}
-                  className={`flex items-center gap-1.5 px-2 py-2 rounded-lg text-xs font-medium text-left transition-all cursor-pointer active:scale-[0.98] ${collapsed ? "lg:justify-center lg:px-0" : ""} ${
+                  className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-left transition-all cursor-pointer active:scale-[0.99] ${collapsed ? "lg:justify-center lg:px-0" : ""} ${
                     isSelected
-                      ? 'bg-emerald-50 text-emerald-700 font-semibold border border-emerald-100'
-                      : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/40'
+                      ? 'bg-slate-100 text-slate-900 font-semibold'
+                      : 'text-slate-700 hover:text-slate-950 hover:bg-slate-100'
                   }`}
                 >
                   <Icon
@@ -272,7 +272,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
         </div>
 
         {/* Conversation History List */}
-        <nav className={`flex-1 overflow-y-auto px-3 py-3 space-y-3 select-none ${collapsed ? "lg:px-2" : "lg:px-4"}`}>
+        <nav className={`flex-1 overflow-y-auto px-2.5 py-3 space-y-4 select-none ${collapsed ? "lg:px-2" : ""}`}>
           {filteredConversations.length === 0 ? (
             <div className="py-6 text-center text-xs text-slate-400">
               {searchFilter ? 'No chats found matching search' : 'No previous conversations'}
@@ -295,7 +295,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
               {/* Today / Recent History */}
               {grouped.today.length > 0 && (
                 <div>
-                  <p className={`text-[10px] font-bold text-slate-400 uppercase px-2 mb-1.5 tracking-wider ${collapsed ? "lg:hidden" : ""}`}>
+                  <p className={`text-[11px] font-semibold text-slate-500 px-3 mb-1.5 tracking-wide ${collapsed ? "lg:hidden" : ""}`}>
                     Recent History
                   </p>
                   <div className="space-y-1">
@@ -332,26 +332,12 @@ export const Sidebar: React.FC<SidebarProps> = ({
         </nav>
 
         {/* Bottom Profile & Settings Area */}
-        <div className={`mt-auto p-3 border-t border-slate-200 space-y-3 bg-white ${collapsed ? "lg:p-2" : "lg:p-4"}`}>
+        <div className={`mt-auto p-3 border-t border-slate-100 space-y-2 bg-white ${collapsed ? "lg:p-2" : ""}`}>
           {/* Quick Tools Link */}
           <button type="button" title={collapsed ? "Tools" : undefined} onClick={() => { onSelectTool("dashboard"); onClose(); }} className={`w-full flex items-center gap-3 px-2 py-2 text-slate-600 hover:text-emerald-600 hover:bg-white rounded-lg cursor-pointer transition-colors active:scale-[0.98] ${collapsed ? "lg:justify-center lg:px-0" : ""}`}>
             <LayoutGrid className="w-4 h-4" />
             <span className={collapsed ? "lg:hidden text-sm font-medium" : "text-sm font-medium"}>Tools</span>
           </button>
-
-          {/* Palia AI brand mark — credits are intentionally hidden */}
-          <div className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl border border-emerald-100 bg-gradient-to-r from-emerald-50 to-cyan-50 ${collapsed ? "lg:justify-center lg:px-1" : ""}`}>
-            <img
-              src={`${import.meta.env.BASE_URL}palia-ai-icon.svg`}
-              alt="Palia AI brand icon"
-              className="w-9 h-9 rounded-xl object-contain flex-shrink-0"
-            />
-            <div className={collapsed ? "lg:hidden min-w-0" : "min-w-0"}>
-              <p className="text-xs font-bold tracking-tight text-slate-800">Palia AI</p>
-              <p className="text-[10px] font-medium text-emerald-700">By PaliaAPK HUB</p>
-            </div>
-            <div className={`ml-auto w-2 h-2 rounded-full bg-emerald-500 ${collapsed ? "lg:hidden" : ""}`} />
-          </div>
 
           {/* User Profile Card */}
           <div className={`flex items-center gap-3 p-2 bg-white rounded-xl border border-slate-200 shadow-2xs ${collapsed ? "lg:justify-center lg:p-1.5" : ""}`}>
@@ -451,10 +437,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
           onSelectConversation(chat.id);
           onClose();
         }}
-        className={`group relative flex items-center justify-between px-2.5 py-2 rounded-lg text-xs cursor-pointer transition-all ${
+        className={`group relative flex items-center justify-between px-3 py-2.5 rounded-xl text-sm cursor-pointer transition-all ${
           isSelected
             ? 'bg-slate-100 text-slate-900 font-medium'
-            : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
+            : 'text-slate-700 hover:text-slate-950 hover:bg-slate-100'
         }`}
       >
         <div className="flex items-center gap-2 min-w-0 pr-1 flex-1">
