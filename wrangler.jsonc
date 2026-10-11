@@ -2,5 +2,8 @@
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "paliaai",
   "main": "cloudflare-worker/index.js",
-  "compatibility_date": "2026-10-11"
+  "compatibility_date": "2026-10-11",
+  "ai": {
+    "binding": "AI"
+  }
 }
