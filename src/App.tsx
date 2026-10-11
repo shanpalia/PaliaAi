@@ -129,12 +129,16 @@ export const App: React.FC = () => {
     const selected = savedConversation || currentConversation;
 
     if (selected) {
-      const normalizedMessages = (selected.messages || []).map((message: any) => ({
-        ...message,
-        sender: message.sender || (message.role === 'user' ? 'user' : 'assistant'),
-        text: message.text ?? message.content ?? '',
-        timestamp: message.timestamp ?? Date.now(),
-      }));
+      const normalizedMessages = (Array.isArray(selected.messages) ? selected.messages : [])
+        .filter((message: any) => message && typeof message === 'object')
+        .map((message: any, index: number) => ({
+          ...message,
+          id: typeof message.id === 'string' && message.id ? message.id : `restored-${id}-${index}`,
+          sender: message.sender || (message.role === 'user' ? 'user' : 'assistant'),
+          text: typeof message.text === 'string' ? message.text : (typeof message.content === 'string' ? message.content : ''),
+          timestamp: message.timestamp ?? Date.now(),
+          attachments: Array.isArray(message.attachments) ? message.attachments.filter((attachment: any) => attachment && typeof attachment === 'object') : [],
+        }));
       const hydrated = { ...selected, messages: normalizedMessages };
       setConversations((current) => {
         const others = current.filter((item) => item.id !== id);
