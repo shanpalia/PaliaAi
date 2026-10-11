@@ -200,9 +200,12 @@ async function hfGenerate(env, prompt, aspectRatio) {
   throw new Error("Image generation timed out. Please try again.");
 }
 
-async function hfEdit(env, image, prompt) {
+async function hfEdit(env, images, prompt) {
   const submitUrl =
     "https://router.huggingface.co/fal-ai/fal-ai/qwen-image-edit?_subdomain=queue";
+  const imageList = (Array.isArray(images) ? images : [images]).filter(Boolean);
+  if (!imageList.length) throw new Error("Upload at least one image to edit.");
+  const imageUrls = imageList.map((image) => `data:${image.mime};base64,${image.base64}`);
 
   const submit = await fetch(submitUrl, {
     method: "POST",
@@ -213,7 +216,11 @@ async function hfEdit(env, image, prompt) {
     body: JSON.stringify({
       input: {
         prompt,
-        image_url: `data:${image.mime};base64,${image.base64}`,
+        // Qwen Image Edit supports multiple reference images through image_urls.
+        // Keep image_url as a compatibility fallback for a single-image edit.
+        ...(imageUrls.length > 1
+          ? { image_urls: imageUrls }
+          : { image_url: imageUrls[0] }),
       },
     }),
   });
@@ -325,11 +332,16 @@ export default {
       const intent = String(body?.intent || "chat");
       const generateImage = body?.generateImage === true;
 
-      const image = attachments
+      const images = attachments
+        .filter((a) => String(a?.type || "").toLowerCase() === "image" ||
+          String(a?.mimeType || "").toLowerCase().startsWith("image/"))
         .map((a) => dataUrlToParts(a?.dataUrl))
-        .find(Boolean);
+        .filter(Boolean);
+      const image = images[0] || null;
+      const shortImageInstruction = /^(same|same image|aisa hi|aisi hi|like this|make same|similar|same bana do|same banao)$/i.test(prompt);
+      const referenceImageEdit = images.length >= 2 && (shortImageInstruction || !prompt);
 
-      if (intent === "image_edit" || intent === "image_generate" || generateImage) {
+      if (referenceImageEdit || intent === "image_edit" || intent === "image_generate" || generateImage) {
         if (!env.HF_TOKEN) {
           throw new Error("HF_TOKEN is not configured in the Cloudflare Worker.");
         }
@@ -352,13 +364,12 @@ export default {
           }, 429);
         }
 
-        const imageUrl = image
-          ? await hfEdit(
-              env,
-              image,
-              prompt || "Enhance this image naturally while preserving the original subject, face, identity and important details."
-            )
-          : await hfGenerate(env, prompt, String(body?.aspectRatio || ""));
+        const editPrompt = referenceImageEdit
+          ? "Use the FIRST reference image as the target composition: preserve its pose, clothing, framing, background, and lighting. Use the SECOND reference image as the identity reference for the person; preserve their recognizable facial identity and natural facial features. Create one photorealistic image combining these references. Do not just describe the images."
+          : prompt || "Enhance this image naturally while preserving the original subject, face, identity and important details.";
+        const imageUrl = images.length
+          ? await hfEdit(env, referenceImageEdit ? images : [image], editPrompt)
+          : await hfGenerate(env, prompt || "Create a beautiful, high-quality image based on the user's request.", String(body?.aspectRatio || ""));
 
         const usage = await recordImageUsage(env, quota);
 
