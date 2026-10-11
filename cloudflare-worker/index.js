@@ -65,6 +65,9 @@ async function geminiChat(env, input) {
  */
 const IMAGE_LIMIT = 25;
 const IMAGE_WINDOW_SECONDS = 24 * 60 * 60;
+// Fallback keeps image features usable when the optional Cloudflare KV binding is absent.
+// This is per Worker isolate; bind PALIA_USAGE for durable, shared quotas in production.
+const localImageUsage = new Map();
 
 async function quotaKey(body, request) {
   const userId = String(body?.userId || '').trim();
@@ -78,13 +81,11 @@ async function quotaKey(body, request) {
 }
 
 async function checkImageQuota(env, body, request) {
-  if (!env.PALIA_USAGE) {
-    throw new Error('PALIA_USAGE KV binding is not configured.');
-  }
-
   const key = await quotaKey(body, request);
   const now = Date.now();
-  const current = await env.PALIA_USAGE.get(key, 'json');
+  const current = env.PALIA_USAGE
+    ? await env.PALIA_USAGE.get(key, 'json')
+    : localImageUsage.get(key) || null;
 
   if (!current || !current.expiresAt || current.expiresAt <= now) {
     return { allowed: true, count: 0, remaining: IMAGE_LIMIT, key };
@@ -102,7 +103,9 @@ async function checkImageQuota(env, body, request) {
 
 async function recordImageUsage(env, quota) {
   const now = Date.now();
-  const current = await env.PALIA_USAGE.get(quota.key, 'json');
+  const current = env.PALIA_USAGE
+    ? await env.PALIA_USAGE.get(quota.key, 'json')
+    : localImageUsage.get(quota.key) || null;
   const expiresAt =
     current && Number(current.expiresAt) > now
       ? Number(current.expiresAt)
@@ -112,11 +115,16 @@ async function recordImageUsage(env, quota) {
       ? Number(current.count || 0) + 1
       : 1;
 
-  await env.PALIA_USAGE.put(
-    quota.key,
-    JSON.stringify({ count, expiresAt }),
-    { expirationTtl: Math.max(60, Math.ceil((expiresAt - now) / 1000)) },
-  );
+  const nextValue = { count, expiresAt };
+  if (env.PALIA_USAGE) {
+    await env.PALIA_USAGE.put(
+      quota.key,
+      JSON.stringify(nextValue),
+      { expirationTtl: Math.max(60, Math.ceil((expiresAt - now) / 1000)) },
+    );
+  } else {
+    localImageUsage.set(quota.key, nextValue);
+  }
 
   return {
     count,
