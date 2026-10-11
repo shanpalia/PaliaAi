@@ -19,7 +19,6 @@ import {
   LayoutGrid,
 } from 'lucide-react';
 import { Conversation, ToolType, UserProfile } from '../../types';
-import { Logo } from './Logo';
 
 interface SidebarProps {
   isOpen: boolean;
