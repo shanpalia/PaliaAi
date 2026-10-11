@@ -30,6 +30,9 @@ jobs:
         run: npm install --no-audit --no-fund
 
       - name: Build frontend
+        env:
+          VITE_RAZORPAY_PRO_MONTHLY_URL: ${{ vars.VITE_RAZORPAY_PRO_MONTHLY_URL }}
+          VITE_RAZORPAY_PRO_YEARLY_URL: ${{ vars.VITE_RAZORPAY_PRO_YEARLY_URL }}
         run: npx vite build
 
       - name: Verify production assets
