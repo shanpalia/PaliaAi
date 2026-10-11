@@ -70,7 +70,7 @@ export const App: React.FC = () => {
     // Always start with a fresh chat when the page/app is opened.
     // Previous conversations remain saved in the sidebar history.
     const newConv = storageService.createConversation('New Chat', 'chat');
-    setConversations(storageService.getConversations());
+    setConversations(loadedConvs.concat(newConv));
     setActiveConversationId(newConv.id);
     setActiveTool('chat');
 
@@ -88,7 +88,7 @@ export const App: React.FC = () => {
 
   const handleNewChat = (toolType: ToolType = 'chat') => {
     const newConv = storageService.createConversation('New Chat', toolType);
-    setConversations(storageService.getConversations());
+    setConversations((current) => [newConv, ...current.filter((conversation) => conversation.id !== newConv.id)]);
     setActiveConversationId(newConv.id);
     setActiveTool(toolType);
     if (window.innerWidth < 1024) {
