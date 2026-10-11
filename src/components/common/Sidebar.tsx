@@ -115,8 +115,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
   // Filtered conversations based on search filter
   const filteredConversations = useMemo(() => {
-    if (!searchFilter.trim()) return conversations;
-    return conversations.filter((c) =>
+    // Show only chats that contain at least one message; blank drafts are temporary.
+    const savedConversations = conversations.filter((c) => Array.isArray(c.messages) && c.messages.length > 0);
+    if (!searchFilter.trim()) return savedConversations;
+    return savedConversations.filter((c) =>
       c.title.toLowerCase().includes(searchFilter.toLowerCase().trim())
     );
   }, [conversations, searchFilter]);
