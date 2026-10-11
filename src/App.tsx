@@ -14,6 +14,7 @@ import { AuthModal } from './components/modals/AuthModal';
 import { SettingsModal } from './components/modals/SettingsModal';
 import { ProfileDrawer } from './components/modals/ProfileDrawer';
 import { ShareModal } from './components/modals/ShareModal';
+import { UpgradeModal } from './components/modals/UpgradeModal';
 
 import {
   Attachment,
@@ -74,6 +75,7 @@ export const App: React.FC = () => {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [isShareOpen, setIsShareOpen] = useState(false);
+  const [isUpgradeOpen, setIsUpgradeOpen] = useState(false);
   const [shareTargetMsg, setShareTargetMsg] = useState<ChatMessage | null>(null);
 
   // User & Settings & Daily Usage
@@ -382,6 +384,7 @@ export const App: React.FC = () => {
           onSelectTool={handleSelectTool}
           onOpenSettings={() => setIsSettingsOpen(true)}
           onOpenProfile={() => setIsProfileOpen(true)}
+          onUpgrade={() => setIsUpgradeOpen(true)}
           onOpenShare={() => {
             setShareTargetMsg(null);
             setIsShareOpen(true);
@@ -474,6 +477,8 @@ export const App: React.FC = () => {
           setCredits(creditService.getBalance());
         }}
       />
+
+      <UpgradeModal isOpen={isUpgradeOpen} onClose={() => setIsUpgradeOpen(false)} />
 
       <ShareModal
         isOpen={isShareOpen}
