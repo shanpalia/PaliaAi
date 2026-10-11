@@ -11,7 +11,7 @@ const searchPatterns = [
 ];
 
 const editPatterns = [
-  /\b(edit|enhance|improve|unblur|sharpen|restore|retouch|upscale|remove background|change background|fix|clean|clear|hd|high quality|quality improve|photo saaf|image saaf|blur hata|blur remove)\b/i,
+  /\b(edit|enhance|improve|unblur|sharpen|restore|retouch|upscale|remove background|change background|background change|background white|white background|white kar|kar de|badal do|badalna|fix|clean|clear|hd|high quality|quality improve|photo saaf|image saaf|blur hata|blur remove)\b/i,
   /(धुंधला|साफ|क्वालिटी|एडिट|एन्हांस|एचडी|बैकग्राउंड|रिस्टोर|शार्प|उपस्केल)/i,
 ];
 
