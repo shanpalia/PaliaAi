@@ -25,6 +25,8 @@ function compactConversation(conversation: Conversation): Conversation {
   };
 }
 
+const pendingConversations = new Map<string, Conversation>();
+
 const DEFAULT_SETTINGS: UserSettings = {
   language: 'en',
   defaultModel: 'palia-ai-ultra',
@@ -53,7 +55,10 @@ export const storageService = {
     try {
       const data = localStorage.getItem(STORAGE_KEYS.CONVERSATIONS);
       if (!data) return [];
-      return JSON.parse(data);
+      const parsed = JSON.parse(data) as Conversation[];
+      const useful = parsed.filter((c) => Array.isArray(c.messages) && c.messages.length > 0);
+      if (useful.length !== parsed.length) this.saveConversations(useful);
+      return useful;
     } catch {
       return [];
     }
@@ -77,15 +82,19 @@ export const storageService = {
       updatedAt: Date.now(),
       toolType,
     };
-    convs.unshift(newConv);
-    this.saveConversations(convs);
+    // Empty chats stay temporary until a message is sent.
+    pendingConversations.set(newConv.id, newConv);
     this.setActiveConversationId(newConv.id);
     return newConv;
   },
 
   addMessage(conversationId: string, message: ChatMessage): void {
     const convs = this.getConversations();
-    const target = convs.find((c) => c.id === conversationId);
+    let target = convs.find((c) => c.id === conversationId);
+    if (!target) {
+      target = pendingConversations.get(conversationId);
+      if (target) { convs.unshift(target); pendingConversations.delete(conversationId); }
+    }
     if (target) {
       target.messages.push(message);
       target.updatedAt = Date.now();
@@ -99,6 +108,7 @@ export const storageService = {
   },
 
   deleteConversation(id: string): void {
+    pendingConversations.delete(id);
     const convs = this.getConversations().filter((c) => c.id !== id);
     this.saveConversations(convs);
   },
