@@ -140,7 +140,9 @@ export const App: React.FC = () => {
         const others = current.filter((item) => item.id !== id);
         return [hydrated, ...others];
       });
-      setActiveTool(selected.toolType || 'chat');
+      // Recent history items are conversations, so always render their saved
+      // messages in ChatContainer instead of switching to a possibly empty tool screen.
+      setActiveTool('chat');
     } else {
       setActiveTool('chat');
     }
