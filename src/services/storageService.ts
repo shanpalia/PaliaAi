@@ -19,7 +19,11 @@ function compactConversation(conversation: Conversation): Conversation {
       // Uploaded images stay in memory for the active request; never persist huge base64 payloads.
       attachments: message.attachments?.map((attachment) => ({
         ...attachment,
-        dataUrl: '',
+        // Preserve reasonably small image data URLs so uploaded photos remain visible
+        // in chat history; omit large payloads to avoid exhausting localStorage quota.
+        dataUrl: attachment.type === 'image' && (attachment.dataUrl || '').length <= 400_000
+          ? attachment.dataUrl
+          : '',
       })),
     })),
   };
