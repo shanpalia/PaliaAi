@@ -182,7 +182,7 @@ export const MessageComposer: React.FC<MessageComposerProps> = ({
               type: 'image',
               mimeType: file.type.startsWith('image/') ? file.type : (detectedImageMime || 'image/png'),
               size: file.size,
-              dataUrl: e.target?.result as string,
+              dataUrl: (e.target?.result as string).replace(/^data:[^;]+;/, `${file.type.startsWith('image/') ? file.type : (detectedImageMime || 'image/png')};`),
             },
           ]);
         };
