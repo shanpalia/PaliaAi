@@ -348,11 +348,11 @@ const CodeBlock: React.FC<{ language: string; code: string }> = ({ language, cod
 const AttachmentItem: React.FC<{ attachment: Attachment }> = ({ attachment }) => {
   if (attachment.type === 'image' && attachment.dataUrl) {
     return (
-      <div className="relative group rounded-lg overflow-hidden border border-slate-200 w-24 h-24 bg-slate-100 shadow-2xs">
+      <div className="relative group rounded-xl overflow-hidden border border-slate-200 max-w-full w-64 h-64 bg-slate-50 shadow-sm">
         <img
           src={attachment.dataUrl}
           alt={attachment.name}
-          className="w-full h-full object-cover"
+          className="w-full h-full object-contain"
         />
         <div className="absolute inset-0 bg-slate-950/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center p-1 text-center">
           <span className="text-[9px] text-white font-medium truncate">{attachment.name}</span>
