@@ -21,17 +21,17 @@ export const AttachmentPreview: React.FC<AttachmentPreviewProps> = ({
           <div
             key={att.id}
             id={`att-preview-${att.id}`}
-            className="group relative flex items-center gap-2 pr-7 pl-2 py-1.5 bg-white border border-slate-200 rounded-lg shadow-2xs text-xs"
+            className={`group relative flex items-center gap-2 pr-7 pl-2 py-1.5 bg-white border border-slate-200 rounded-lg shadow-2xs text-xs ${isImage ? 'min-w-[220px]' : ''}`}
           >
             {isImage && att.dataUrl ? (
               <img
                 src={att.dataUrl}
                 alt={att.name}
-                className="w-7 h-7 rounded object-cover border border-slate-200"
+                className="w-16 h-16 rounded-md object-contain bg-slate-50 border border-slate-200"
               />
             ) : (
               <div className="w-7 h-7 rounded bg-indigo-50 border border-indigo-100 flex items-center justify-center text-indigo-600">
-                <FileText className="w-4 h-4" />
+                {isImage ? <ImageIcon className="w-4 h-4" /> : <FileText className="w-4 h-4" />}
               </div>
             )}
 
