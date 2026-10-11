@@ -19,7 +19,7 @@ const json = (data, status = 200) =>
   });
 
 function dataUrlToParts(dataUrl) {
-  const m = String(dataUrl || "").match(/^data:(image\\/[^;]+);base64,(.+)$/s);
+  const m = String(dataUrl || "").match(/^data:(image\/[^;]+);base64,(.+)$/s);
   return m ? { mime: m[1], base64: m[2] } : null;
 }
 
