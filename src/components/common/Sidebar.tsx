@@ -295,7 +295,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 </div>
               )}
 
-              {/* Today / Recent History */}
+              {/* Today / Recent Chats */}
               {grouped.today.length > 0 && (
                 <div>
                   <p className={`text-[11px] font-semibold text-slate-500 px-3 mb-1.5 tracking-wide ${collapsed ? "lg:hidden" : ""}`}>
