@@ -49,12 +49,12 @@ export const Header: React.FC<HeaderProps> = ({
         <button
           onClick={() => onSelectTool('chat')}
           className="flex items-center gap-2.5 min-w-0 rounded-xl px-2 py-1.5 hover:bg-slate-50 transition-all"
-          aria-label="Palia AI By PaliaAPK HUB home"
+          aria-label="Palia AI By ShanPalia home"
         >
           <img src={`${import.meta.env.BASE_URL}palia-ai-icon.svg`} alt="Palia AI By PaliaAPK HUB" className="w-9 h-9 rounded-[12px] object-contain" />
           <div className="min-w-0 text-left">
             <div className="font-bold text-[15px] text-slate-950 leading-tight truncate max-w-[42vw]">
-              {activeConversationTitle || 'Palia AI'}
+              PaliaAi
             </div>
             <div className="hidden sm:flex items-center gap-1 text-[10px] font-medium text-slate-400 mt-0.5">
               <Sparkles className="w-3 h-3 text-emerald-500" /> By PaliaAPK HUB
