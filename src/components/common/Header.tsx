@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Menu, Pencil, MoreVertical, Share2, Settings as SettingsIcon, User as UserIcon, Sparkles } from 'lucide-react';
+import { Menu, Pencil, MoreVertical, Share2, Settings as SettingsIcon, User as UserIcon, Sparkles, Crown } from 'lucide-react';
 import { ToolType, UserProfile } from '../../types';
 
 interface HeaderProps {
@@ -11,6 +11,7 @@ interface HeaderProps {
   onOpenProfile: () => void;
   onOpenAuth?: () => void;
   onOpenShare?: () => void;
+  onUpgrade?: () => void;
   user: UserProfile | null;
   credits: number;
   activeConversationTitle?: string;
@@ -24,6 +25,7 @@ export const Header: React.FC<HeaderProps> = ({
   onOpenSettings,
   onOpenProfile,
   onOpenShare,
+  onUpgrade,
   user,
   activeConversationTitle,
 }) => {
@@ -72,6 +74,16 @@ export const Header: React.FC<HeaderProps> = ({
         >
           <Pencil className="w-4 h-4" />
           <span>New chat</span>
+        </button>
+
+        <button
+          id="btn-header-upgrade"
+          onClick={onUpgrade}
+          className="flex h-9 items-center gap-1.5 rounded-xl bg-emerald-600 px-3 text-xs sm:text-sm font-semibold text-white shadow-sm transition-colors hover:bg-emerald-700 cursor-pointer"
+          title="Upgrade to Palia Pro"
+        >
+          <Crown className="h-4 w-4" />
+          <span>Upgrade</span>
         </button>
 
         <div className="relative">
