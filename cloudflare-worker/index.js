@@ -202,7 +202,7 @@ async function hfGenerate(env, prompt, aspectRatio) {
 
 async function hfEdit(env, images, prompt) {
   const submitUrl =
-    "https://router.huggingface.co/fal-ai/fal-ai/qwen-image-edit?_subdomain=queue";
+    "https://router.huggingface.co/fal-ai/fal-ai/flux-kontext-pro?_subdomain=queue";
   const imageList = (Array.isArray(images) ? images : [images]).filter(Boolean);
   if (!imageList.length) throw new Error("Upload at least one image to edit.");
   const imageUrls = imageList.map((image) => `data:${image.mime};base64,${image.base64}`);
