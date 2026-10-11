@@ -121,12 +121,32 @@ export const App: React.FC = () => {
   };
 
   const handleSelectConversation = (id: string) => {
+    // Reload the selected saved conversation from storage so Recent always opens
+    // the persisted messages rather than a stale in-memory list.
+    const savedConversations = storageService.getConversations();
+    const savedConversation = savedConversations.find((item) => item.id === id);
+    const currentConversation = conversations.find((item) => item.id === id);
+    const selected = savedConversation || currentConversation;
+
+    if (selected) {
+      const normalizedMessages = (selected.messages || []).map((message: any) => ({
+        ...message,
+        sender: message.sender || (message.role === 'user' ? 'user' : 'assistant'),
+        text: message.text ?? message.content ?? '',
+        timestamp: message.timestamp ?? Date.now(),
+      }));
+      const hydrated = { ...selected, messages: normalizedMessages };
+      setConversations((current) => {
+        const others = current.filter((item) => item.id !== id);
+        return [hydrated, ...others];
+      });
+      setActiveTool(selected.toolType || 'chat');
+    } else {
+      setActiveTool('chat');
+    }
+
     setActiveConversationId(id);
     storageService.setActiveConversationId(id);
-    const conv = conversations.find((c) => c.id === id);
-    if (conv) {
-      setActiveTool(conv.toolType || 'chat');
-    }
     if (window.innerWidth < 1024) {
       setSidebarOpen(false);
     }
