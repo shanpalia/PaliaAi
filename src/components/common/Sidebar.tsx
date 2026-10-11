@@ -198,6 +198,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
           </button>
         </div>
 
+        <div className={`min-h-0 flex-1 overflow-y-auto overscroll-contain [scrollbar-width:thin] ${collapsed ? "lg:px-0" : ""}`}>
         {/* New Chat & Search Input */}
         <div className={`px-2.5 pt-1 space-y-1.5 ${collapsed ? "lg:px-2" : ""}`}>
           <button
@@ -272,7 +273,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
         </div>
 
         {/* Conversation History List */}
-        <nav className={`min-h-0 flex-1 overflow-y-auto overscroll-contain px-2.5 py-3 space-y-4 select-none [scrollbar-width:thin] ${collapsed ? "lg:px-2" : ""}`}>
+        <nav className={`px-2.5 py-3 space-y-4 select-none ${collapsed ? "lg:px-2" : ""}`}>
           {filteredConversations.length === 0 ? (
             <div className="py-6 text-center text-xs text-slate-400">
               {searchFilter ? 'No chats found matching search' : 'No previous conversations'}
@@ -330,6 +331,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
             </>
           )}
         </nav>
+        </div>
 
         {/* Bottom Profile & Settings Area */}
         <div className={`mt-auto p-3 border-t border-slate-100 space-y-2 bg-white ${collapsed ? "lg:p-2" : ""}`}>
