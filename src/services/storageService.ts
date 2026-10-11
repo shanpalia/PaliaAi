@@ -21,9 +21,15 @@ function compactConversation(conversation: Conversation): Conversation {
         ...attachment,
         // Preserve reasonably small image data URLs so uploaded photos remain visible
         // in chat history; omit large payloads to avoid exhausting localStorage quota.
-        dataUrl: attachment.type === 'image' && (attachment.dataUrl || '').length <= 400_000
-          ? attachment.dataUrl
-          : '',
+        dataUrl:
+          (
+            attachment.type === 'image' ||
+            String(attachment.mimeType || '').toLowerCase().startsWith('image/') ||
+            /\.(png|jpe?g|webp|gif|bmp|avif)$/i.test(attachment.name || '')
+          ) &&
+          (attachment.dataUrl || '').length <= 700_000
+            ? attachment.dataUrl
+            : '',
       })),
     })),
   };
