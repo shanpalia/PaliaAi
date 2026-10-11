@@ -231,10 +231,6 @@ export default {
       const referenceImageEdit = images.length >= 2 && (shortImageInstruction || !prompt);
 
       if (referenceImageEdit || intent === "image_edit" || intent === "image_generate" || generateImage) {
-        if (!env.PALIA_HF_TOKEN) {
-          throw new Error("PALIA_HF_TOKEN is not configured in the Cloudflare Worker.");
-        }
-
         const quota = await checkImageQuota(env, body, request);
         if (!quota.allowed) {
           const resetInHours = Math.max(
