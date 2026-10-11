@@ -176,7 +176,7 @@ async function hfGenerate(env, prompt, aspectRatio) {
     "9:16": { width: 720, height: 1280 },
     "4:3": { width: 1024, height: 768 },
   };
-  return hfImageRequest(env, "black-forest-labs/FLUX.1-dev", {
+  return hfImageRequest(env, "fal-ai/flux/dev", {
     inputs: prompt,
     parameters: {
       width: (sizes[aspectRatio] || sizes["1:1"]).width,
@@ -193,7 +193,7 @@ async function hfEdit(env, images, prompt) {
   const image = imageList[0];
   // Hugging Face's image-to-image task expects the image as base64 in "inputs";
   // the prompt belongs in parameters.prompt (not a data: URL wrapper).
-  return hfImageRequest(env, "black-forest-labs/FLUX.2-klein-9B", {
+  return hfImageRequest(env, "fal-ai/flux-2/klein/9b/edit", {
     inputs: image.base64,
     parameters: { prompt },
   });
@@ -275,7 +275,7 @@ export default {
         return json({
           id: `palia-image-${Date.now()}`,
           object: "chat.completion",
-          model: image ? "Qwen/Qwen-Image-Edit" : "black-forest-labs/FLUX.2-klein-9B",
+          model: image ? "Qwen/Qwen-Image-Edit" : "fal-ai/flux-2/klein/9b/edit",
           choices: [{
             index: 0,
             message: {
