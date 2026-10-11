@@ -351,6 +351,7 @@ export const aiService = {
     prompt: string;
     aspectRatio?: string;
     style?: string;
+    imageDataUrl?: string;
   }): Promise<{
     success: boolean;
     imageUrl?: string;
@@ -360,49 +361,58 @@ export const aiService = {
   }> {
     try {
       const meta = getRequestMeta();
+      const isEdit = Boolean(params.imageDataUrl);
+      const prompt = [
+        params.prompt.trim(),
+        params.style ? `Style: ${params.style}` : '',
+        params.aspectRatio ? `Aspect ratio: ${params.aspectRatio}` : '',
+      ].filter(Boolean).join('. ');
 
-      const res = await apiFetch('/api/image/generate', {
+      const res = await workerFetch('/v1/chat/completions', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           ...meta,
-          ...params,
+          prompt,
+          model: 'Qwen-Image',
+          intent: isEdit ? 'image_edit' : 'image_generate',
+          generateImage: true,
+          attachments: isEdit ? [{
+            name: 'uploaded-image',
+            type: 'image',
+            mimeType: params.imageDataUrl?.match(/^data:([^;]+)/)?.[1] || 'image/png',
+            dataUrl: params.imageDataUrl,
+          }] : [],
         }),
       });
 
-      const data = await res.json();
-
-      if (data.usage) {
-        usageService.updateFromApiResponse(
-          data.usage,
-        );
-      }
-
+      const data: any = await res.json().catch(() => ({}));
       if (!res.ok) {
-        const isLimit =
-          res.status === 429 ||
-          data.isLimitReached;
-
+        const message = data?.error?.message || data?.error || 'Image generation failed.';
         return {
           success: false,
-          error:
-            data.error ||
-            (isLimit
-              ? 'Daily AI limit reached.'
-              : 'Image generation failed'),
-          isLimitReached: isLimit,
+          error: message,
+          isLimitReached: res.status === 429 || data?.isLimitReached === true,
         };
       }
 
-      return data;
+      const imageUrl = data?.imageUrl || data?.generatedImageUrl || data?.image_url;
+      if (!imageUrl) {
+        return {
+          success: false,
+          error: data?.choices?.[0]?.message?.content || 'Image provider did not return an image. Check the Hugging Face token and free quota in the Cloudflare Worker.',
+        };
+      }
+
+      return {
+        success: true,
+        imageUrl,
+        description: params.prompt,
+      };
     } catch (err: any) {
       return {
         success: false,
-        error:
-          err.message ||
-          'Image generation request failed.',
+        error: err?.message || 'Image generation request failed.',
       };
     }
   },
