@@ -7,6 +7,24 @@ const STORAGE_KEYS = {
   USER_PROFILE: 'palia_user_profile_v3',
 };
 
+const pendingConversations = new Map<string, Conversation>();
+const MAX_SAVED_CONVERSATIONS = 30;
+const MAX_SAVED_MESSAGES_PER_CONVERSATION = 50;
+
+function compactConversation(conversation: Conversation): Conversation {
+  return {
+    ...conversation,
+    messages: (conversation.messages || []).slice(-MAX_SAVED_MESSAGES_PER_CONVERSATION).map((message) => ({
+      ...message,
+      // Uploaded images stay in memory for the active request; never persist huge base64 payloads.
+      attachments: message.attachments?.map((attachment) => ({
+        ...attachment,
+        dataUrl: '',
+      })),
+    })),
+  };
+}
+
 const DEFAULT_SETTINGS: UserSettings = {
   language: 'en',
   defaultModel: 'palia-ai-ultra',
