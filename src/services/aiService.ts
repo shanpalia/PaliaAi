@@ -374,6 +374,7 @@ export const aiService = {
         body: JSON.stringify({
           ...meta,
           prompt,
+          aspectRatio: params.aspectRatio || '1:1',
           model: 'Qwen-Image',
           intent: isEdit ? 'image_edit' : 'image_generate',
           generateImage: true,
