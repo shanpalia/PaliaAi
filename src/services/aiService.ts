@@ -127,11 +127,22 @@ export const aiService = {
         String(a.mimeType || '').toLowerCase().startsWith('image/')
       );
 
-      const intent = detectPaliaIntent(
-        cleanMessage,
-        hasImage,
-        Boolean(params.enableSearchGrounding),
+      const imageAttachments = attachments.filter((a) =>
+        String(a.type || '').toLowerCase() === 'image' ||
+        String(a.mimeType || '').toLowerCase().startsWith('image/')
       );
+      const referenceImageEdit =
+        imageAttachments.length >= 2 &&
+        (!cleanMessage ||
+          /^(same|same image|aisa hi|aisi hi|like this|make same|similar|same bana do|same banao)$/i.test(cleanMessage));
+
+      const intent = referenceImageEdit
+        ? 'image_edit'
+        : detectPaliaIntent(
+            cleanMessage,
+            hasImage,
+            Boolean(params.enableSearchGrounding),
+          );
 
       /*
        * Palia AI task router:
