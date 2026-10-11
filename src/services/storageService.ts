@@ -25,8 +25,6 @@ function compactConversation(conversation: Conversation): Conversation {
   };
 }
 
-const pendingConversations = new Map<string, Conversation>();
-
 const DEFAULT_SETTINGS: UserSettings = {
   language: 'en',
   defaultModel: 'palia-ai-ultra',
@@ -65,10 +63,26 @@ export const storageService = {
   },
 
   saveConversations(conversations: Conversation[]): void {
+    // Persist only real chats. Empty drafts are held in memory until the first message.
+    const useful = conversations
+      .filter((c) => Array.isArray(c.messages) && c.messages.length > 0)
+      .sort((a, b) => Number(Boolean(b.isPinned)) - Number(Boolean(a.isPinned)) || b.updatedAt - a.updatedAt)
+      .slice(0, MAX_SAVED_CONVERSATIONS)
+      .map(compactConversation);
+
     try {
-      localStorage.setItem(STORAGE_KEYS.CONVERSATIONS, JSON.stringify(conversations));
-    } catch (e) {
-      console.error('Failed to persist conversations', e);
+      localStorage.setItem(STORAGE_KEYS.CONVERSATIONS, JSON.stringify(useful));
+    } catch (firstError) {
+      // Retry with a smaller history if older messages or attachments still exceed browser quota.
+      try {
+        const reduced = useful.slice(0, 10).map((conversation) => ({
+          ...conversation,
+          messages: conversation.messages.slice(-15),
+        }));
+        localStorage.setItem(STORAGE_KEYS.CONVERSATIONS, JSON.stringify(reduced));
+      } catch (retryError) {
+        console.error('Failed to persist conversations after reducing saved history', retryError || firstError);
+      }
     }
   },
 
