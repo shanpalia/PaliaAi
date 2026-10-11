@@ -62,7 +62,7 @@ async function geminiChat(env, input) {
 /*
  * Image generation and editing use Cloudflare Workers AI (free daily allocation).
  */
-const IMAGE_LIMIT = 25;
+const IMAGE_LIMIT = 50;
 const IMAGE_WINDOW_SECONDS = 24 * 60 * 60;
 // Fallback keeps image features usable when the optional Cloudflare KV binding is absent.
 // This is per Worker isolate; bind PALIA_USAGE for durable, shared quotas in production.
