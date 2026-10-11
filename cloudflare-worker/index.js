@@ -60,9 +60,7 @@ async function geminiChat(env, input) {
 }
 
 /*
- * Hugging Face Inference Providers -> fal-ai queue.
- * HF's provider adapter converts image-to-image input to fal's image_url
- * format. The queue returns response_url; we poll its /status endpoint.
+ * Image generation and editing use Cloudflare Workers AI (free daily allocation).
  */
 const IMAGE_LIMIT = 25;
 const IMAGE_WINDOW_SECONDS = 24 * 60 * 60;
@@ -134,69 +132,61 @@ async function recordImageUsage(env, quota) {
   };
 }
 
-async function hfImageRequest(env, modelId, payload) {
-  // Use the Hugging Face model ID on the fal-ai provider route. The provider-specific
-  // shortcut paths can fail with "Model not supported by provider fal-ai".
-  const response = await fetch(`https://router.huggingface.co/fal-ai/${modelId}`, {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${env.PALIA_HF_TOKEN}`,
-      "Content-Type": "application/json",
-      Accept: "image/*",
-    },
-    body: JSON.stringify(payload),
+function imageDataUrl(base64, mime = "image/jpeg") {
+  return `data:${mime};base64,${base64}`;
+}
+
+function base64ToBytes(base64) {
+  const binary = atob(base64);
+  const bytes = new Uint8Array(binary.length);
+  for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+  return bytes;
+}
+
+async function runCloudflareImage(env, prompt, aspectRatio, images = []) {
+  if (!env.AI) throw new Error("Cloudflare Workers AI binding AI is not configured.");
+  const sizes = {
+    "1:1": [1024, 1024],
+    "16:9": [1280, 720],
+    "9:16": [720, 1280],
+    "4:3": [1024, 768],
+  };
+  const [width, height] = sizes[aspectRatio] || sizes["1:1"];
+  const form = new FormData();
+  form.append("prompt", prompt.slice(0, 2048));
+  form.append("width", String(width));
+  form.append("height", String(height));
+  images.slice(0, 2).forEach((image, index) => {
+    form.append(`input_image_${index}`, new Blob([base64ToBytes(image.base64)], { type: image.mime || "image/png" }), `reference-${index}.png`);
   });
-
-  if (!response.ok) {
-    const raw = await response.text();
-    let detail;
-    try { detail = JSON.parse(raw); } catch { detail = null; }
-    throw new Error(detail?.error || detail?.message || raw || `Hugging Face HTTP ${response.status}`);
-  }
-
-  const contentType = response.headers.get("content-type") || "image/png";
-  if (!contentType.toLowerCase().startsWith("image/")) {
-    const raw = await response.text();
-    throw new Error(`Hugging Face returned unexpected content: ${raw.slice(0, 400)}`);
-  }
-
-  const bytes = new Uint8Array(await response.arrayBuffer());
-  let binary = "";
-  const chunkSize = 0x8000;
-  for (let offset = 0; offset < bytes.length; offset += chunkSize) {
-    binary += String.fromCharCode(...bytes.subarray(offset, offset + chunkSize));
-  }
-  return `data:${contentType};base64,${btoa(binary)}`;
+  const request = new Response(form);
+  const result = await env.AI.run("@cf/black-forest-labs/flux-2-klein-4b", {
+    multipart: {
+      body: request.body,
+      contentType: request.headers.get("content-type"),
+    },
+  });
+  if (!result?.image) throw new Error("Cloudflare Workers AI returned no image. Please try again.");
+  return imageDataUrl(result.image);
 }
 
 async function hfGenerate(env, prompt, aspectRatio) {
-  const sizes = {
-    "1:1": { width: 1024, height: 1024 },
-    "16:9": { width: 1280, height: 720 },
-    "9:16": { width: 720, height: 1280 },
-    "4:3": { width: 1024, height: 768 },
-  };
-  return hfImageRequest(env, "fal-ai/flux/dev", {
-    inputs: prompt,
-    parameters: {
-      width: (sizes[aspectRatio] || sizes["1:1"]).width,
-      height: (sizes[aspectRatio] || sizes["1:1"]).height,
-    },
-  });
+  return runCloudflareImage(
+    env,
+    prompt || "Create a beautiful, high-quality image based on the user's request.",
+    aspectRatio,
+  );
 }
 
 async function hfEdit(env, images, prompt) {
   const imageList = (Array.isArray(images) ? images : [images]).filter(Boolean);
   if (!imageList.length) throw new Error("Upload at least one image to edit.");
-
-  // FLUX.2 klein image-to-image accepts one source image per request.
-  const image = imageList[0];
-  // Hugging Face's image-to-image task expects the image as base64 in "inputs";
-  // the prompt belongs in parameters.prompt (not a data: URL wrapper).
-  return hfImageRequest(env, "fal-ai/flux-2/klein/9b/edit", {
-    inputs: image.base64,
-    parameters: { prompt },
-  });
+  return runCloudflareImage(
+    env,
+    prompt || "Enhance this image naturally while preserving the original subject, face, identity and important details.",
+    "1:1",
+    imageList,
+  );
 }
 
 export default {
