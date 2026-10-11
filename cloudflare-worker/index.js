@@ -125,6 +125,81 @@ async function recordImageUsage(env, quota) {
   };
 }
 
+async function hfGenerate(env, prompt, aspectRatio) {
+  const sizes = {
+    '1:1': 'square_hd',
+    '16:9': 'landscape_16_9',
+    '9:16': 'portrait_16_9',
+    '4:3': 'landscape_4_3',
+  };
+  const submitUrl =
+    "https://router.huggingface.co/fal-ai/fal-ai/flux/schnell?_subdomain=queue";
+
+  const submit = await fetch(submitUrl, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${env.HF_TOKEN}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      input: {
+        prompt,
+        image_size: sizes[aspectRatio] || "square_hd",
+        num_images: 1,
+      },
+    }),
+  });
+
+  const submitRaw = await submit.text();
+  let job;
+  try { job = JSON.parse(submitRaw); } catch { job = {}; }
+
+  if (!submit.ok) {
+    throw new Error(job?.error || job?.message || submitRaw || `Image provider HTTP ${submit.status}`);
+  }
+  if (!job.request_id || !job.response_url) {
+    throw new Error("Image provider did not return a queue request. Check HF_TOKEN and Hugging Face Inference Provider access.");
+  }
+
+  const responseUrl = new URL(job.response_url);
+  const baseUrl = `${responseUrl.origin}${responseUrl.pathname}`;
+  const query = responseUrl.search;
+  const statusUrl = `${baseUrl}/status${query}`;
+  const resultUrl = `${baseUrl}${query}`;
+
+  for (let attempt = 0; attempt < 60; attempt++) {
+    const statusResponse = await fetch(statusUrl, {
+      headers: { Authorization: `Bearer ${env.HF_TOKEN}` },
+    });
+    const statusRaw = await statusResponse.text();
+    let status;
+    try { status = JSON.parse(statusRaw); } catch { status = {}; }
+
+    if (!statusResponse.ok) {
+      throw new Error(status?.error || status?.message || statusRaw || "Image generation status failed.");
+    }
+    if (status.status === "COMPLETED") {
+      const resultResponse = await fetch(resultUrl, {
+        headers: { Authorization: `Bearer ${env.HF_TOKEN}` },
+      });
+      const resultRaw = await resultResponse.text();
+      let result;
+      try { result = JSON.parse(resultRaw); } catch { result = {}; }
+      if (!resultResponse.ok) {
+        throw new Error(result?.error || result?.message || resultRaw || "Image generation result failed.");
+      }
+      const url = result?.images?.[0]?.url;
+      if (!url) throw new Error("Image provider completed without returning an image URL.");
+      return url;
+    }
+    if (status.status === "FAILED") {
+      throw new Error(status.error || status.message || "Image generation failed at the provider.");
+    }
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+  }
+  throw new Error("Image generation timed out. Please try again.");
+}
+
 async function hfEdit(env, image, prompt) {
   const submitUrl =
     "https://router.huggingface.co/fal-ai/fal-ai/qwen-image-edit?_subdomain=queue";
@@ -254,9 +329,9 @@ export default {
         .map((a) => dataUrlToParts(a?.dataUrl))
         .find(Boolean);
 
-      if ((intent === "image_edit" || generateImage) && image) {
+      if (intent === "image_edit" || intent === "image_generate" || generateImage) {
         if (!env.HF_TOKEN) {
-          throw new Error("HF_TOKEN is not configured.");
+          throw new Error("HF_TOKEN is not configured in the Cloudflare Worker.");
         }
 
         const quota = await checkImageQuota(env, body, request);
@@ -277,29 +352,32 @@ export default {
           }, 429);
         }
 
-        const edited = await hfEdit(
-          env,
-          image,
-          prompt ||
-            "Enhance this image naturally while preserving the original subject, face, identity and important details."
-        );
+        const imageUrl = image
+          ? await hfEdit(
+              env,
+              image,
+              prompt || "Enhance this image naturally while preserving the original subject, face, identity and important details."
+            )
+          : await hfGenerate(env, prompt, String(body?.aspectRatio || ""));
 
         const usage = await recordImageUsage(env, quota);
 
         return json({
           id: `palia-image-${Date.now()}`,
           object: "chat.completion",
-          model: "Qwen/Qwen-Image-Edit",
+          model: image ? "Qwen/Qwen-Image-Edit" : "fal-ai/flux/schnell",
           choices: [{
             index: 0,
             message: {
               role: "assistant",
-              content: "आपकी फोटो को आपके prompt के अनुसार तैयार कर दिया गया है।",
+              content: image
+                ? "आपकी फोटो को आपके prompt के अनुसार तैयार कर दिया गया है।"
+                : "आपकी AI इमेज तैयार है।",
             },
             finish_reason: "stop",
           }],
-          imageUrl: edited,
-          generatedImageUrl: edited,
+          imageUrl,
+          generatedImageUrl: imageUrl,
           imageLimit: IMAGE_LIMIT,
           imagesUsed: usage.count,
           imagesRemaining: usage.remaining,
