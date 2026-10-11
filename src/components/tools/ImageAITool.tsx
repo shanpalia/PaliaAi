@@ -62,9 +62,24 @@ export const ImageAITool: React.FC<ImageAIToolProps> = ({ onSendToChat }) => {
   ];
 
   const handleGenerate = async () => {
-    if (!prompt.trim() || isLoading) return;
+    if (isLoading) return;
+    if (activeTab === 'generate' && !prompt.trim()) return;
+    if (activeTab === 'edit' && !uploadedBaseImg) {
+      alert('पहले edit करने के लिए एक image upload करें।');
+      return;
+    }
 
-    // Deduct credits (15 credits)
+    const editPrompts: Record<string, string> = {
+      enhance: 'Enhance and polish this image naturally. Preserve the original person, face, identity, colors and important details.',
+      remove_bg: 'Remove the background cleanly and preserve the main subject with accurate edges.',
+      upscale: 'Upscale and improve image clarity and detail while preserving the original subject and identity.',
+      custom: prompt.trim(),
+    };
+    const finalPrompt = activeTab === 'edit'
+      ? (editPrompts[editOperation] || prompt.trim())
+      : prompt.trim();
+
+    // Keep the existing app credit rules for image requests.
     const successDeduct = await creditService.deductCredits('Image AI Generation', 15);
     if (!successDeduct) {
       alert('Insufficient credits for Image AI. Please check your credit balance.');
@@ -74,14 +89,15 @@ export const ImageAITool: React.FC<ImageAIToolProps> = ({ onSendToChat }) => {
     setIsLoading(true);
     try {
       const res = await aiService.generateImage({
-        prompt: prompt.trim(),
+        prompt: finalPrompt,
         aspectRatio,
-        style: selectedStyle,
+        style: activeTab === 'generate' ? selectedStyle : undefined,
+        imageDataUrl: activeTab === 'edit' ? uploadedBaseImg || undefined : undefined,
       });
 
       if (res.success && res.imageUrl) {
         setGeneratedImage(res.imageUrl);
-        setDescription(res.description || `Generated: ${prompt}`);
+        setDescription(res.description || `Generated: ${finalPrompt}`);
       } else {
         alert(res.error || 'Image generation failed');
       }
