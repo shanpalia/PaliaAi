@@ -175,7 +175,7 @@ async function hfGenerate(env, prompt, aspectRatio) {
     "9:16": { width: 720, height: 1280 },
     "4:3": { width: 1024, height: 768 },
   };
-  return hfImageRequest(env, "black-forest-labs/FLUX.1-schnell", {
+  return hfImageRequest(env, "black-forest-labs/FLUX.2-klein-9B", {
     inputs: prompt,
     parameters: {
       width: (sizes[aspectRatio] || sizes["1:1"]).width,
@@ -273,7 +273,7 @@ export default {
         return json({
           id: `palia-image-${Date.now()}`,
           object: "chat.completion",
-          model: image ? "Qwen/Qwen-Image-Edit" : "fal-ai/flux/schnell",
+          model: image ? "Qwen/Qwen-Image-Edit" : "black-forest-labs/FLUX.2-klein-9B",
           choices: [{
             index: 0,
             message: {
