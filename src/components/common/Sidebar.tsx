@@ -175,7 +175,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
       {/* Main Sidebar Container */}
       <aside
         id="palia-sidebar"
-        className={`fixed top-0 bottom-0 left-0 z-40 w-[min(86vw,320px)] bg-white border-r border-slate-200 flex flex-col transform-gpu transition-[width,transform,box-shadow] duration-300 ease-out lg:relative lg:z-40 lg:translate-x-0 lg:shadow-none ${isOpen ? 'translate-x-0 shadow-2xl' : '-translate-x-full lg:translate-x-0'} ${collapsed ? 'lg:w-[76px]' : 'lg:w-[280px]'}`}
+        className={`fixed top-0 bottom-0 left-0 z-40 w-[min(86vw,280px)] bg-white border-r border-slate-200 flex flex-col transform-gpu transition-[width,transform,box-shadow] duration-300 ease-out lg:relative lg:z-40 lg:translate-x-0 lg:shadow-none ${isOpen ? 'translate-x-0 shadow-2xl' : '-translate-x-full lg:translate-x-0'} ${collapsed ? 'lg:w-[76px]' : 'lg:w-[260px]'}`}
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
@@ -188,13 +188,11 @@ export const Sidebar: React.FC<SidebarProps> = ({
           touchAction: 'pan-y',
         }}
       >
-        {/* Top Branding Section */}
-        <div className={`p-4 sm:p-5 flex items-center justify-between ${collapsed ? "lg:justify-center" : ""}`}>
-          <div className={collapsed ? "lg:hidden" : ""}><Logo size="md" /></div>
-          <img src={`${import.meta.env.BASE_URL}palia-ai-icon.svg`} alt="Palia AI" className={`hidden w-9 h-9 rounded-xl ${collapsed ? "lg:block" : ""}`} />
+        {/* ChatGPT-inspired sidebar: actions start at the top */}
+        <div className="px-3 pt-3 pb-1 flex items-center justify-end lg:hidden">
           <button
             onClick={onClose}
-            className="lg:hidden p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-200/50"
+            className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100"
             aria-label="Close sidebar"
           >
             <X className="w-5 h-5" />
