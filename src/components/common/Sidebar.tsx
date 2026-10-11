@@ -16,7 +16,6 @@ import {
   Check,
   X,
   Pin,
-  Coins,
   LayoutGrid,
 } from 'lucide-react';
 import { Conversation, ToolType, UserProfile } from '../../types';
@@ -343,13 +342,19 @@ export const Sidebar: React.FC<SidebarProps> = ({
             <span className={collapsed ? "lg:hidden text-sm font-medium" : "text-sm font-medium"}>Tools</span>
           </button>
 
-          {/* AI Credits Badge */}
-          <button type="button" title={collapsed ? "AI Credits" : undefined} onClick={() => { onOpenProfile(); onClose(); }} className={`w-full flex items-center justify-between px-3 bg-emerald-50 py-2 rounded-lg cursor-pointer hover:bg-blue-100/80 active:scale-[0.99] transition-colors ${collapsed ? "lg:justify-center lg:px-1" : ""}`}>
-            <span className={collapsed ? "lg:hidden text-[11px] font-bold text-emerald-700 uppercase" : "text-[11px] font-bold text-blue-700 uppercase"}>
-              AI Credits: {credits}
-            </span>
-            <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse" />
-          </button>
+          {/* Palia AI brand mark — credits are intentionally hidden */}
+          <div className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl border border-emerald-100 bg-gradient-to-r from-emerald-50 to-cyan-50 ${collapsed ? "lg:justify-center lg:px-1" : ""}`}>
+            <img
+              src={`${import.meta.env.BASE_URL}palia-ai-icon.svg`}
+              alt="Palia AI brand icon"
+              className="w-9 h-9 rounded-xl object-contain flex-shrink-0"
+            />
+            <div className={collapsed ? "lg:hidden min-w-0" : "min-w-0"}>
+              <p className="text-xs font-bold tracking-tight text-slate-800">Palia AI</p>
+              <p className="text-[10px] font-medium text-emerald-700">By PaliaAPK HUB</p>
+            </div>
+            <div className={`ml-auto w-2 h-2 rounded-full bg-emerald-500 ${collapsed ? "lg:hidden" : ""}`} />
+          </div>
 
           {/* User Profile Card */}
           <div className={`flex items-center gap-3 p-2 bg-white rounded-xl border border-slate-200 shadow-2xs ${collapsed ? "lg:justify-center lg:p-1.5" : ""}`}>
