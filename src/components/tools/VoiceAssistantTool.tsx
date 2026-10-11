@@ -36,7 +36,7 @@ export const VoiceAssistantTool: React.FC = () => {
     {
       id: 'init',
       sender: 'assistant',
-      text: "Hello! I'm Palia AI Voice Assistant. Tap the microphone below and speak naturally. I will respond conversationally with voice playback.",
+      text: "नमस्ते! मैं Palia AI By PaliaAPK HUB हूँ। नीचे माइक्रोफ़ोन दबाकर हिंदी में बात करें; मैं जवाब दूँगा और उसे आवाज़ में सुनाऊँगा।",
       timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
     },
   ]);
@@ -113,7 +113,7 @@ export const VoiceAssistantTool: React.FC = () => {
       const recognition = new SpeechRecognition();
       recognition.continuous = false;
       recognition.interimResults = false;
-      recognition.lang = 'en-US';
+      recognition.lang = 'hi-IN';
 
       recognition.onstart = () => {
         setIsListening(true);
