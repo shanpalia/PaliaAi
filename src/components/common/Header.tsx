@@ -57,7 +57,7 @@ export const Header: React.FC<HeaderProps> = ({
               {activeConversationTitle || 'Palia AI'}
             </div>
             <div className="hidden sm:flex items-center gap-1 text-[10px] font-medium text-slate-400 mt-0.5">
-              <Sparkles className="w-3 h-3 text-emerald-500" /> Palia AI
+              <Sparkles className="w-3 h-3 text-emerald-500" /> By PaliaAPK HUB
             </div>
           </div>
         </button>
