@@ -134,10 +134,10 @@ async function recordImageUsage(env, quota) {
   };
 }
 
-async function hfImageRequest(env, model, payload) {
-  // Hugging Face Inference Providers expects a Hugging Face model ID after the provider name,
-  // not a fal.ai endpoint slug. These endpoints return image bytes, not a fal queue job.
-  const response = await fetch(`https://router.huggingface.co/fal-ai/${model}`, {
+async function hfImageRequest(env, providerPath, payload) {
+  // Use the provider's mapped endpoint path. For FLUX.2 Klein image editing,
+  // Hugging Face maps the model to fal-ai/flux-2/klein/9b/edit.
+  const response = await fetch(`https://router.huggingface.co/fal-ai/${providerPath}`, {
     method: "POST",
     headers: {
       Authorization: `Bearer ${env.HF_TOKEN}`,
@@ -193,7 +193,7 @@ async function hfEdit(env, images, prompt) {
   const image = imageList[0];
   // Hugging Face's image-to-image task expects the image as base64 in "inputs";
   // the prompt belongs in parameters.prompt (not a data: URL wrapper).
-  return hfImageRequest(env, "black-forest-labs/FLUX.2-klein-9B", {
+  return hfImageRequest(env, "fal-ai/flux-2/klein/9b/edit", {
     inputs: image.base64,
     parameters: { prompt },
   });
