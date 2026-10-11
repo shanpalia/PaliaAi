@@ -351,7 +351,16 @@ const AttachmentItem: React.FC<{ attachment: Attachment }> = ({ attachment }) =>
     attachment.type === 'image' ||
     String(attachment.mimeType || '').toLowerCase().startsWith('image/') ||
     /\.(png|jpe?g|webp|gif|bmp|avif)$/i.test(attachment.name || '');
-  if (looksLikeImage && attachment.dataUrl) {
+  if (looksLikeImage) {
+    if (!attachment.dataUrl) {
+      return (
+        <div className="relative rounded-xl overflow-hidden border border-slate-200 w-64 h-40 bg-slate-50 flex flex-col items-center justify-center gap-2 text-slate-400">
+          <ImageIcon className="w-8 h-8" />
+          <span className="text-xs px-3 text-center truncate max-w-full">{attachment.name}</span>
+          <span className="text-[10px]">Preview unavailable for this older upload</span>
+        </div>
+      );
+    }
     return (
       <div className="relative group rounded-xl overflow-hidden border border-slate-200 max-w-full w-64 h-64 bg-slate-50 shadow-sm">
         <img
