@@ -125,179 +125,68 @@ async function recordImageUsage(env, quota) {
   };
 }
 
-async function hfGenerate(env, prompt, aspectRatio) {
-  const sizes = {
-    '1:1': 'square_hd',
-    '16:9': 'landscape_16_9',
-    '9:16': 'portrait_16_9',
-    '4:3': 'landscape_4_3',
-  };
-  const submitUrl =
-    "https://router.huggingface.co/fal-ai/fal-ai/flux/schnell?_subdomain=queue";
-
-  const submit = await fetch(submitUrl, {
+async function hfImageRequest(env, model, payload) {
+  // Hugging Face Inference Providers expects a Hugging Face model ID after the provider name,
+  // not a fal.ai endpoint slug. These endpoints return image bytes, not a fal queue job.
+  const response = await fetch(`https://router.huggingface.co/fal-ai/${model}`, {
     method: "POST",
     headers: {
       Authorization: `Bearer ${env.HF_TOKEN}`,
       "Content-Type": "application/json",
+      Accept: "image/*",
     },
-    body: JSON.stringify({
-      input: {
-        prompt,
-        image_size: sizes[aspectRatio] || "square_hd",
-        num_images: 1,
-      },
-    }),
+    body: JSON.stringify(payload),
   });
 
-  const submitRaw = await submit.text();
-  let job;
-  try { job = JSON.parse(submitRaw); } catch { job = {}; }
-
-  if (!submit.ok) {
-    throw new Error(job?.error || job?.message || submitRaw || `Image provider HTTP ${submit.status}`);
-  }
-  if (!job.request_id || !job.response_url) {
-    throw new Error("Image provider did not return a queue request. Check HF_TOKEN and Hugging Face Inference Provider access.");
+  if (!response.ok) {
+    const raw = await response.text();
+    let detail;
+    try { detail = JSON.parse(raw); } catch { detail = null; }
+    throw new Error(detail?.error || detail?.message || raw || `Hugging Face HTTP ${response.status}`);
   }
 
-  const responseUrl = new URL(job.response_url);
-  const baseUrl = `${responseUrl.origin}${responseUrl.pathname}`;
-  const query = responseUrl.search;
-  const statusUrl = `${baseUrl}/status${query}`;
-  const resultUrl = `${baseUrl}${query}`;
-
-  for (let attempt = 0; attempt < 60; attempt++) {
-    const statusResponse = await fetch(statusUrl, {
-      headers: { Authorization: `Bearer ${env.HF_TOKEN}` },
-    });
-    const statusRaw = await statusResponse.text();
-    let status;
-    try { status = JSON.parse(statusRaw); } catch { status = {}; }
-
-    if (!statusResponse.ok) {
-      throw new Error(status?.error || status?.message || statusRaw || "Image generation status failed.");
-    }
-    if (status.status === "COMPLETED") {
-      const resultResponse = await fetch(resultUrl, {
-        headers: { Authorization: `Bearer ${env.HF_TOKEN}` },
-      });
-      const resultRaw = await resultResponse.text();
-      let result;
-      try { result = JSON.parse(resultRaw); } catch { result = {}; }
-      if (!resultResponse.ok) {
-        throw new Error(result?.error || result?.message || resultRaw || "Image generation result failed.");
-      }
-      const url = result?.images?.[0]?.url;
-      if (!url) throw new Error("Image provider completed without returning an image URL.");
-      return url;
-    }
-    if (status.status === "FAILED") {
-      throw new Error(status.error || status.message || "Image generation failed at the provider.");
-    }
-    await new Promise((resolve) => setTimeout(resolve, 1000));
+  const contentType = response.headers.get("content-type") || "image/png";
+  if (!contentType.toLowerCase().startsWith("image/")) {
+    const raw = await response.text();
+    throw new Error(`Hugging Face returned unexpected content: ${raw.slice(0, 400)}`);
   }
-  throw new Error("Image generation timed out. Please try again.");
+
+  const bytes = new Uint8Array(await response.arrayBuffer());
+  let binary = "";
+  const chunkSize = 0x8000;
+  for (let offset = 0; offset < bytes.length; offset += chunkSize) {
+    binary += String.fromCharCode(...bytes.subarray(offset, offset + chunkSize));
+  }
+  return `data:${contentType};base64,${btoa(binary)}`;
+}
+
+async function hfGenerate(env, prompt, aspectRatio) {
+  const sizes = {
+    "1:1": { width: 1024, height: 1024 },
+    "16:9": { width: 1280, height: 720 },
+    "9:16": { width: 720, height: 1280 },
+    "4:3": { width: 1024, height: 768 },
+  };
+  return hfImageRequest(env, "black-forest-labs/FLUX.1-schnell", {
+    inputs: prompt,
+    parameters: {
+      width: (sizes[aspectRatio] || sizes["1:1"]).width,
+      height: (sizes[aspectRatio] || sizes["1:1"]).height,
+    },
+  });
 }
 
 async function hfEdit(env, images, prompt) {
-  const submitUrl =
-    "https://router.huggingface.co/fal-ai/fal-ai/flux-2/klein/9b/edit?_subdomain=queue";
   const imageList = (Array.isArray(images) ? images : [images]).filter(Boolean);
   if (!imageList.length) throw new Error("Upload at least one image to edit.");
-  const imageUrls = imageList.map((image) => `data:${image.mime};base64,${image.base64}`);
 
-  const submit = await fetch(submitUrl, {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${env.HF_TOKEN}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      input: {
-        prompt,
-        // Hugging Face currently maps black-forest-labs/FLUX.2-klein-9B to fal-ai/flux-2/klein/9b/edit.
-        // Send one image as image_url; use image_urls for multiple reference images where supported.
-        ...(imageUrls.length > 1
-          ? { image_urls: imageUrls }
-          : { image_url: imageUrls[0] }),
-      },
-    }),
+  // FLUX.2 klein image-to-image accepts one source image per request.
+  const image = imageList[0];
+  const inputImage = `data:${image.mime};base64,${image.base64}`;
+  return hfImageRequest(env, "black-forest-labs/FLUX.2-klein-9B", {
+    inputs: inputImage,
+    parameters: { prompt },
   });
-
-  const submitRaw = await submit.text();
-  let job;
-  try { job = JSON.parse(submitRaw); } catch { job = {}; }
-
-  if (!submit.ok) {
-    throw new Error(
-      job?.error || job?.message || submitRaw || `Hugging Face HTTP ${submit.status}`
-    );
-  }
-
-  if (!job.request_id || !job.response_url) {
-    throw new Error("Hugging Face did not return a queue request.");
-  }
-
-  const responseUrl = new URL(job.response_url);
-  const baseUrl = `${responseUrl.origin}${responseUrl.pathname}`;
-  const query = responseUrl.search;
-
-  const statusUrl = `${baseUrl}/status${query}`;
-  const resultUrl = `${baseUrl}${query}`;
-
-  for (let attempt = 0; attempt < 60; attempt++) {
-    const statusResponse = await fetch(statusUrl, {
-      headers: {
-        Authorization: `Bearer ${env.HF_TOKEN}`,
-      },
-    });
-
-    const statusRaw = await statusResponse.text();
-    let status;
-    try { status = JSON.parse(statusRaw); } catch { status = {}; }
-
-    if (!statusResponse.ok) {
-      throw new Error(
-        status?.error || status?.message || statusRaw
-      );
-    }
-
-    if (status.status === "COMPLETED") {
-      const resultResponse = await fetch(resultUrl, {
-        headers: {
-          Authorization: `Bearer ${env.HF_TOKEN}`,
-        },
-      });
-
-      const resultRaw = await resultResponse.text();
-      let result;
-      try { result = JSON.parse(resultRaw); } catch { result = {}; }
-
-      if (!resultResponse.ok) {
-        throw new Error(
-          result?.error || result?.message || resultRaw
-        );
-      }
-
-      const url = result?.images?.[0]?.url;
-      if (!url) {
-        throw new Error("Image provider completed without an image URL.");
-      }
-
-      return url;
-    }
-
-    if (status.status === "FAILED") {
-      throw new Error(
-        status.error || status.message || "Image editing failed."
-      );
-    }
-
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-  }
-
-  throw new Error("Image editing timed out. Please try again.");
 }
 
 export default {
