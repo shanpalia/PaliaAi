@@ -175,7 +175,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
       {/* Main Sidebar Container */}
       <aside
         id="palia-sidebar"
-        className={`fixed top-0 bottom-0 left-0 z-40 w-[min(86vw,320px)] bg-white border-r border-slate-200 flex flex-col transform-gpu transition-[width,transform,box-shadow] duration-300 ease-out lg:relative lg:z-40 lg:translate-x-0 lg:shadow-none ${isOpen ? 'translate-x-0 shadow-2xl' : '-translate-x-full lg:translate-x-0'} ${collapsed ? 'lg:w-[76px]' : 'lg:w-[286px]'}`}
+        className={`fixed top-0 bottom-0 left-0 z-40 w-[min(86vw,320px)] bg-white border-r border-slate-200 flex flex-col transform-gpu transition-[width,transform,box-shadow] duration-300 ease-out lg:relative lg:z-40 lg:translate-x-0 lg:shadow-none ${isOpen ? 'translate-x-0 shadow-2xl' : '-translate-x-full lg:translate-x-0'} ${collapsed ? 'lg:w-[76px]' : 'lg:w-[340px]'}`}
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
@@ -202,7 +202,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
         </div>
 
         {/* New Chat & Search Input */}
-        <div className={`px-3 sm:px-5 space-y-3 ${collapsed ? "lg:px-3" : ""}`}>
+        <div className={`px-3 sm:px-4 space-y-3 ${collapsed ? "lg:px-3" : ""}`}>
           <button
             id="btn-sidebar-new-chat"
             title={collapsed ? "New chat" : undefined}
@@ -239,7 +239,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
         </div>
 
         {/* Palia AI Tools Suite Navigation */}
-        <div className={`px-3 sm:px-5 py-3 border-b border-slate-200/60 ${collapsed ? "lg:px-2" : ""}`}>
+        <div className={`px-3 sm:px-4 py-3 border-b border-slate-200/60 ${collapsed ? "lg:px-2" : ""}`}>
           <p className={`text-[10px] font-bold text-slate-400 uppercase px-1 mb-2 tracking-wider ${collapsed ? "lg:hidden" : ""}`}>
             AI Tools
           </p>
@@ -335,7 +335,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
         </nav>
 
         {/* Bottom Profile & Settings Area */}
-        <div className={`mt-auto p-3 border-t border-slate-200 space-y-3 bg-slate-50 ${collapsed ? "lg:p-2" : "lg:p-4"}`}>
+        <div className={`mt-auto p-3 border-t border-slate-200 space-y-3 bg-white ${collapsed ? "lg:p-2" : "lg:p-4"}`}>
           {/* Quick Tools Link */}
           <button type="button" title={collapsed ? "Tools" : undefined} onClick={() => { onSelectTool("dashboard"); onClose(); }} className={`w-full flex items-center gap-3 px-2 py-2 text-slate-600 hover:text-emerald-600 hover:bg-white rounded-lg cursor-pointer transition-colors active:scale-[0.98] ${collapsed ? "lg:justify-center lg:px-0" : ""}`}>
             <LayoutGrid className="w-4 h-4" />
