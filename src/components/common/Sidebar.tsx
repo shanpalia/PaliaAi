@@ -175,7 +175,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
       {/* Main Sidebar Container */}
       <aside
         id="palia-sidebar"
-        className={`fixed top-0 bottom-0 left-0 z-40 w-[min(86vw,320px)] bg-white border-r border-slate-200 flex flex-col transform-gpu transition-[width,transform,box-shadow] duration-300 ease-out lg:relative lg:z-40 lg:translate-x-0 lg:shadow-none ${isOpen ? 'translate-x-0 shadow-2xl' : '-translate-x-full lg:translate-x-0'} ${collapsed ? 'lg:w-[76px]' : 'lg:w-[340px]'}`}
+        className={`fixed top-0 bottom-0 left-0 z-40 w-[min(86vw,320px)] bg-white border-r border-slate-200 flex flex-col transform-gpu transition-[width,transform,box-shadow] duration-300 ease-out lg:relative lg:z-40 lg:translate-x-0 lg:shadow-none ${isOpen ? 'translate-x-0 shadow-2xl' : '-translate-x-full lg:translate-x-0'} ${collapsed ? 'lg:w-[76px]' : 'lg:w-[280px]'}`}
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
