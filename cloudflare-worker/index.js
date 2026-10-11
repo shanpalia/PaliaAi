@@ -202,7 +202,7 @@ async function hfGenerate(env, prompt, aspectRatio) {
 
 async function hfEdit(env, images, prompt) {
   const submitUrl =
-    "https://router.huggingface.co/fal-ai/fal-ai/flux-kontext-pro?_subdomain=queue";
+    "https://router.huggingface.co/fal-ai/fal-ai/flux-2/klein/9b/edit?_subdomain=queue";
   const imageList = (Array.isArray(images) ? images : [images]).filter(Boolean);
   if (!imageList.length) throw new Error("Upload at least one image to edit.");
   const imageUrls = imageList.map((image) => `data:${image.mime};base64,${image.base64}`);
@@ -216,8 +216,8 @@ async function hfEdit(env, images, prompt) {
     body: JSON.stringify({
       input: {
         prompt,
-        // Qwen Image Edit supports multiple reference images through image_urls.
-        // Keep image_url as a compatibility fallback for a single-image edit.
+        // Hugging Face currently maps black-forest-labs/FLUX.2-klein-9B to fal-ai/flux-2/klein/9b/edit.
+        // Send one image as image_url; use image_urls for multiple reference images where supported.
         ...(imageUrls.length > 1
           ? { image_urls: imageUrls }
           : { image_url: imageUrls[0] }),
