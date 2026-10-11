@@ -42,7 +42,7 @@ async function geminiChat(env, input) {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      "x-goog-api-key": env.GEMINI_API_KEY,
+      "x-goog-api-key": env.PALIA_GEMINI_API_KEY,
     },
     body: JSON.stringify({
       model: "gemini-3.6-flash",
@@ -140,7 +140,7 @@ async function hfImageRequest(env, providerPath, payload) {
   const response = await fetch(`https://router.huggingface.co/${providerPath}`, {
     method: "POST",
     headers: {
-      Authorization: `Bearer ${env.HF_TOKEN}`,
+      Authorization: `Bearer ${env.PALIA_HF_TOKEN}`,
       "Content-Type": "application/json",
       Accept: "image/*",
     },
@@ -241,8 +241,8 @@ export default {
       const referenceImageEdit = images.length >= 2 && (shortImageInstruction || !prompt);
 
       if (referenceImageEdit || intent === "image_edit" || intent === "image_generate" || generateImage) {
-        if (!env.HF_TOKEN) {
-          throw new Error("HF_TOKEN is not configured in the Cloudflare Worker.");
+        if (!env.PALIA_HF_TOKEN) {
+          throw new Error("PALIA_HF_TOKEN is not configured in the Cloudflare Worker.");
         }
 
         const quota = await checkImageQuota(env, body, request);
