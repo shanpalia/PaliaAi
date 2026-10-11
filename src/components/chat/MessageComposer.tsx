@@ -36,11 +36,13 @@ export const MessageComposer: React.FC<MessageComposerProps> = ({
   const [isSearchMode, setIsSearchMode] = useState(defaultSearchMode);
   const [isListening, setIsListening] = useState(false);
   const [showAttachmentMenu, setShowAttachmentMenu] = useState(false);
+  const [thinkHarder, setThinkHarder] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
   const [usage, setUsage] = useState<DailyUsageStatus>(usageService.getStatus());
 
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const cameraInputRef = useRef<HTMLInputElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);
   const recognitionRef = useRef<any>(null);
 
@@ -232,7 +234,7 @@ export const MessageComposer: React.FC<MessageComposerProps> = ({
     if (!trimmed && attachments.length === 0) return;
     if (isLoading) return;
 
-    onSendMessage(trimmed, attachments, isSearchMode);
+    onSendMessage(thinkHarder && trimmed ? `Please think carefully and provide a thorough, well-reasoned answer.\n\n${trimmed}` : trimmed, attachments, isSearchMode);
     setInput('');
     setAttachments([]);
     if (textareaRef.current) {
@@ -335,12 +337,15 @@ export const MessageComposer: React.FC<MessageComposerProps> = ({
             >
               <Plus className="w-6 h-6" />
             </button>
-            <input ref={fileInputRef} type="file" multiple className="hidden" onChange={(e) => handleFiles(e.target.files)} />
+            <input ref={fileInputRef} type="file" multiple className="hidden" onChange={(e) => { void handleFiles(e.target.files); e.currentTarget.value = ''; }} />
+            <input ref={cameraInputRef} type="file" accept="image/*" capture="environment" className="hidden" onChange={(e) => { void handleFiles(e.target.files); e.currentTarget.value = ''; }} />
             {showAttachmentMenu && (
-              <div id="attachment-menu-dropdown" className="absolute bottom-full left-0 mb-2 w-48 bg-white border border-slate-200 rounded-2xl shadow-xl p-1.5 z-30">
-                <button type="button" onClick={() => { if (fileInputRef.current) { fileInputRef.current.accept = "image/*"; fileInputRef.current.click(); } setShowAttachmentMenu(false); }} className="w-full flex items-center gap-2 px-3 py-2.5 rounded-xl text-sm text-slate-700 hover:bg-slate-50 text-left"><ImageIcon className="w-4 h-4" />Upload image</button>
-                <button type="button" onClick={() => { if (fileInputRef.current) { fileInputRef.current.accept = "application/pdf,.pdf"; fileInputRef.current.click(); } setShowAttachmentMenu(false); }} className="w-full flex items-center gap-2 px-3 py-2.5 rounded-xl text-sm text-slate-700 hover:bg-slate-50 text-left"><FileText className="w-4 h-4" />Upload PDF</button>
-                <button type="button" onClick={() => { if (fileInputRef.current) { fileInputRef.current.accept = ".txt,.md,.doc,.docx"; fileInputRef.current.click(); } setShowAttachmentMenu(false); }} className="w-full flex items-center gap-2 px-3 py-2.5 rounded-xl text-sm text-slate-700 hover:bg-slate-50 text-left"><Paperclip className="w-4 h-4" />Upload document</button>
+              <div id="attachment-menu-dropdown" className="absolute bottom-full left-0 mb-3 w-64 max-w-[calc(100vw-48px)] bg-white border border-slate-200 rounded-[28px] shadow-2xl p-2 z-50">
+                <button type="button" onClick={() => { cameraInputRef.current?.click(); setShowAttachmentMenu(false); }} className="w-full flex items-center gap-3 px-3 py-3 rounded-2xl text-base text-slate-800 hover:bg-slate-50 text-left"><span className="w-11 h-11 rounded-full bg-slate-100 flex items-center justify-center"><span aria-hidden="true">📷</span></span>Camera</button>
+                <button type="button" onClick={() => { if (fileInputRef.current) { fileInputRef.current.accept = "image/*"; fileInputRef.current.removeAttribute('capture'); fileInputRef.current.click(); } setShowAttachmentMenu(false); }} className="w-full flex items-center gap-3 px-3 py-3 rounded-2xl text-base text-slate-800 hover:bg-slate-50 text-left"><span className="w-11 h-11 rounded-full bg-slate-100 flex items-center justify-center"><ImageIcon className="w-6 h-6" /></span>Photos</button>
+                <button type="button" onClick={() => { if (fileInputRef.current) { fileInputRef.current.accept = "*/*"; fileInputRef.current.removeAttribute('capture'); fileInputRef.current.click(); } setShowAttachmentMenu(false); }} className="w-full flex items-center gap-3 px-3 py-3 rounded-2xl text-base text-slate-800 hover:bg-slate-50 text-left"><span className="w-11 h-11 rounded-full bg-slate-100 flex items-center justify-center"><Paperclip className="w-6 h-6" /></span>Files</button>
+                <button type="button" onClick={() => { setShowAttachmentMenu(false); alert('Plugin integrations are not configured in this version of PaliaAi yet.'); }} className="w-full flex items-center gap-3 px-3 py-3 rounded-2xl text-base text-slate-800 hover:bg-slate-50 text-left"><span className="w-11 h-11 rounded-full bg-slate-100 flex items-center justify-center">◎</span>Plugins</button>
+                <button type="button" aria-pressed={thinkHarder} onClick={() => { setThinkHarder((v) => !v); setShowAttachmentMenu(false); }} className={`w-full flex items-center gap-3 px-3 py-3 rounded-2xl text-base text-left ${thinkHarder ? 'bg-blue-50 text-blue-700' : 'text-slate-800 hover:bg-slate-50'}`}><span className="w-11 h-11 rounded-full bg-slate-100 flex items-center justify-center">♧</span>{thinkHarder ? 'Think harder ✓' : 'Think harder'}</button>
               </div>
             )}
             <button
