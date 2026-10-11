@@ -27,7 +27,7 @@ jobs:
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          command: deploy cloudflare-worker/index.js --name paliaai-shanpalia786
+          command: deploy cloudflare-worker/index.js --name paliaai
           secrets: |
             HF_TOKEN
             GEMINI_API_KEY
