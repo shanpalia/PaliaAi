@@ -31,6 +31,30 @@ import { aiService } from './services/aiService';
 import { usageService } from './services/usageService';
 
 
+function preserveLiveAttachments(saved: Conversation[], current: Conversation[]): Conversation[] {
+  const currentById = new Map(current.map((conversation) => [conversation.id, conversation]));
+  return saved.map((conversation) => {
+    const live = currentById.get(conversation.id);
+    if (!live) return conversation;
+    const liveMessages = new Map(live.messages.map((message) => [message.id, message]));
+    return {
+      ...conversation,
+      messages: conversation.messages.map((message) => {
+        const liveMessage = liveMessages.get(message.id);
+        if (!liveMessage?.attachments?.length || !message.attachments?.length) return message;
+        const liveAttachments = new Map(liveMessage.attachments.map((attachment) => [attachment.id, attachment]));
+        return {
+          ...message,
+          attachments: message.attachments.map((attachment) => {
+            const liveAttachment = liveAttachments.get(attachment.id);
+            return liveAttachment?.dataUrl ? { ...attachment, dataUrl: liveAttachment.dataUrl } : attachment;
+          }),
+        };
+      }),
+    };
+  });
+}
+
 export const App: React.FC = () => {
   // App Navigation & View State
   const [activeTool, setActiveTool] = useState<ToolType>('chat');
@@ -139,7 +163,7 @@ export const App: React.FC = () => {
         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
       };
       storageService.addMessage(activeConversationId, limitMsg);
-      setConversations(storageService.getConversations());
+      setConversations((current) => preserveLiveAttachments(storageService.getConversations(), current));
       setIsProfileOpen(true);
       return;
     }
@@ -158,7 +182,13 @@ export const App: React.FC = () => {
 
     // Update conversation with user message
     storageService.addMessage(activeConversationId, userMsg);
-    setConversations(storageService.getConversations());
+    // Keep the original image data in memory for immediate display; storage intentionally strips base64 to avoid quota errors.
+    setConversations((current) => {
+      const withMessage = current.map((conversation) => conversation.id === activeConversationId
+        ? { ...conversation, messages: [...conversation.messages.filter((message) => message.id !== userMsg.id), userMsg] }
+        : conversation);
+      return preserveLiveAttachments(storageService.getConversations(), withMessage);
+    });
 
     // 2. Prepare AI Call
     setIsLoading(true);
