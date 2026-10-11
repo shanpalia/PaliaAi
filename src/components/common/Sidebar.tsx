@@ -272,7 +272,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
         </div>
 
         {/* Conversation History List */}
-        <nav className={`flex-1 overflow-y-auto px-2.5 py-3 space-y-4 select-none ${collapsed ? "lg:px-2" : ""}`}>
+        <nav className={`min-h-0 flex-1 overflow-y-auto overscroll-contain px-2.5 py-3 space-y-4 select-none [scrollbar-width:thin] ${collapsed ? "lg:px-2" : ""}`}>
           {filteredConversations.length === 0 ? (
             <div className="py-6 text-center text-xs text-slate-400">
               {searchFilter ? 'No chats found matching search' : 'No previous conversations'}
