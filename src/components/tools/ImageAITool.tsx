@@ -16,7 +16,6 @@ import {
   Eye,
 } from 'lucide-react';
 import { aiService } from '../../services/aiService';
-import { creditService } from '../../services/creditService';
 
 interface ImageAIToolProps {
   onSendToChat?: (imageUrl: string, prompt: string) => void;
@@ -78,13 +77,6 @@ export const ImageAITool: React.FC<ImageAIToolProps> = ({ onSendToChat }) => {
     const finalPrompt = activeTab === 'edit'
       ? (editPrompts[editOperation] || prompt.trim())
       : prompt.trim();
-
-    // Keep the existing app credit rules for image requests.
-    const successDeduct = await creditService.deductCredits('Image AI Generation', 15);
-    if (!successDeduct) {
-      alert('Insufficient credits for Image AI. Please check your credit balance.');
-      return;
-    }
 
     setIsLoading(true);
     try {
@@ -152,7 +144,7 @@ export const ImageAITool: React.FC<ImageAIToolProps> = ({ onSendToChat }) => {
               </div>
               <h1 className="text-xl font-bold text-slate-900">Image AI Studio</h1>
               <span className="text-xs px-2 py-0.5 rounded-full bg-purple-50 text-purple-700 font-semibold border border-purple-100">
-                15 Credits / Gen
+                Free quota
               </span>
             </div>
             <p className="text-xs text-slate-500 mt-1">
@@ -272,7 +264,7 @@ export const ImageAITool: React.FC<ImageAIToolProps> = ({ onSendToChat }) => {
                   ) : (
                     <>
                       <Sparkles className="w-4 h-4" />
-                      <span>Generate Image (15 Credits)</span>
+                      <span>Generate Image</span>
                     </>
                   )}
                 </button>
@@ -369,7 +361,7 @@ export const ImageAITool: React.FC<ImageAIToolProps> = ({ onSendToChat }) => {
                   }`}
                 >
                   <Wand2 className="w-4 h-4" />
-                  <span>Apply AI Image Transformation (15 Credits)</span>
+                  <span>Apply AI Image Transformation</span>
                 </button>
               </div>
             )}
