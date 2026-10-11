@@ -182,7 +182,17 @@ export const MessageComposer: React.FC<MessageComposerProps> = ({
               type: 'image',
               mimeType: file.type.startsWith('image/') ? file.type : (detectedImageMime || 'image/png'),
               size: file.size,
-              dataUrl: (e.target?.result as string).replace(/^data:[^;]+;/, `${file.type.startsWith('image/') ? file.type : (detectedImageMime || 'image/png')};`),
+              dataUrl: (() => {
+                const rawDataUrl = String(e.target?.result || '');
+                const normalizedMime = file.type.startsWith('image/')
+                  ? file.type
+                  : (detectedImageMime || 'image/png');
+                // Keep the required data: URL prefix; replacing it breaks browser image previews.
+                const base64Payload = rawDataUrl.includes(',')
+                  ? rawDataUrl.slice(rawDataUrl.indexOf(',') + 1)
+                  : rawDataUrl;
+                return `data:${normalizedMime};base64,${base64Payload}`;
+              })(),
             },
           ]);
         };
