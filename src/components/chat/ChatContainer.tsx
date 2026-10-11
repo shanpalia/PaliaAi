@@ -136,31 +136,17 @@ export const ChatContainer: React.FC<ChatContainerProps> = ({
       >
         {isEmpty ? (
           /* Premium landing state */
-          <div className="flex-1 flex flex-col items-center justify-center px-5 sm:px-10 py-8 sm:py-10 relative overflow-hidden">
-            <div className="absolute inset-0 pointer-events-none">
-              <div className="absolute left-1/2 top-16 -translate-x-1/2 w-[520px] h-[260px] rounded-full bg-emerald-100/30 blur-3xl" />
-              <div className="absolute left-[12%] bottom-20 w-40 h-40 rounded-full bg-cyan-100/20 blur-3xl" />
-            </div>
-            <div className="relative z-10 text-center mb-8 sm:mb-10">
-              <div className="hidden">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" /> Palia AI
-              </div>
-              <div className="mb-5">
-                <img
-                  src={`${import.meta.env.BASE_URL}palia-ai-icon.svg`}
-                  alt="Palia AI"
-                  className="w-[112px] h-[112px] sm:w-[132px] sm:h-[132px] mx-auto object-contain drop-shadow-[0_12px_24px_rgba(16,185,129,0.20)]"
-                />
-              </div>
-              <h2 className="text-[32px] sm:text-[46px] font-bold text-slate-950 tracking-[-0.04em] leading-tight">
-                How can I help, <span className="text-emerald-500">Shan?</span>
+          <div className="flex-1 flex flex-col items-center justify-center px-5 sm:px-8 py-6 sm:py-8">
+            <div className="w-full max-w-[800px] text-center mb-7 sm:mb-8">
+              <h2 className="text-[30px] sm:text-[36px] font-semibold text-slate-900 tracking-[-0.035em] leading-tight">
+                How can I help, <span className="text-emerald-600">Shan?</span>
               </h2>
               <p className="mt-3 text-sm sm:text-base text-slate-500">
                 Ask anything, explore ideas, analyze files, search the web, or create images.
               </p>
             </div>
 
-            <div className="relative z-10 grid grid-cols-1 sm:grid-cols-2 gap-3 w-full max-w-[760px]">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full max-w-[800px]">
               {suggestions.map((sug, idx) => {
                 const Icon = sug.icon;
                 return (
@@ -170,7 +156,7 @@ export const ChatContainer: React.FC<ChatContainerProps> = ({
                     onClick={() =>
                       onSelectSuggestion(sug.prompt, sug.tool, sug.uploadType)
                     }
-                    className="p-4 sm:p-5 bg-white backdrop-blur border border-slate-200/80 rounded-2xl cursor-pointer hover:-translate-y-0.5 hover:border-emerald-200 hover:shadow-md transition-all group select-none text-left"
+                    className="min-h-[76px] p-4 bg-white border border-slate-200 rounded-2xl cursor-pointer hover:bg-slate-50 hover:border-slate-300 hover:shadow-sm transition-all group select-none text-left"
                   >
                     <div className="flex items-center gap-3">
                       <div className={`w-10 h-10 rounded-xl ${sug.color} flex items-center justify-center transition-colors flex-shrink-0`}>
