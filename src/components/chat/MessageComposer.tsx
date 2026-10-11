@@ -135,13 +135,17 @@ export const MessageComposer: React.FC<MessageComposerProps> = ({
         continue;
       }
 
-      const isImg = file.type.startsWith('image/');
-      const isPdf = file.type === 'application/pdf' || file.name.endsWith('.pdf');
+      const lowerName = file.name.toLowerCase();
+      // Windows and some browser uploads can have an empty MIME type.
+      const isImg =
+        file.type.startsWith('image/') ||
+        /\.(png|jpe?g|webp|gif|bmp|avif)$/i.test(lowerName);
+      const isPdf = file.type === 'application/pdf' || lowerName.endsWith('.pdf');
       const isDoc =
-        file.name.endsWith('.txt') ||
-        file.name.endsWith('.doc') ||
-        file.name.endsWith('.docx') ||
-        file.name.endsWith('.md');
+        lowerName.endsWith('.txt') ||
+        lowerName.endsWith('.doc') ||
+        lowerName.endsWith('.docx') ||
+        lowerName.endsWith('.md');
 
       let type: Attachment['type'] = 'text';
       if (isImg) type = 'image';
