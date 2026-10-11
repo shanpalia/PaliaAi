@@ -8,6 +8,7 @@ import {
   RefreshCw,
   Share2,
   FileText,
+  Image as ImageIcon,
   ExternalLink,
   Sparkles,
   User,
