@@ -37,7 +37,7 @@ function textFromGemini(data) {
 }
 
 async function geminiChat(env, input) {
-  const r = await fetch("https://generativelanguage.googleapis.com/v1/interactions", {
+  const r = await fetch("https://generativelanguage.googleapis.com/v1beta/interactions", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
