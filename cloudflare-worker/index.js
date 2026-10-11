@@ -134,10 +134,10 @@ async function recordImageUsage(env, quota) {
   };
 }
 
-async function hfImageRequest(env, providerPath, payload) {
-  // providerPath is the full provider model route, including the "fal-ai/"
-  // prefix required by Hugging Face's Inference Providers router.
-  const response = await fetch(`https://router.huggingface.co/${providerPath}`, {
+async function hfImageRequest(env, modelId, payload) {
+  // Use the Hugging Face model ID on the fal-ai provider route. The provider-specific
+  // shortcut paths can fail with "Model not supported by provider fal-ai".
+  const response = await fetch(`https://router.huggingface.co/fal-ai/${modelId}`, {
     method: "POST",
     headers: {
       Authorization: `Bearer ${env.PALIA_HF_TOKEN}`,
@@ -176,7 +176,7 @@ async function hfGenerate(env, prompt, aspectRatio) {
     "9:16": { width: 720, height: 1280 },
     "4:3": { width: 1024, height: 768 },
   };
-  return hfImageRequest(env, "fal-ai/flux/dev", {
+  return hfImageRequest(env, "black-forest-labs/FLUX.1-dev", {
     inputs: prompt,
     parameters: {
       width: (sizes[aspectRatio] || sizes["1:1"]).width,
@@ -193,7 +193,7 @@ async function hfEdit(env, images, prompt) {
   const image = imageList[0];
   // Hugging Face's image-to-image task expects the image as base64 in "inputs";
   // the prompt belongs in parameters.prompt (not a data: URL wrapper).
-  return hfImageRequest(env, "fal-ai/flux-2/klein/9b/edit", {
+  return hfImageRequest(env, "black-forest-labs/FLUX.2-klein-9B", {
     inputs: image.base64,
     parameters: { prompt },
   });
