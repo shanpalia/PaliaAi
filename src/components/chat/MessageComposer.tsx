@@ -136,9 +136,27 @@ export const MessageComposer: React.FC<MessageComposerProps> = ({
       }
 
       const lowerName = file.name.toLowerCase();
-      // Windows and some browser uploads can have an empty MIME type.
+      // Some uploads have generic names/MIME types. Inspect the actual file signature too.
+      const header = new Uint8Array(await file.slice(0, 16).arrayBuffer());
+      const starts = (...bytes: number[]) => bytes.every((byte, index) => header[index] === byte);
+      const isPng = starts(0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a);
+      const isJpeg = starts(0xff, 0xd8, 0xff);
+      const isGif = starts(0x47, 0x49, 0x46, 0x38);
+      const isWebp = starts(0x52, 0x49, 0x46, 0x46) && starts(0x57, 0x45, 0x42, 0x50) === false
+        ? String.fromCharCode(...header.slice(8, 12)) === 'WEBP'
+        : String.fromCharCode(...header.slice(8, 12)) === 'WEBP';
+      const isBmp = starts(0x42, 0x4d);
+      const isAvif = String.fromCharCode(...header.slice(4, 12)).includes('ftypavif') ||
+        String.fromCharCode(...header.slice(4, 12)).includes('ftypavis');
+      const detectedImageMime = isPng ? 'image/png'
+        : isJpeg ? 'image/jpeg'
+        : isGif ? 'image/gif'
+        : isWebp ? 'image/webp'
+        : isBmp ? 'image/bmp'
+        : isAvif ? 'image/avif' : '';
       const isImg =
         file.type.startsWith('image/') ||
+        Boolean(detectedImageMime) ||
         /\.(png|jpe?g|webp|gif|bmp|avif)$/i.test(lowerName);
       const isPdf = file.type === 'application/pdf' || lowerName.endsWith('.pdf');
       const isDoc =
@@ -162,7 +180,7 @@ export const MessageComposer: React.FC<MessageComposerProps> = ({
               id: `att_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`,
               name: file.name,
               type: 'image',
-              mimeType: file.type || 'image/png',
+              mimeType: file.type.startsWith('image/') ? file.type : (detectedImageMime || 'image/png'),
               size: file.size,
               dataUrl: e.target?.result as string,
             },
