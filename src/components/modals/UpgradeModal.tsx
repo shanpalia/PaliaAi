@@ -7,7 +7,7 @@ interface UpgradeModalProps {
 }
 
 const monthlyLink = 'https://rzp.io/rzp/q5Ri26Kb';
-const yearlyLink = (import.meta.env.VITE_RAZORPAY_PRO_YEARLY_URL || '').trim();
+const yearlyLink = 'https://rzp.io/rzp/A086v2Tj';
 
 const plans = [
   {
@@ -86,7 +86,7 @@ export const UpgradeModal: React.FC<UpgradeModalProps> = ({ isOpen, onClose }) =
             <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-slate-500" />
             <p>Razorpay checkout opens separately. Premium access must only be activated after trusted server-side payment verification; this link alone does not activate an account's Pro plan. Confirm the Razorpay link is set to exactly ₹49 before sharing it.</p>
           </div>
-          {!yearlyLink && <p className="mt-3 text-xs text-amber-700">Monthly payment link is connected. Yearly plan remains unavailable until its separate ₹399 Razorpay Payment Link and server-side payment verification are configured.</p>}
+          {!yearlyLink && <p className="mt-3 text-xs text-amber-700">Monthly and yearly Razorpay links are connected. Pro access still requires trusted server-side payment verification.</p>}
         </div>
       </div>
     </div>
