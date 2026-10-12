@@ -6,25 +6,35 @@ interface UpgradeModalProps {
   onClose: () => void;
 }
 
-const monthlyLink = (import.meta.env.VITE_RAZORPAY_PRO_MONTHLY_URL || '').trim();
+const monthlyLink = 'https://rzp.io/rzp/q5Ri26Kb';
 const yearlyLink = (import.meta.env.VITE_RAZORPAY_PRO_YEARLY_URL || '').trim();
 
 const plans = [
   {
     id: 'monthly',
     name: 'Palia Pro Monthly',
-    price: '₹99',
+    price: '₹49',
     period: '/ month',
     link: monthlyLink,
-    features: ['More AI access', 'AI tools and image features', 'Priority feature updates'],
+    features: [
+      'Higher AI chat usage (subject to service limits)',
+      'Access to premium models when enabled',
+      'More capacity for coding and document help',
+      'Image generation remains free for everyone',
+    ],
   },
   {
     id: 'yearly',
     name: 'Palia Pro Yearly',
-    price: '₹999',
+    price: '₹399',
     period: '/ year',
     link: yearlyLink,
-    features: ['Everything in Monthly', 'One yearly payment', 'Best value'],
+    features: [
+      'All Palia Pro benefits',
+      'Lower cost than paying monthly for a year',
+      'Image generation remains free for everyone',
+      'One payment for 12 months',
+    ],
     featured: true,
   },
 ];
@@ -40,7 +50,7 @@ export const UpgradeModal: React.FC<UpgradeModalProps> = ({ isOpen, onClose }) =
             <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-700"><Sparkles className="h-5 w-5" /></div>
             <div>
               <h2 id="upgrade-title" className="text-lg font-bold text-slate-900">Upgrade to Palia Pro</h2>
-              <p className="text-xs text-slate-500">Support Palia AI and unlock a premium plan</p>
+              <p className="text-xs text-slate-500">Support Palia AI and help fund its development</p>
             </div>
           </div>
           <button onClick={onClose} aria-label="Close upgrade window" className="rounded-full p-2 text-slate-500 hover:bg-slate-100 cursor-pointer"><X className="h-5 w-5" /></button>
@@ -48,8 +58,8 @@ export const UpgradeModal: React.FC<UpgradeModalProps> = ({ isOpen, onClose }) =
 
         <div className="p-5 sm:p-7">
           <div className="mb-5 rounded-2xl border border-emerald-100 bg-emerald-50/70 p-4 text-sm text-emerald-950">
-            <p className="font-semibold">Keep Palia AI growing</p>
-            <p className="mt-1 text-xs leading-relaxed text-emerald-900/80">Choose a plan below. Payments are handled by Razorpay hosted checkout when the payment links are configured.</p>
+            <p className="font-semibold">Simple, affordable plans</p>
+            <p className="mt-1 text-xs leading-relaxed text-emerald-900/80">Pro is designed for people who need more AI chat and productivity capacity. Image generation remains free for everyone.</p>
           </div>
 
           <div className="grid gap-4 sm:grid-cols-2">
@@ -63,10 +73,10 @@ export const UpgradeModal: React.FC<UpgradeModalProps> = ({ isOpen, onClose }) =
                 </ul>
                 {plan.link ? (
                   <a href={plan.link} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center gap-2 rounded-xl bg-slate-900 px-4 py-3 text-sm font-semibold text-white hover:bg-slate-700">
-                    Upgrade securely <ExternalLink className="h-4 w-4" />
+                    Continue to Razorpay <ExternalLink className="h-4 w-4" />
                   </a>
                 ) : (
-                  <button type="button" disabled className="rounded-xl bg-slate-100 px-4 py-3 text-sm font-semibold text-slate-400 cursor-not-allowed">Payment setup required</button>
+                  <button type="button" disabled className="rounded-xl bg-slate-100 px-4 py-3 text-sm font-semibold text-slate-400 cursor-not-allowed">Yearly payment link not configured</button>
                 )}
               </section>
             ))}
@@ -74,11 +84,9 @@ export const UpgradeModal: React.FC<UpgradeModalProps> = ({ isOpen, onClose }) =
 
           <div className="mt-5 flex items-start gap-2 rounded-xl border border-slate-200 p-3 text-[11px] leading-relaxed text-slate-500">
             <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-slate-500" />
-            <p>Secure checkout opens on Razorpay. Do not enter payment credentials on this website. Premium access must only be activated after server-side payment verification; a payment link alone does not automatically change your account plan.</p>
+            <p>Razorpay checkout opens separately. Premium access must only be activated after trusted server-side payment verification; this link alone does not activate an account's Pro plan. Confirm the Razorpay link is set to exactly ₹49 before sharing it.</p>
           </div>
-          {!monthlyLink && !yearlyLink && (
-            <p className="mt-3 text-xs text-amber-700">To enable payments, add VITE_RAZORPAY_PRO_MONTHLY_URL and VITE_RAZORPAY_PRO_YEARLY_URL in your GitHub Pages build environment with your own Razorpay Payment Link URLs.</p>
-          )}
+          {!yearlyLink && <p className="mt-3 text-xs text-amber-700">Monthly payment link is connected. Yearly plan remains unavailable until its separate ₹399 Razorpay Payment Link and server-side payment verification are configured.</p>}
         </div>
       </div>
     </div>
