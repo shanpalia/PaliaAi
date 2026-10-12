@@ -55,8 +55,8 @@ class AuthManager {
       name: name.charAt(0).toUpperCase() + name.slice(1),
       email,
       avatarUrl: '',
-      tier: 'Pro',
-      plan: 'Palia Pro',
+      tier: 'Free',
+      plan: 'Free Tier',
       credits: 850,
       createdAt: Date.now(),
     };
@@ -71,8 +71,8 @@ class AuthManager {
       name: name || email.split('@')[0],
       email,
       avatarUrl: '',
-      tier: 'Pro',
-      plan: 'Palia Pro',
+      tier: 'Free',
+      plan: 'Free Tier',
       credits: 850,
       createdAt: Date.now(),
     };
@@ -88,8 +88,8 @@ class AuthManager {
       name: 'Shan Palia',
       email: mockEmail,
       avatarUrl: '',
-      tier: 'Pro',
-      plan: 'Palia Pro',
+      tier: 'Free',
+      plan: 'Free Tier',
       credits: 850,
       createdAt: Date.now(),
     };
