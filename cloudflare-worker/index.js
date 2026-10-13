@@ -38,6 +38,11 @@ function textFromGemini(data) {
 }
 
 async function geminiChat(env, input) {
+  if (!env.PALIA_GEMINI_API_KEY) {
+    const error = new Error("Gemini API key is not configured.");
+    error.provider = "gemini";
+    throw error;
+  }
   const r = await fetch("https://generativelanguage.googleapis.com/v1beta/interactions", {
     method: "POST",
     headers: {
@@ -55,8 +60,60 @@ async function geminiChat(env, input) {
   const raw = await r.text();
   let data;
   try { data = JSON.parse(raw); } catch { data = { error: { message: raw } }; }
-  if (!r.ok) throw new Error(data?.error?.message || "Gemini request failed");
+  if (!r.ok) {
+    const error = new Error(data?.error?.message || data?.message || "Gemini request failed");
+    error.status = r.status;
+    error.provider = "gemini";
+    throw error;
+  }
   return data;
+}
+
+function isProviderQuotaError(error) {
+  const message = String(error?.message || "").toLowerCase();
+  return error?.status === 429 ||
+    error?.status === 503 ||
+    /quota|rate.?limit|resource_exhausted|too many requests|exceeded a quota|capacity/i.test(message);
+}
+
+async function openAIChatFallback(env, input) {
+  if (!env.OPENAI_API_KEY) {
+    throw new Error("Gemini quota/rate limit reached and OPENAI_API_KEY is not configured for fallback.");
+  }
+  const r = await fetch("https://api.openai.com/v1/responses", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${env.OPENAI_API_KEY}`,
+    },
+    body: JSON.stringify({
+      model: env.PALIA_OPENAI_FALLBACK_MODEL || "gpt-5.6-sol",
+      instructions: SYSTEM,
+      input,
+      store: false,
+    }),
+  });
+  const raw = await r.text();
+  let data;
+  try { data = JSON.parse(raw); } catch { data = { error: { message: raw } }; }
+  if (!r.ok) {
+    const message = data?.error?.message || "OpenAI fallback request failed";
+    throw new Error(`Gemini quota was reached; OpenAI fallback also failed: ${message}`);
+  }
+  let outputText = typeof data.output_text === "string" ? data.output_text : "";
+  if (!outputText && Array.isArray(data.output)) {
+    outputText = data.output.flatMap((item) =>
+      Array.isArray(item.content) ? item.content : []
+    ).filter((part) => part?.type === "output_text" && typeof part.text === "string")
+      .map((part) => part.text).join("\\n");
+  }
+  if (!outputText.trim()) throw new Error("OpenAI fallback returned an empty response.");
+  return {
+    id: data.id,
+    model: data.model || env.PALIA_OPENAI_FALLBACK_MODEL || "gpt-5.6-sol",
+    output_text: outputText.trim(),
+    fallbackProvider: "openai",
+  };
 }
 
 /*
@@ -290,13 +347,23 @@ export default {
         .filter(Boolean)
         .join("\n\n");
 
-      const data = await geminiChat(env, input);
+      let data;
+      let provider = "gemini";
+      try {
+        data = await geminiChat(env, input);
+      } catch (geminiError) {
+        if (!isProviderQuotaError(geminiError)) throw geminiError;
+        console.warn("Gemini quota/rate limit reached; trying configured OpenAI fallback.");
+        data = await openAIChatFallback(env, input);
+        provider = "openai-fallback";
+      }
       const text = textFromGemini(data);
 
       return json({
         id: data?.id || `palia-${Date.now()}`,
         object: "chat.completion",
-        model: data?.model || "gemini-3.6-flash",
+        model: data?.model || (provider === "gemini" ? "gemini-3.6-flash" : "gpt-5.6-sol"),
+        provider,
         choices: [{
           index: 0,
           message: {
