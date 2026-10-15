@@ -1,0 +1,8 @@
+name = "paliaai"
+main = "src/index.ts"
+compatibility_date = "2026-10-01"
+
+[vars]
+GEMINI_CHAT_MODEL = "gemini-2.5-flash-lite"
+GEMINI_IMAGE_MODEL = "gemini-2.5-flash-image"
+APP_ORIGIN = "https://shanpalia.github.io"
