@@ -57,6 +57,7 @@ function getImageParts(attachments: any[]) {
 async function callGemini(env: Env, model: string, contents: any[], options: Record<string, unknown> = {}) {
   const url = "https://generativelanguage.googleapis.com/v1beta/models/" +
     encodeURIComponent(model) + ":generateContent";
+  const { systemInstruction, ...generationOptions } = options;
   const result = await fetch(url, {
     method: "POST",
     headers: {
@@ -65,7 +66,8 @@ async function callGemini(env: Env, model: string, contents: any[], options: Rec
     },
     body: JSON.stringify({
       contents,
-      generationConfig: { temperature: 0.7, ...options },
+      ...(systemInstruction ? { systemInstruction } : {}),
+      generationConfig: { temperature: 0.7, ...generationOptions },
     }),
   });
   const data: any = await result.json().catch(() => ({}));
