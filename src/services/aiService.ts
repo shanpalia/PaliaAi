@@ -363,6 +363,7 @@ export const aiService = {
     aspectRatio?: string;
     style?: string;
     imageDataUrl?: string;
+    operation?: 'enhance' | 'remove_bg' | 'upscale' | 'custom';
   }): Promise<{
     success: boolean;
     imageUrl?: string;
@@ -387,7 +388,10 @@ export const aiService = {
           prompt,
           aspectRatio: params.aspectRatio || '1:1',
           model: 'Qwen-Image',
-          intent: isEdit ? 'image_edit' : 'image_generate',
+          intent: isEdit && params.operation === 'remove_bg'
+            ? 'background_remove'
+            : isEdit ? 'image_edit' : 'image_generate',
+          operation: params.operation,
           generateImage: true,
           attachments: isEdit ? [{
             name: 'uploaded-image',
