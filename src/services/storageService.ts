@@ -16,6 +16,13 @@ function compactConversation(conversation: Conversation): Conversation {
     ...conversation,
     messages: (conversation.messages || []).slice(-MAX_SAVED_MESSAGES_PER_CONVERSATION).map((message) => ({
       ...message,
+      // Keep localStorage usable: large generated data URLs can exceed browser quota.
+      // Small generated images and normal remote image URLs remain available in history.
+      generatedImageUrl:
+        message.generatedImageUrl &&
+        (!message.generatedImageUrl.startsWith('data:') || message.generatedImageUrl.length <= 700_000)
+          ? message.generatedImageUrl
+          : undefined,
       // Uploaded images stay in memory for the active request; never persist huge base64 payloads.
       attachments: message.attachments?.map((attachment) => ({
         ...attachment,
