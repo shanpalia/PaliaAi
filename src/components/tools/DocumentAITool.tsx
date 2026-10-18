@@ -1,6 +1,7 @@
 import React, { useState, useRef } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
+import { jsPDF } from 'jspdf';
 import {
   FileText,
   UploadCloud,
@@ -274,7 +275,28 @@ export const DocumentAITool: React.FC<DocumentAIToolProps> = ({ onSendToChat }) 
                 )}
               </div>
 
-              {/* Bottom Actions */}
+              const handleDownloadPdf = () => {
+    if (!analysisResult) return;
+    const pdf = new jsPDF({ unit: 'pt', format: 'a4' });
+    const margin = 48;
+    const pageWidth = pdf.internal.pageSize.getWidth();
+    const pageHeight = pdf.internal.pageSize.getHeight();
+    const lines = pdf.splitTextToSize(analysisResult.replace(/\*\*|__|\*|_|\`/g, ''), pageWidth - margin * 2);
+    let y = margin;
+    pdf.setFont('helvetica', 'normal');
+    pdf.setFontSize(11);
+    for (const line of lines) {
+      if (y > pageHeight - margin) {
+        pdf.addPage();
+        y = margin;
+      }
+      pdf.text(line, margin, y);
+      y += 16;
+    }
+    pdf.save(`PaliaAI-Report-${(file?.name || 'document').replace(/[^a-z0-9_-]/gi, '_')}.pdf`);
+  };
+
+  {/* Bottom Actions */}
               {analysisResult && (
                 <div className="flex items-center justify-between pt-2 border-t border-slate-100">
                   <button
@@ -283,6 +305,14 @@ export const DocumentAITool: React.FC<DocumentAIToolProps> = ({ onSendToChat }) 
                   >
                     {copied ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
                     <span>{copied ? 'Copied' : 'Copy Report'}</span>
+                  </button>
+
+                  <button
+                    onClick={handleDownloadPdf}
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-600 text-white hover:bg-emerald-700 text-xs font-medium transition-all"
+                  >
+                    <Download className="w-3.5 h-3.5" />
+                    <span>Download PDF</span>
                   </button>
 
                   {onSendToChat && (
