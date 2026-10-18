@@ -150,11 +150,36 @@ export default {
       if (!messages.some((m) => m.role === "user")) messages.push({ role: "user", content: prompt });
       const result: any = await env.AI.run(CHAT_MODEL, {
         messages,
-        max_tokens: 2048,
+        max_completion_tokens: 1024,
         temperature: 0.7,
+        reasoning_effort: "low",
+        chat_template_kwargs: { enable_thinking: false },
       });
-      const text = String(result?.response || result?.result?.response || "").trim();
-      if (!text) return json({ error: "AI returned an empty response. Please try again." }, 502, corsOrigin);
+
+      // Workers AI models can return either a native { response } object
+      // or an OpenAI-style { choices: [{ message: { content } }] } object.
+      const candidate =
+        result?.response ??
+        result?.result?.response ??
+        result?.choices?.[0]?.message?.content ??
+        result?.choices?.[0]?.text ??
+        result?.text ??
+        result?.output_text;
+      const text = typeof candidate === "string" ? candidate.trim() : "";
+      if (!text) {
+        // Include only response shape metadata; never log the user's prompt.
+        const keys = result && typeof result === "object" ? Object.keys(result).slice(0, 12) : [];
+        console.error("Workers AI returned no text", {
+          model: CHAT_MODEL,
+          resultKeys: keys,
+          responseType: typeof result?.response,
+          choiceCount: Array.isArray(result?.choices) ? result.choices.length : 0,
+        });
+        return json({
+          error: "Cloudflare AI returned no text. Check Workers AI logs and model availability, then retry.",
+          diagnostic: { model: CHAT_MODEL, resultKeys: keys },
+        }, 502, corsOrigin);
+      }
       return json({
         id: "paliaai-" + crypto.randomUUID(),
         model: CHAT_MODEL,
