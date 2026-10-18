@@ -93,6 +93,9 @@ export const App: React.FC = () => {
     const currentUser = authService.getCurrentUser();
     setUser(currentUser);
 
+    // Keep the app state in sync with Firebase sessions and sign-out.
+    const unsubscribeAuth = authService.subscribe((state) => setUser(state.user));
+
     // Always start with a fresh chat when the page/app is opened.
     // Previous conversations remain saved in the sidebar history.
     const newConv = storageService.createConversation('New Chat', 'chat');
@@ -106,7 +109,10 @@ export const App: React.FC = () => {
       setDailyUsage(u);
     });
 
-    return unsub;
+    return () => {
+      unsub();
+      unsubscribeAuth();
+    };
   }, []);
 
   // Sync state helpers
