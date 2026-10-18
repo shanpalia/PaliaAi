@@ -70,7 +70,7 @@ export const ImageAITool: React.FC<ImageAIToolProps> = ({ onSendToChat }) => {
 
     const editPrompts: Record<string, string> = {
       enhance: 'Enhance and polish this image naturally. Preserve the original person, face, identity, colors and important details.',
-      remove_bg: 'Remove the background cleanly and preserve the main subject with accurate edges.',
+      remove_bg: 'EDIT THE PROVIDED PHOTO, do not create a new image. Keep the original foreground subject fully visible and unchanged, preserving its exact colors, face, clothes, shape, texture and details. Change ONLY the background to a perfectly solid pure white (#FFFFFF). Do not whiten, erase, fade, blur, crop, or recolor the subject. Keep clean precise edges around the subject. The final image must clearly show the same original subject against a white background.',
       upscale: 'Upscale and improve image clarity and detail while preserving the original subject and identity.',
       custom: prompt.trim(),
     };
