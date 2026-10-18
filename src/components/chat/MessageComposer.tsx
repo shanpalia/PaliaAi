@@ -175,28 +175,49 @@ export const MessageComposer: React.FC<MessageComposerProps> = ({
       // Read file
       if (isImg) {
         const reader = new FileReader();
+        reader.onerror = () => alert(`Could not read "${file.name}". Please try another image.`);
         reader.onload = (e) => {
-          setAttachments((prev) => [
-            ...prev,
-            {
-              id: `att_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`,
-              name: file.name,
-              type: 'image',
-              mimeType: file.type.startsWith('image/') ? file.type : (detectedImageMime || 'image/png'),
-              size: file.size,
-              dataUrl: (() => {
-                const rawDataUrl = String(e.target?.result || '');
-                const normalizedMime = file.type.startsWith('image/')
-                  ? file.type
-                  : (detectedImageMime || 'image/png');
-                // Keep the required data: URL prefix; replacing it breaks browser image previews.
-                const base64Payload = rawDataUrl.includes(',')
-                  ? rawDataUrl.slice(rawDataUrl.indexOf(',') + 1)
-                  : rawDataUrl;
-                return `data:${normalizedMime};base64,${base64Payload}`;
-              })(),
-            },
-          ]);
+          const rawDataUrl = String(e.target?.result || '');
+          const image = new Image();
+          image.onerror = () => alert(`Could not preview "${file.name}". Please try a JPG or PNG image.`);
+          image.onload = () => {
+            // Keep chat attachments small enough to persist in local history while retaining a useful preview.
+            const maxSide = 900;
+            const scale = Math.min(1, maxSide / Math.max(image.naturalWidth, image.naturalHeight));
+            const canvas = document.createElement('canvas');
+            canvas.width = Math.max(1, Math.round(image.naturalWidth * scale));
+            canvas.height = Math.max(1, Math.round(image.naturalHeight * scale));
+            const ctx = canvas.getContext('2d');
+            if (!ctx) {
+              alert('Image preview is unavailable in this browser.');
+              return;
+            }
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
+            let dataUrl = canvas.toDataURL('image/jpeg', 0.72);
+            let quality = 0.62;
+            while (dataUrl.length > 650_000 && quality >= 0.32) {
+              dataUrl = canvas.toDataURL('image/jpeg', quality);
+              quality -= 0.1;
+            }
+            if (dataUrl.length > 700_000) {
+              alert(`"${file.name}" is too detailed to save in chat history. Please choose a smaller image.`);
+              return;
+            }
+            setAttachments((prev) => [
+              ...prev,
+              {
+                id: `att_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`,
+                name: file.name,
+                type: 'image',
+                mimeType: 'image/jpeg',
+                size: file.size,
+                dataUrl,
+              },
+            ]);
+          };
+          image.src = rawDataUrl;
         };
         reader.readAsDataURL(file);
       } else {
