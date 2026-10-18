@@ -89,8 +89,30 @@ export const ImageAITool: React.FC<ImageAIToolProps> = ({ onSendToChat }) => {
       });
 
       if (res.success && res.imageUrl) {
-        setGeneratedImage(res.imageUrl);
         setDescription(res.description || `Generated: ${finalPrompt}`);
+        if (activeTab === 'edit' && editOperation === 'remove_bg') {
+          // The segmentation model returns a transparent cutout. Composite it over
+          // solid white locally so the subject stays intact and the downloaded file has a white background.
+          const cutout = new Image();
+          cutout.onerror = () => alert('Background was removed, but the preview could not be opened. Please try again.');
+          cutout.onload = () => {
+            const canvas = document.createElement('canvas');
+            canvas.width = cutout.naturalWidth;
+            canvas.height = cutout.naturalHeight;
+            const ctx = canvas.getContext('2d');
+            if (!ctx) {
+              alert('Could not prepare the white background. Please try another browser.');
+              return;
+            }
+            ctx.fillStyle = '#FFFFFF';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.drawImage(cutout, 0, 0);
+            setGeneratedImage(canvas.toDataURL('image/png'));
+          };
+          cutout.src = res.imageUrl;
+        } else {
+          setGeneratedImage(res.imageUrl);
+        }
       } else {
         alert(res.error || 'Image generation failed');
       }
