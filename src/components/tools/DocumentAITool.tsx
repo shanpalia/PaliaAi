@@ -90,6 +90,27 @@ export const DocumentAITool: React.FC<DocumentAIToolProps> = ({ onSendToChat }) 
     setTimeout(() => setCopied(false), 2000);
   };
 
+  const handleDownloadPdf = () => {
+    if (!analysisResult) return;
+    const pdf = new jsPDF({ unit: 'pt', format: 'a4' });
+    const margin = 48;
+    const pageWidth = pdf.internal.pageSize.getWidth();
+    const pageHeight = pdf.internal.pageSize.getHeight();
+    const lines = pdf.splitTextToSize(analysisResult.replace(/\*\*|__|\*|_|\`/g, ''), pageWidth - margin * 2);
+    let y = margin;
+    pdf.setFont('helvetica', 'normal');
+    pdf.setFontSize(11);
+    for (const line of lines) {
+      if (y > pageHeight - margin) {
+        pdf.addPage();
+        y = margin;
+      }
+      pdf.text(line, margin, y);
+      y += 16;
+    }
+    pdf.save(`PaliaAI-Report-${(file?.name || 'document').replace(/[^a-z0-9_-]/gi, '_')}.pdf`);
+  };
+
   return (
     <div id="document-ai-tool" className="flex-1 overflow-y-auto bg-slate-50/50 p-4 sm:p-8">
       <div className="max-w-5xl mx-auto space-y-6">
@@ -274,27 +295,6 @@ export const DocumentAITool: React.FC<DocumentAIToolProps> = ({ onSendToChat }) 
                   </div>
                 )}
               </div>
-
-              const handleDownloadPdf = () => {
-    if (!analysisResult) return;
-    const pdf = new jsPDF({ unit: 'pt', format: 'a4' });
-    const margin = 48;
-    const pageWidth = pdf.internal.pageSize.getWidth();
-    const pageHeight = pdf.internal.pageSize.getHeight();
-    const lines = pdf.splitTextToSize(analysisResult.replace(/\*\*|__|\*|_|\`/g, ''), pageWidth - margin * 2);
-    let y = margin;
-    pdf.setFont('helvetica', 'normal');
-    pdf.setFontSize(11);
-    for (const line of lines) {
-      if (y > pageHeight - margin) {
-        pdf.addPage();
-        y = margin;
-      }
-      pdf.text(line, margin, y);
-      y += 16;
-    }
-    pdf.save(`PaliaAI-Report-${(file?.name || 'document').replace(/[^a-z0-9_-]/gi, '_')}.pdf`);
-  };
 
   {/* Bottom Actions */}
               {analysisResult && (
