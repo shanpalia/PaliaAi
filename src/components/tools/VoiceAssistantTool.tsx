@@ -32,6 +32,7 @@ export const VoiceAssistantTool: React.FC = () => {
   const [isThinking, setIsThinking] = useState(false);
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [selectedVoice, setSelectedVoice] = useState('Kore');
+  const [continuousMode, setContinuousMode] = useState(false);
   const [logs, setLogs] = useState<VoiceLog[]>([
     {
       id: 'init',
@@ -42,6 +43,7 @@ export const VoiceAssistantTool: React.FC = () => {
   ]);
 
   const recognitionRef = useRef<any>(null);
+  const keepListeningRef = useRef(false);
   const logsEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -97,6 +99,7 @@ export const VoiceAssistantTool: React.FC = () => {
       if (recognitionRef.current) {
         recognitionRef.current.stop();
       }
+      keepListeningRef.current = false;
       setIsListening(false);
       return;
     }
@@ -111,7 +114,8 @@ export const VoiceAssistantTool: React.FC = () => {
 
     try {
       const recognition = new SpeechRecognition();
-      recognition.continuous = false;
+      keepListeningRef.current = true;
+      recognition.continuous = continuousMode;
       recognition.interimResults = false;
       recognition.lang = 'hi-IN';
 
@@ -120,9 +124,11 @@ export const VoiceAssistantTool: React.FC = () => {
       };
 
       recognition.onresult = (event: any) => {
-        const transcript = event.results[0][0].transcript;
-        if (transcript) {
-          handleVoiceQuery(transcript);
+        for (let i = event.resultIndex; i < event.results.length; i += 1) {
+          const result = event.results[i];
+          if (result.isFinal && result[0]?.transcript) {
+            handleVoiceQuery(result[0].transcript);
+          }
         }
       };
 
@@ -132,13 +138,18 @@ export const VoiceAssistantTool: React.FC = () => {
       };
 
       recognition.onend = () => {
-        setIsListening(false);
+        if (keepListeningRef.current && continuousMode) {
+          try { recognition.start(); } catch { setIsListening(false); }
+        } else {
+          setIsListening(false);
+        }
       };
 
       recognitionRef.current = recognition;
       recognition.start();
     } catch (err) {
       console.error('Failed to start voice recognition:', err);
+      keepListeningRef.current = false;
       setIsListening(false);
     }
   };
@@ -146,6 +157,11 @@ export const VoiceAssistantTool: React.FC = () => {
   return (
     <div id="voice-assistant-tool" className="flex-1 overflow-y-auto bg-slate-50/50 p-4 sm:p-8">
       <div className="max-w-4xl mx-auto space-y-6">
+        {/* Continuous listening toggle */}
+        <label className="flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs text-slate-700">
+          <input type="checkbox" checked={continuousMode} onChange={(e) => setContinuousMode(e.target.checked)} className="accent-purple-600" />
+          Keep listening after each spoken question
+        </label>
         {/* Header */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
