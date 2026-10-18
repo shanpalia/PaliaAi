@@ -8,6 +8,7 @@ const MAX_BODY_BYTES = 8 * 1024 * 1024;
 const MAX_PROMPT_CHARS = 8000;
 const CHAT_MODEL = "@cf/zai-org/glm-4.7-flash";
 const IMAGE_MODEL = "@cf/black-forest-labs/flux-2-klein-4b";
+const BACKGROUND_MODEL = "bria/remove-background";
 
 function json(data: unknown, status = 200, origin = DEFAULT_ORIGIN) {
   return new Response(JSON.stringify(data), {
@@ -98,9 +99,63 @@ export default {
 
     const intent = String(body?.intent || (body?.generateImage ? "image_generate" : "chat"));
     const attachments = Array.isArray(body?.attachments) ? body.attachments : [];
-    const wantsImage = body?.generateImage === true || intent === "image_generate" || intent === "image_edit";
+    const wantsBackgroundRemoval = intent === "background_remove" || body?.operation === "remove_bg";
+    const wantsImage = wantsBackgroundRemoval || body?.generateImage === true || intent === "image_generate" || intent === "image_edit";
 
     try {
+      if (wantsBackgroundRemoval) {
+        const sourceDataUrl = attachments.find((attachment: any) =>
+          typeof attachment?.dataUrl === "string" &&
+          /^data:image\/(?:png|jpeg|webp);base64,/.test(attachment.dataUrl)
+        )?.dataUrl;
+        if (!sourceDataUrl) {
+          return json({ error: "Please upload a JPG, PNG, or WEBP photo before removing its background." }, 400, corsOrigin);
+        }
+
+        // Use a dedicated segmentation model instead of a generative image model.
+        // This isolates the foreground subject rather than repainting the whole image white.
+        const result: any = await env.AI.run(BACKGROUND_MODEL, {
+          image: sourceDataUrl,
+          preserve_alpha: false,
+        });
+        const outputImage = result?.image || result?.result?.image;
+        if (typeof outputImage !== "string" || !outputImage) {
+          console.error("Background removal returned no image URL", {
+            model: BACKGROUND_MODEL,
+            resultKeys: result && typeof result === "object" ? Object.keys(result).slice(0, 12) : [],
+          });
+          return json({ error: "Background removal did not return an image. Please try again." }, 502, corsOrigin);
+        }
+
+        // Bria returns a temporary URL. Fetch it now and return a self-contained data URL
+        // so the result remains usable after the provider's temporary URL expires.
+        let imageUrl = outputImage;
+        if (/^https?:\/\//i.test(outputImage)) {
+          const imageResponse = await fetch(outputImage);
+          if (!imageResponse.ok) {
+            return json({ error: "Could not retrieve the processed background-removal image. Please retry." }, 502, corsOrigin);
+          }
+          const bytes = new Uint8Array(await imageResponse.arrayBuffer());
+          let binary = "";
+          const chunkSize = 0x8000;
+          for (let i = 0; i < bytes.length; i += chunkSize) {
+            binary += String.fromCharCode(...bytes.subarray(i, i + chunkSize));
+          }
+          imageUrl = "data:image/png;base64," + btoa(binary);
+        }
+        if (!imageUrl.startsWith("data:image/")) {
+          return json({ error: "Background removal returned an unsupported image format." }, 502, corsOrigin);
+        }
+        return json({
+          id: "paliaai-" + crypto.randomUUID(),
+          model: BACKGROUND_MODEL,
+          text: "Background removed using foreground segmentation.",
+          imageUrl,
+          generatedImageUrl: imageUrl,
+          description: "Background removed.",
+        }, 200, corsOrigin);
+      }
+
       if (wantsImage) {
         const form = new FormData();
         form.set("prompt", prompt.slice(0, 2048));
