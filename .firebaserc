@@ -1,5 +1,14 @@
 {
   "projects": {
     "default": "shanpalia-apk-hub"
+  },
+  "targets": {
+    "shanpalia-apk-hub": {
+      "hosting": {
+        "palia-ai": [
+          "palia-ai"
+        ]
+      }
+    }
   }
 }
