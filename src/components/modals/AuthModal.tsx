@@ -31,6 +31,24 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onSuccess
 
   if (!isOpen) return null;
 
+  const handleGoogleSignIn = async () => {
+    setError('');
+    setIsLoading(true);
+    try {
+      const res = await authService.loginWithGoogle();
+      if (res.success) {
+        onSuccess();
+        onClose();
+      } else {
+        setError(res.error || 'Google sign-in failed');
+      }
+    } catch (err: any) {
+      setError(err.message || 'Google sign-in failed');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
@@ -129,6 +147,22 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onSuccess
           </div>
         )}
 
+        <button
+          type="button"
+          onClick={handleGoogleSignIn}
+          disabled={isLoading}
+          className="w-full py-2.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 text-xs font-semibold transition-all flex items-center justify-center gap-2 disabled:opacity-60"
+        >
+          <span className="text-base font-bold text-blue-600">G</span>
+          Continue with Google
+        </button>
+
+        <div className="flex items-center gap-3 text-[10px] text-slate-400">
+          <div className="h-px flex-1 bg-slate-200" />
+          <span>OR USE EMAIL</span>
+          <div className="h-px flex-1 bg-slate-200" />
+        </div>
+
         {/* Auth Form */}
         <form onSubmit={handleSubmit} className="space-y-4">
           {tab === 'signup' && (
@@ -205,10 +239,10 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onSuccess
           </button>
         </form>
 
-        {/* Supabase Security Badge */}
+        {/* Firebase Auth Badge */}
         <div className="pt-2 border-t border-slate-100 flex items-center justify-center gap-1.5 text-[11px] text-slate-400">
           <ShieldCheck className="w-3.5 h-3.5 text-emerald-500" />
-          <span>Secured with Supabase Auth & AES-256 Encryption</span>
+          <span>Sign-in secured by Firebase Authentication</span>
         </div>
       </div>
     </div>
