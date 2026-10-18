@@ -365,15 +365,15 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 />
               ) : (
                 <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-emerald-500 to-teal-600 text-white font-bold text-xs flex items-center justify-center flex-shrink-0 shadow-xs">
-                  {user?.name?.charAt(0).toUpperCase() || user?.email?.charAt(0).toUpperCase() || 'P'}
+                  {user && user.id !== 'guest_user' ? (user.name?.charAt(0).toUpperCase() || user.email?.charAt(0).toUpperCase() || 'U') : '↗'}
                 </div>
               )}
               <div className={collapsed ? "lg:hidden flex-1 min-w-0" : "flex-1 min-w-0"}>
                 <p className="text-xs font-bold text-slate-800 truncate leading-tight">
-                  {user?.name || 'Shan Palia'}
+                  {user && user.id !== 'guest_user' ? (user.name || user.email) : 'Log in'}
                 </p>
                 <p className="text-[10px] text-slate-400 truncate">
-                  {user?.plan === 'pro' || user?.plan === 'Palia Pro' ? 'Pro Member' : 'Palia Pro'}
+                  {user && user.id !== 'guest_user' ? (user.plan === 'pro' || user.plan === 'Palia Pro' ? 'Pro Member' : 'Free account') : 'Sign in to PaliaAi'}
                 </p>
               </div>
             </button>
