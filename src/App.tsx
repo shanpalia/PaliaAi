@@ -186,6 +186,10 @@ export const App: React.FC = () => {
   ) => {
     const cleanText = (text || '').trim();
     if (!cleanText && (!attachments || attachments.length === 0)) return;
+    if (!user || user.id === 'guest_user') {
+      setIsAuthOpen(true);
+      return;
+    }
     if (!activeConversationId) return;
 
     // Check if daily AI usage allowance is exhausted
@@ -333,6 +337,11 @@ export const App: React.FC = () => {
       setActiveTool(tool);
     } else {
       setActiveTool('chat');
+      // Prefill suggestions for guests; require sign-in only when they send.
+      if (!user || user.id === 'guest_user') {
+        setIsAuthOpen(true);
+        return;
+      }
       handleSendMessage(prompt, [], tool === 'search');
     }
   };
@@ -413,6 +422,8 @@ export const App: React.FC = () => {
         }}
         onOpenSettings={() => setIsSettingsOpen(true)}
         onOpenProfile={() => setIsProfileOpen(true)}
+        onOpenAuth={() => setIsAuthOpen(true)}
+        user={user}
         searchFilter={searchFilter}
         onSearchChange={setSearchFilter}
       />
