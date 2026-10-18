@@ -85,6 +85,7 @@ export const ImageAITool: React.FC<ImageAIToolProps> = ({ onSendToChat }) => {
         aspectRatio,
         style: activeTab === 'generate' ? selectedStyle : undefined,
         imageDataUrl: activeTab === 'edit' ? uploadedBaseImg || undefined : undefined,
+        operation: activeTab === 'edit' ? editOperation : undefined,
       });
 
       if (res.success && res.imageUrl) {
