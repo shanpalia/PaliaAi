@@ -90,15 +90,35 @@ export const storageService = {
     try {
       localStorage.setItem(STORAGE_KEYS.CONVERSATIONS, JSON.stringify(useful));
     } catch (firstError) {
-      // Retry with a smaller history if older messages or attachments still exceed browser quota.
+      // If quota is tight, preserve conversation text/history first and remove only image payloads.
       try {
-        const reduced = useful.slice(0, 10).map((conversation) => ({
+        const textFirst = useful.map((conversation) => ({
           ...conversation,
-          messages: conversation.messages.slice(-15),
+          messages: conversation.messages.map((message) => ({
+            ...message,
+            generatedImageUrl: message.generatedImageUrl?.startsWith('data:') ? undefined : message.generatedImageUrl,
+            attachments: message.attachments?.map((attachment) => ({
+              ...attachment,
+              dataUrl: '',
+            })),
+          })),
         }));
-        localStorage.setItem(STORAGE_KEYS.CONVERSATIONS, JSON.stringify(reduced));
+        localStorage.setItem(STORAGE_KEYS.CONVERSATIONS, JSON.stringify(textFirst));
       } catch (retryError) {
-        console.error('Failed to persist conversations after reducing saved history', retryError || firstError);
+        // Last-resort fallback keeps the most recent message text rather than losing all history.
+        try {
+          const reduced = useful.slice(0, 10).map((conversation) => ({
+            ...conversation,
+            messages: conversation.messages.slice(-15).map((message) => ({
+              ...message,
+              generatedImageUrl: message.generatedImageUrl?.startsWith('data:') ? undefined : message.generatedImageUrl,
+              attachments: message.attachments?.map((attachment) => ({ ...attachment, dataUrl: '' })),
+            })),
+          }));
+          localStorage.setItem(STORAGE_KEYS.CONVERSATIONS, JSON.stringify(reduced));
+        } catch (finalError) {
+          console.error('Failed to persist conversation history after quota-safe retries', finalError || retryError || firstError);
+        }
       }
     }
   },
