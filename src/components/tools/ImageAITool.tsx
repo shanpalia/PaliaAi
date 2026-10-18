@@ -108,13 +108,57 @@ export const ImageAITool: React.FC<ImageAIToolProps> = ({ onSendToChat }) => {
 
   const handleUploadImage = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        setUploadedBaseImg(event.target?.result as string);
-      };
-      reader.readAsDataURL(file);
+    // Allow only browser-readable image formats and keep the upload small enough
+    // for the Worker request limits. The original file never leaves the browser.
+    if (!file) return;
+    if (!file.type.startsWith('image/')) {
+      alert('कृपया JPG, PNG या WEBP image चुनें।');
+      e.target.value = '';
+      return;
     }
+    if (file.size > 10 * 1024 * 1024) {
+      alert('Image 10MB से छोटी होनी चाहिए।');
+      e.target.value = '';
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onerror = () => alert('Image पढ़ी नहीं जा सकी। कृपया दूसरी image चुनें।');
+    reader.onload = () => {
+      const image = new Image();
+      image.onerror = () => alert('यह image खुल नहीं सकी। कृपया JPG, PNG या WEBP इस्तेमाल करें।');
+      image.onload = () => {
+        const maxSide = 1280;
+        const scale = Math.min(1, maxSide / Math.max(image.naturalWidth, image.naturalHeight));
+        const canvas = document.createElement('canvas');
+        canvas.width = Math.max(1, Math.round(image.naturalWidth * scale));
+        canvas.height = Math.max(1, Math.round(image.naturalHeight * scale));
+        const context = canvas.getContext('2d');
+        if (!context) {
+          alert('Image processing उपलब्ध नहीं है। कृपया दूसरा browser आज़माएँ।');
+          return;
+        }
+        context.fillStyle = '#ffffff';
+        context.fillRect(0, 0, canvas.width, canvas.height);
+        context.drawImage(image, 0, 0, canvas.width, canvas.height);
+
+        // FLUX reference-image payload is capped by the Worker; reduce quality
+        // gradually to stay comfortably under that limit.
+        let dataUrl = canvas.toDataURL('image/jpeg', 0.82);
+        let quality = 0.72;
+        while (dataUrl.length > 1_750_000 && quality >= 0.42) {
+          dataUrl = canvas.toDataURL('image/jpeg', quality);
+          quality -= 0.1;
+        }
+        if (dataUrl.length > 1_950_000) {
+          alert('Image अभी भी बहुत बड़ी है। कृपया छोटी image चुनें।');
+          return;
+        }
+        setUploadedBaseImg(dataUrl);
+      };
+      image.src = String(reader.result || '');
+    };
+    reader.readAsDataURL(file);
   };
 
   const handleCopyImage = () => {
