@@ -50,6 +50,7 @@ export const ImageAITool: React.FC<ImageAIToolProps> = ({ onSendToChat }) => {
   const [copied, setCopied] = useState(false);
   const [uploadedBaseImg, setUploadedBaseImg] = useState<string | null>(null);
   const [editOperation, setEditOperation] = useState<'enhance' | 'remove_bg' | 'upscale' | 'custom'>('enhance');
+  const [outputResolution, setOutputResolution] = useState<'hd' | '2k' | '4k'>('2k');
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -110,6 +111,28 @@ export const ImageAITool: React.FC<ImageAIToolProps> = ({ onSendToChat }) => {
             setGeneratedImage(canvas.toDataURL('image/png'));
           };
           cutout.src = res.imageUrl;
+        } else if (activeTab === 'edit' && (editOperation === 'enhance' || editOperation === 'upscale')) {
+          // First use the AI edit model, then export at the selected long-edge resolution.
+          // Canvas resizing increases pixel dimensions; it cannot recover detail absent from the AI result.
+          const enhanced = new Image();
+          enhanced.onerror = () => alert('AI image तैयार हुई, लेकिन उसे खोल नहीं पाए। कृपया दोबारा कोशिश करें।');
+          enhanced.onload = () => {
+            const targetLongEdge = outputResolution === 'hd' ? 1280 : outputResolution === '2k' ? 2048 : 4096;
+            const scale = targetLongEdge / Math.max(enhanced.naturalWidth, enhanced.naturalHeight);
+            const canvas = document.createElement('canvas');
+            canvas.width = Math.max(1, Math.round(enhanced.naturalWidth * scale));
+            canvas.height = Math.max(1, Math.round(enhanced.naturalHeight * scale));
+            const ctx = canvas.getContext('2d');
+            if (!ctx) {
+              setGeneratedImage(res.imageUrl);
+              return;
+            }
+            ctx.imageSmoothingEnabled = true;
+            ctx.imageSmoothingQuality = 'high';
+            ctx.drawImage(enhanced, 0, 0, canvas.width, canvas.height);
+            setGeneratedImage(canvas.toDataURL('image/png'));
+          };
+          enhanced.src = res.imageUrl;
         } else {
           setGeneratedImage(res.imageUrl);
         }
@@ -311,6 +334,22 @@ export const ImageAITool: React.FC<ImageAIToolProps> = ({ onSendToChat }) => {
                     ))}
                   </div>
                 </div>
+
+                {activeTab === 'edit' && (editOperation === 'enhance' || editOperation === 'upscale') && (
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-semibold text-slate-900">Output Resolution</label>
+                    <select
+                      value={outputResolution}
+                      onChange={(e) => setOutputResolution(e.target.value as 'hd' | '2k' | '4k')}
+                      className="w-full p-2.5 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-900 focus:outline-none focus:ring-1 focus:ring-purple-500"
+                    >
+                      <option value="hd">HD — 1280 px long edge</option>
+                      <option value="2k">2K — 2048 px long edge</option>
+                      <option value="4k">4K — 4096 px long edge</option>
+                    </select>
+                    <p className="text-[10px] text-slate-500">AI enhancement runs first. Larger export sizes increase pixel dimensions; they do not guarantee native 2K/4K detail.</p>
+                  </div>
+                )}
 
                 {/* Submit button */}
                 <button
