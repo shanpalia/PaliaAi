@@ -51,6 +51,7 @@ export const ImageAITool: React.FC<ImageAIToolProps> = ({ onSendToChat }) => {
   const [uploadedBaseImg, setUploadedBaseImg] = useState<string | null>(null);
   const [editOperation, setEditOperation] = useState<'enhance' | 'remove_bg' | 'upscale' | 'custom'>('enhance');
   const [outputResolution, setOutputResolution] = useState<'hd' | '2k' | '4k'>('2k');
+  const [comparisonPosition, setComparisonPosition] = useState(50);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -484,6 +485,23 @@ export const ImageAITool: React.FC<ImageAIToolProps> = ({ onSendToChat }) => {
                   </span>
                 )}
               </div>
+
+              {/* Before / After comparison */}
+              {generatedImage && uploadedBaseImg && activeTab === 'edit' && (
+                <div className="mb-3 rounded-xl border border-slate-200 bg-white p-3 space-y-2">
+                  <div className="flex items-center justify-between text-[11px] font-semibold text-slate-600">
+                    <span>Before</span><span>After — drag the slider</span>
+                  </div>
+                  <div className="relative w-full overflow-hidden rounded-lg bg-slate-100" style={{ aspectRatio: '4 / 3' }}>
+                    <img src={uploadedBaseImg} alt="Before enhancement" className="absolute inset-0 h-full w-full object-contain" />
+                    <div className="absolute inset-0 overflow-hidden" style={{ clipPath: `inset(0 0 0 ${100 - comparisonPosition}%)` }}>
+                      <img src={generatedImage} alt="After enhancement" className="h-full w-full object-contain" />
+                    </div>
+                    <div className="absolute inset-y-0 w-0.5 bg-white shadow" style={{ left: `${comparisonPosition}%` }} />
+                  </div>
+                  <input aria-label="Before and after comparison" type="range" min="0" max="100" value={comparisonPosition} onChange={(e) => setComparisonPosition(Number(e.target.value))} className="w-full accent-purple-600" />
+                </div>
+              )}
 
               {/* Display Area */}
               <div className="flex-1 flex items-center justify-center p-4 bg-slate-50/70 rounded-xl border border-slate-100 overflow-hidden min-h-[300px]">
