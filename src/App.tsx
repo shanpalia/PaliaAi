@@ -258,7 +258,21 @@ export const App: React.FC = () => {
         };
 
         storageService.addMessage(activeConversationId, botMsg);
-        setConversations(storageService.getConversations());
+        // Keep the full generated image in live React state. localStorage intentionally
+        // drops large base64 image payloads to avoid quota errors, which otherwise made
+        // the just-generated image disappear before it could render.
+        const savedConversations = storageService.getConversations();
+        setConversations(savedConversations.map((conversation) =>
+          conversation.id === activeConversationId
+            ? {
+                ...conversation,
+                messages: [
+                  ...conversation.messages.filter((message) => message.id !== botMsg.id),
+                  botMsg,
+                ],
+              }
+            : conversation,
+        ));
       } else {
         const errorMsg: ChatMessage = {
           id: `msg_bot_err_${Date.now()}`,
