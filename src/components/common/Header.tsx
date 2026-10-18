@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Menu, Pencil, MoreVertical, Share2, Settings as SettingsIcon, User as UserIcon, Sparkles, Crown } from 'lucide-react';
+import { Menu, Pencil, MoreVertical, Share2, Settings as SettingsIcon, Sparkles, Crown } from 'lucide-react';
 import { ToolType, UserProfile } from '../../types';
 
 interface HeaderProps {
@@ -106,22 +106,10 @@ export const Header: React.FC<HeaderProps> = ({
               <button onClick={() => { setShowMenu(false); onOpenSettings(); }} className="w-full flex items-center gap-3 text-left px-3 py-2.5 rounded-xl text-sm hover:bg-slate-50">
                 <SettingsIcon className="w-4 h-4 text-slate-500" /> Settings
               </button>
-              <button onClick={() => { setShowMenu(false); onOpenProfile(); }} className="w-full flex items-center gap-3 text-left px-3 py-2.5 rounded-xl text-sm hover:bg-slate-50">
-                <UserIcon className="w-4 h-4 text-slate-500" /> Profile
-              </button>
             </div>
           )}
         </div>
 
-        <button id="btn-header-profile" onClick={onOpenProfile} className="hidden sm:flex items-center justify-center p-0.5 rounded-full hover:ring-2 hover:ring-emerald-500/20 transition-all" title={userName || 'Profile'}>
-          {hasAvatarUrl ? (
-            <img src={user?.avatarUrl} alt={userName || 'User'} className="w-9 h-9 rounded-full border border-slate-200 object-cover" />
-          ) : userInitial ? (
-            <div className="w-9 h-9 rounded-full bg-slate-900 text-white font-bold text-xs flex items-center justify-center">{userInitial}</div>
-          ) : (
-            <div className="w-9 h-9 rounded-full bg-emerald-500 text-white font-bold text-sm flex items-center justify-center">P</div>
-          )}
-        </button>
       </div>
     </header>
   );
