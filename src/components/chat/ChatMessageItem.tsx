@@ -33,6 +33,15 @@ export const ChatMessageItem: React.FC<ChatMessageItemProps> = ({
 }) => {
   const [copied, setCopied] = useState(false);
   const [isPlayingAudio, setIsPlayingAudio] = useState(false);
+  const [lightboxImage, setLightboxImage] = useState<{ src: string; alt: string } | null>(null);
+  React.useEffect(() => {
+    const openImage = (event: Event) => {
+      const detail = (event as CustomEvent<{ src: string; alt: string }>).detail;
+      if (detail?.src) setLightboxImage(detail);
+    };
+    window.addEventListener('palia-open-image', openImage);
+    return () => window.removeEventListener('palia-open-image', openImage);
+  }, []);
   const isAssistant = message.role === 'assistant' || message.sender === 'assistant';
   const messageBody = message.content || message.text || '';
 
@@ -321,6 +330,31 @@ export const ChatMessageItem: React.FC<ChatMessageItemProps> = ({
           )}
         </div>
       </div>
+      {lightboxImage && (
+        <div
+          className="fixed inset-0 z-[100] bg-black/90 p-3 sm:p-8 flex items-center justify-center"
+          role="dialog"
+          aria-modal="true"
+          aria-label="Image preview"
+          onClick={() => setLightboxImage(null)}
+          onKeyDown={(event) => { if (event.key === 'Escape') setLightboxImage(null); }}
+        >
+          <button
+            type="button"
+            onClick={() => setLightboxImage(null)}
+            className="absolute top-4 right-4 z-10 rounded-full bg-white/15 hover:bg-white/25 text-white px-4 py-2 text-sm"
+            aria-label="Close image preview"
+          >
+            Close ✕
+          </button>
+          <img
+            src={lightboxImage.src}
+            alt={lightboxImage.alt}
+            className="max-w-full max-h-full object-contain cursor-zoom-out"
+            onClick={(event) => event.stopPropagation()}
+          />
+        </div>
+      )}
     </div>
   );
 };
@@ -385,14 +419,19 @@ const AttachmentItem: React.FC<{ attachment: Attachment }> = ({ attachment }) =>
     }
     return (
       <div className="relative group rounded-xl overflow-hidden border border-slate-200 max-w-full w-64 h-64 bg-slate-50 shadow-sm">
-        <img
-          src={attachment.dataUrl}
-          alt={attachment.name}
-          className="w-full h-full object-contain"
-        />
-        <div className="absolute inset-0 bg-slate-950/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center p-1 text-center">
-          <span className="text-[9px] text-white font-medium truncate">{attachment.name}</span>
-        </div>
+        <button
+          type="button"
+          onClick={() => window.dispatchEvent(new CustomEvent('palia-open-image', { detail: { src: attachment.dataUrl, alt: attachment.name } }))}
+          className="w-full h-full cursor-zoom-in"
+          title="Click to enlarge image"
+        >
+          <img
+            src={attachment.dataUrl}
+            alt={attachment.name}
+            className="w-full h-full object-contain"
+          />
+          <span className="absolute bottom-2 right-2 rounded-full bg-black/60 text-white text-[10px] px-2 py-1">Click to enlarge</span>
+        </button>
       </div>
     );
   }
