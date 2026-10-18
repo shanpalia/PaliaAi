@@ -5,7 +5,8 @@ import {defineConfig} from 'vite';
 
 export default defineConfig(() => {
   return {
-    base: '/PaliaAi/',
+    // GitHub Pages uses /PaliaAi; Firebase Hosting serves from the domain root.
+    base: process.env.VITE_DEPLOY_TARGET === 'firebase' ? '/' : '/PaliaAi/',
     plugins: [react(), tailwindcss()],
     resolve: {
       alias: {
