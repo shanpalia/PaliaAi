@@ -1,0 +1,36 @@
+name: Deploy PaliaAi to Firebase Hosting
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  build_and_deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install dependencies
+        run: npm install --no-audit --no-fund
+
+      - name: Build for Firebase Hosting
+        env:
+          VITE_DEPLOY_TARGET: firebase
+          VITE_RAZORPAY_PRO_MONTHLY_URL: ${{ vars.VITE_RAZORPAY_PRO_MONTHLY_URL }}
+          VITE_RAZORPAY_PRO_YEARLY_URL: ${{ vars.VITE_RAZORPAY_PRO_YEARLY_URL }}
+        run: npx vite build
+
+      - name: Deploy to Firebase Hosting
+        uses: FirebaseExtended/action-hosting-deploy@v0
+        with:
+          repoToken: ${{ secrets.GITHUB_TOKEN }}
+          firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_SHANPALIA_APK_HUB }}
+          projectId: shanpalia-apk-hub
+          channelId: live
