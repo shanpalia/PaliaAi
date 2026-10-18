@@ -4,6 +4,7 @@ import remarkGfm from 'remark-gfm';
 import {
   Copy,
   Check,
+  Download,
   Volume2,
   RefreshCw,
   Share2,
@@ -114,6 +115,26 @@ export const ChatMessageItem: React.FC<ChatMessageItemProps> = ({
                 className="w-full h-auto object-cover max-h-96"
                 referrerPolicy="no-referrer"
               />
+              <div className="flex items-center justify-between gap-2 p-2 bg-white border-t border-slate-200">
+                <span className="text-[11px] text-slate-500">Palia AI image</span>
+                <a
+                  href={message.generatedImageUrl}
+                  download={`palia-ai-image-${message.id}.png`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-slate-900 text-white hover:bg-slate-700 text-xs font-medium"
+                  onClick={(event) => {
+                    // Data URLs download directly; remote URLs open in a new tab if the browser blocks cross-origin downloads.
+                    if (!message.generatedImageUrl?.startsWith('data:')) {
+                      event.preventDefault();
+                      window.open(message.generatedImageUrl, '_blank', 'noopener,noreferrer');
+                    }
+                  }}
+                >
+                  <Download className="w-3.5 h-3.5" />
+                  Download image
+                </a>
+              </div>
             </div>
           )}
 
