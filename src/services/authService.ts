@@ -177,3 +177,11 @@ class AuthManager {
 }
 
 export const authService = new AuthManager();
+
+
+// Return a Firebase ID token for authenticated, server-side payment requests.
+export async function getFirebaseIdToken(): Promise<string | null> {
+  const current = firebaseAuth.currentUser;
+  if (!current) return null;
+  return current.getIdToken();
+}
