@@ -121,12 +121,16 @@ export const App: React.FC = () => {
   const paymentReturn = new URLSearchParams(window.location.search).get('payment');
 
   useEffect(() => {
-    if (paymentReturn !== 'success') return;
     let cancelled = false;
     const verifySubscription = async () => {
+      if (!user || user.id === 'guest_user') {
+        if (paymentReturn === 'success' && !cancelled) setPaymentVerification('signin');
+        return;
+      }
+      if (paymentReturn === 'success' && !cancelled) setPaymentVerification('checking');
       const token = await getFirebaseIdToken();
       if (!token) {
-        if (!cancelled) setPaymentVerification('signin');
+        if (paymentReturn === 'success' && !cancelled) setPaymentVerification('signin');
         return;
       }
       try {
@@ -134,19 +138,17 @@ export const App: React.FC = () => {
         if (!response.ok) throw new Error('Subscription check unavailable');
         const data = await response.json() as { tier?: string; plan?: string | null };
         if (cancelled) return;
-        if (data.tier === 'Pro') {
-          authService.updateProfile({ tier: 'Pro', plan: data.plan === 'yearly' ? 'Palia Pro Yearly' : 'Palia Pro Monthly' });
-          setPaymentVerification('active');
-        } else {
-          setPaymentVerification('pending');
-        }
+        const isPro = data.tier === 'Pro';
+        authService.updateProfile({ tier: isPro ? 'Pro' : 'Free', plan: isPro ? (data.plan === 'yearly' ? 'Palia Pro Yearly' : 'Palia Pro Monthly') : 'Free Tier' });
+        if (paymentReturn === 'success') setPaymentVerification(isPro ? 'active' : 'pending');
       } catch {
-        if (!cancelled) setPaymentVerification('pending');
+        if (!cancelled && paymentReturn === 'success') setPaymentVerification('pending');
       }
     };
     void verifySubscription();
     return () => { cancelled = true; };
   }, [paymentReturn, user?.id]);
+
 
   // Sync state helpers
   const activeConversation = conversations.find((c) => c.id === activeConversationId) || null;
