@@ -85,28 +85,13 @@ class AuthManager {
   getUser(): UserProfile { return this.user; }
   getCurrentUser(): UserProfile { return this.user; }
 
-  async refreshVerifiedSubscription(): Promise<void> {
-    const workerUrl = (import.meta.env.VITE_PALIA_PAYMENTS_WORKER_URL || '').trim().replace(/\/$/, '');
-    const token = await getFirebaseIdToken();
-    if (!workerUrl || !token || this.isGuest) return;
-    try {
-      const response = await fetch(workerUrl + '/subscription', { headers: { authorization: 'Bearer ' + token } });
-      if (!response.ok) return;
-      const result = await response.json() as { tier?: string; plan?: string };
-      this.user = { ...this.user, tier: result.tier === 'Pro' ? 'Pro' : 'Free', plan: result.tier === 'Pro' ? (result.plan || 'Palia Pro') : 'Free Tier' };
-      this.notify();
-    } catch (error) {
-      console.error('PaliaAi subscription status check failed:', error);
-    }
-  }
-
   async getIdToken(): Promise<string | null> {
     const current = firebaseAuth.currentUser;
     return current ? getIdToken(current) : null;
   }
 
   async refreshVerifiedSubscription(): Promise<void> {
-    const workerUrl = (import.meta.env.VITE_PALIA_PAYMENTS_WORKER_URL || '').trim().replace(/\\/$/, '');
+    const workerUrl = (import.meta.env.VITE_PALIA_PAYMENTS_WORKER_URL || '').trim().replace(/\/$/, '');
     const current = firebaseAuth.currentUser;
     if (!workerUrl || !current) return;
     try {
