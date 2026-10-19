@@ -536,6 +536,75 @@ async function startServer() {
     }
   });
 
+  // Analyze an uploaded image and draft prompt metadata with Gemini Vision.
+  // This is separate from /api/chat so the existing chat provider and behavior stay unchanged.
+  app.post('/api/prompt/analyze-image', async (req, res) => {
+    const userId = req.body.userId || (req.headers['x-user-id'] as string) || 'prompt-maker-admin';
+    const timezone = req.body.timezone || (req.headers['x-timezone'] as string) || 'Asia/Kolkata';
+    const usageCheck = usageManager.getUsageStatus(userId, timezone);
+    if (!usageCheck.allowed) {
+      return res.status(429).json({
+        success: false,
+        error: "Daily AI limit reached: You've used today's 2-hour AI allowance. Your AI access will reset tomorrow.",
+        isLimitReached: true,
+        limitReached: true,
+        usage: usageCheck,
+      });
+    }
+
+    const startTime = Date.now();
+    try {
+      const { imageDataUrl, idea = '' } = req.body || {};
+      if (typeof imageDataUrl !== 'string' || !imageDataUrl.startsWith('data:image/')) {
+        return res.status(400).json({ success: false, error: 'Please upload a valid image.' });
+      }
+      const match = imageDataUrl.match(/^data:(image\/(?:png|jpeg|jpg|webp|gif));base64,([A-Za-z0-9+/=\r\n]+)$/i);
+      if (!match) {
+        return res.status(400).json({ success: false, error: 'Supported image formats are PNG, JPG, WEBP, and GIF.' });
+      }
+      const mimeType = match[1].toLowerCase() === 'image/jpg' ? 'image/jpeg' : match[1].toLowerCase();
+      const base64Data = match[2].replace(/\s/g, '');
+      if (base64Data.length > 14 * 1024 * 1024) {
+        return res.status(413).json({ success: false, error: 'Image is too large. Please use an image under 10 MB.' });
+      }
+
+      const ai = getGenAI();
+      const response = await ai.models.generateContent({
+        model: 'gemini-3.7-flash',
+        contents: [{
+          role: 'user',
+          parts: [
+            { inlineData: { mimeType, data: base64Data } },
+            { text: 'Analyze this uploaded image and create metadata for an AI image-prompt website. Return ONLY valid JSON with keys title, category, prompt. title: concise, attractive English title, maximum 100 characters. category: choose exactly one of Portrait, Cinematic, Couple, Anime, Festival, Landscape, Car, Other. prompt: a detailed English image-generation prompt that accurately describes the visible subject, composition, lighting, colors, background, clothing/objects, camera/style and mood; do not claim hidden details that cannot be seen. Do not identify real people. ' + (typeof idea === 'string' && idea.trim() ? 'Additional user context: ' + idea.trim().slice(0, 1000) : '') }
+          ]
+        }],
+        config: { responseMimeType: 'application/json' },
+      });
+
+      const raw = String(response.text || '').trim();
+      const parsed = JSON.parse(raw.replace(/^\x60{3}(?:json)?\s*/i, '').replace(/\s*\x60{3}$/i, ''));
+      const title = String(parsed.title || '').trim().slice(0, 100);
+      const prompt = String(parsed.prompt || '').trim();
+      const categories = ['Portrait', 'Cinematic', 'Couple', 'Anime', 'Festival', 'Landscape', 'Car', 'Other'];
+      const categoryValue = categories.find(c => c.toLowerCase() === String(parsed.category || '').trim().toLowerCase()) || 'Other';
+      if (!title || prompt.length < 10) {
+        throw new Error('Gemini returned incomplete image metadata. Please try again.');
+      }
+      const elapsedSec = Math.max(1, (Date.now() - startTime) / 1000);
+      const updatedUsage = usageManager.recordUsage(userId, elapsedSec, timezone);
+      return res.json({ success: true, title, category: categoryValue, prompt, modelUsed: 'gemini-3.7-flash', usage: updatedUsage });
+    } catch (err: any) {
+      console.error('Image prompt analysis error:', err);
+      const elapsedSec = Math.max(1, (Date.now() - startTime) / 1000);
+      const updatedUsage = usageManager.recordUsage(userId, elapsedSec, timezone);
+      return res.status(500).json({
+        success: false,
+        error: err.message || 'PaliaAI could not analyze this image. Please try again.',
+        usage: updatedUsage,
+      });
+    }
+  });
+
   // Image AI Tool: Generate & Edit with Usage Tracking
   app.post('/api/image/generate', async (req, res) => {
     const userId = req.body.userId || (req.headers['x-user-id'] as string) || 'default_user';
