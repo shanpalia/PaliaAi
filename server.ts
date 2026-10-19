@@ -60,6 +60,19 @@ async function startServer() {
   const app = express();
   const PORT = Number(process.env.PORT) || 3000;
 
+  // CORS for the Prompt Maker GitHub Pages frontend. AI keys remain server-side.
+  app.use((req, res, next) => {
+    const origin = req.headers.origin;
+    if (origin === 'https://shanpalia.github.io') {
+      res.setHeader('Access-Control-Allow-Origin', origin);
+      res.setHeader('Vary', 'Origin');
+      res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+      res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-User-Id, X-Timezone');
+    }
+    if (req.method === 'OPTIONS') return res.sendStatus(204);
+    next();
+  });
+
   // Body parsers with larger limit for base64 images and documents
   app.use(express.json({ limit: '25mb' }));
   app.use(express.urlencoded({ extended: true, limit: '25mb' }));
