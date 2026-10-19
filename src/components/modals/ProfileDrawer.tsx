@@ -244,7 +244,7 @@ export const ProfileDrawer: React.FC<ProfileDrawerProps> = ({
                     Daily limit
                   </span>
                   <span className="text-xs font-bold text-slate-800 mt-0.5">
-                    2 hours
+                    
                   </span>
                 </div>
                 <div className="p-2.5 rounded-xl bg-white border border-slate-200/60 flex flex-col">
