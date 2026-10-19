@@ -1,6 +1,0 @@
-name = "paliaai-payments"
-main = "src/index.ts"
-compatibility_date = "2026-10-19"
-
-[vars]
-APP_ORIGIN = "https://shanpalia.github.io/PaliaAi/"
