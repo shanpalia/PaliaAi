@@ -30,6 +30,8 @@ import { authService } from './services/authService';
 import { creditService } from './services/creditService';
 import { aiService } from './services/aiService';
 import { usageService } from './services/usageService';
+import { getFirebaseIdToken } from './services/authService';
+import { workerFetch } from './services/api';
 
 
 function preserveLiveAttachments(saved: Conversation[], current: Conversation[]): Conversation[] {
@@ -84,6 +86,7 @@ export const App: React.FC = () => {
   const [credits, setCredits] = useState<number>(creditService.getBalance());
   const [isLoading, setIsLoading] = useState(false);
   const [dailyUsage, setDailyUsage] = useState<DailyUsageStatus>(usageService.getStatus());
+  const [paymentVerification, setPaymentVerification] = useState<'checking' | 'active' | 'pending' | 'signin'>('checking');
 
   // Initialize data on mount
   useEffect(() => {
@@ -114,6 +117,36 @@ export const App: React.FC = () => {
       unsubscribeAuth();
     };
   }, []);
+
+  const paymentReturn = new URLSearchParams(window.location.search).get('payment');
+
+  useEffect(() => {
+    if (paymentReturn !== 'success') return;
+    let cancelled = false;
+    const verifySubscription = async () => {
+      const token = await getFirebaseIdToken();
+      if (!token) {
+        if (!cancelled) setPaymentVerification('signin');
+        return;
+      }
+      try {
+        const response = await workerFetch('/subscription', { headers: { authorization: 'Bearer ' + token } });
+        if (!response.ok) throw new Error('Subscription check unavailable');
+        const data = await response.json() as { tier?: string; plan?: string | null };
+        if (cancelled) return;
+        if (data.tier === 'Pro') {
+          authService.updateProfile({ tier: 'Pro', plan: data.plan === 'yearly' ? 'Palia Pro Yearly' : 'Palia Pro Monthly' });
+          setPaymentVerification('active');
+        } else {
+          setPaymentVerification('pending');
+        }
+      } catch {
+        if (!cancelled) setPaymentVerification('pending');
+      }
+    };
+    void verifySubscription();
+    return () => { cancelled = true; };
+  }, [paymentReturn, user?.id]);
 
   // Sync state helpers
   const activeConversation = conversations.find((c) => c.id === activeConversationId) || null;
@@ -365,23 +398,21 @@ export const App: React.FC = () => {
     handleNewChat('chat');
   };
 
-  const paymentReturn = new URLSearchParams(window.location.search).get('payment');
-
   if (paymentReturn === 'success') {
+    const status = paymentVerification === 'active'
+      ? { title: 'Payment verified', message: 'Your PaliaAi Pro subscription is active on this account.' }
+      : paymentVerification === 'checking'
+        ? { title: 'Checking payment status', message: 'We are checking your subscription status with the server. This page does not activate Pro by itself.' }
+        : paymentVerification === 'signin'
+          ? { title: 'Sign in to check status', message: 'Sign in with the same PaliaAi account used before checkout, then return here to check your subscription.' }
+          : { title: 'Payment received — verification pending', message: 'Razorpay has returned you to PaliaAi, but the server has not confirmed an active subscription yet. Do not pay again; check your Razorpay receipt and try again shortly.' };
     return (
       <main className="flex min-h-screen items-center justify-center bg-slate-50 p-5 text-slate-900">
         <section className="w-full max-w-md rounded-3xl border border-slate-200 bg-white p-7 text-center shadow-sm">
-          <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-emerald-50 text-emerald-600 text-3xl" aria-hidden="true">✓</div>
-          <h1 className="mt-4 text-2xl font-bold">Payment Submitted</h1>
-          <p className="mt-3 text-sm leading-6 text-slate-600">Thank you for choosing PaliaAi Pro. Your payment return was received. Pro access will be enabled only after the payment is verified.</p>
-          <p className="mt-3 text-xs leading-5 text-slate-500">If you completed payment but access is not updated, please keep your Razorpay payment receipt and contact support. Do not pay again just because this page appears.</p>
-          <button
-            type="button"
-            onClick={() => { window.history.replaceState({}, document.title, window.location.pathname); window.location.reload(); }}
-            className="mt-6 w-full rounded-xl bg-slate-900 px-4 py-3 text-sm font-semibold text-white hover:bg-slate-700"
-          >
-            Return to PaliaAi
-          </button>
+          <div className={`mx-auto flex h-16 w-16 items-center justify-center rounded-full ${paymentVerification === 'active' ? 'bg-emerald-50 text-emerald-600' : 'bg-amber-50 text-amber-600'} text-3xl`} aria-hidden="true">{paymentVerification === 'active' ? '✓' : '…'}</div>
+          <h1 className="mt-4 text-2xl font-bold">{status.title}</h1>
+          <p className="mt-3 text-sm leading-6 text-slate-600">{status.message}</p>
+          <button type="button" onClick={() => { window.history.replaceState({}, document.title, window.location.pathname); window.location.reload(); }} className="mt-6 w-full rounded-xl bg-slate-900 px-4 py-3 text-sm font-semibold text-white hover:bg-slate-700">Return to PaliaAi</button>
         </section>
       </main>
     );
