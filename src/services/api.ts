@@ -13,3 +13,5 @@ export function workerFetch(path: string, init?: RequestInit) {
   const normalized = path.startsWith('/') ? path : `/${path}`;
   return fetch(`${PALIA_AI_WORKER_URL}${normalized}`, init);
 }
+
+export const PALIA_PAYMENTS_WORKER_URL = (import.meta.env.VITE_PALIA_PAYMENTS_WORKER_URL || '').trim().replace(/\/$/, '');
