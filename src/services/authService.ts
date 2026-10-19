@@ -1,4 +1,4 @@
-import { User as FirebaseUser, createUserWithEmailAndPassword, getAuth, GoogleAuthProvider, onAuthStateChanged, signInWithEmailAndPassword, signInWithPopup, signOut, updateProfile } from 'firebase/auth';
+import { User as FirebaseUser, createUserWithEmailAndPassword, getAuth, GoogleAuthProvider, onAuthStateChanged, signInWithEmailAndPassword, signInWithPopup, signOut, updateProfile, getIdToken } from 'firebase/auth';
 import { initializeApp } from 'firebase/app';
 import { UserProfile } from '../types';
 import { storageService } from './storageService';
@@ -44,8 +44,8 @@ const toProfile = (firebaseUser: FirebaseUser): UserProfile => {
     name: firebaseUser.displayName || firebaseUser.email?.split('@')[0] || 'User',
     email: firebaseUser.email || '',
     avatarUrl: firebaseUser.photoURL || '',
-    tier: saved.id === firebaseUser.uid ? saved.tier : 'Free',
-    plan: saved.id === firebaseUser.uid ? saved.plan : 'Free Tier',
+    tier: 'Free',
+    plan: 'Free Tier',
     credits: saved.id === firebaseUser.uid ? saved.credits : 850,
     createdAt: saved.id === firebaseUser.uid ? saved.createdAt : Date.now(),
   };
@@ -83,6 +83,27 @@ class AuthManager {
 
   getUser(): UserProfile { return this.user; }
   getCurrentUser(): UserProfile { return this.user; }
+
+  async getIdToken(): Promise<string | null> {
+    const current = firebaseAuth.currentUser;
+    return current ? getIdToken(current) : null;
+  }
+
+  async refreshVerifiedSubscription(): Promise<void> {
+    const workerUrl = (import.meta.env.VITE_PALIA_PAYMENTS_WORKER_URL || '').trim().replace(/\\/$/, '');
+    const current = firebaseAuth.currentUser;
+    if (!workerUrl || !current) return;
+    try {
+      const token = await getIdToken(current);
+      const response = await fetch(workerUrl + '/subscription', { headers: { authorization: 'Bearer ' + token } });
+      if (!response.ok) return;
+      const subscription = await response.json() as { tier?: string; plan?: string };
+      this.user = { ...this.user, tier: subscription.tier === 'Pro' ? 'Pro' : 'Free', plan: subscription.tier === 'Pro' ? (subscription.plan || 'Palia Pro') : 'Free Tier' };
+      this.notify();
+    } catch (error) {
+      console.error('Could not refresh verified PaliaAi subscription:', error);
+    }
+  }
 
   async login(email: string, password?: string): Promise<{ success: boolean; error?: string }> {
     if (!password) return { success: false, error: 'Password is required.' };
