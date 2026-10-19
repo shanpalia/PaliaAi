@@ -6,13 +6,5 @@
   "workers_dev": true,
   "vars": {
     "APP_ORIGIN": "https://shanpalia.github.io/PaliaAi/"
-  },
-  "d1_databases": [
-    {
-      "binding": "DB",
-      "database_name": "paliaai-payments",
-      "database_id": "REPLACE_WITH_D1_DATABASE_ID",
-      "migrations_dir": "migrations"
-    }
-  ]
+  }
 }
