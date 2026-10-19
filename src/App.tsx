@@ -531,7 +531,7 @@ export const App: React.FC = () => {
         }}
       />
 
-      <UpgradeModal isOpen={isUpgradeOpen} onClose={() => setIsUpgradeOpen(false)} />
+      <UpgradeModal isOpen={isUpgradeOpen} onClose={() => setIsUpgradeOpen(false)} onAuthRequired={() => setIsAuthOpen(true)} />
 
       <ShareModal
         isOpen={isShareOpen}
