@@ -86,7 +86,7 @@ class AuthManager {
   getCurrentUser(): UserProfile { return this.user; }
 
   async refreshVerifiedSubscription(): Promise<void> {
-    const workerUrl = (import.meta.env.VITE_PALIA_PAYMENTS_WORKER_URL || '').trim().replace(/\\/$/, '');
+    const workerUrl = (import.meta.env.VITE_PALIA_PAYMENTS_WORKER_URL || '').trim().replace(/\/$/, '');
     const token = await getFirebaseIdToken();
     if (!workerUrl || !token || this.isGuest) return;
     try {
