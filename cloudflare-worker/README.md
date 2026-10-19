@@ -1,29 +1,23 @@
-# PaliaAi Razorpay Cloudflare Worker
+# PaliaAi Razorpay Worker (Cloudflare + Firebase Auth + D1)
 
-This Worker implements server-verified Razorpay Payment Link webhooks and persistent Supabase subscription records. It does not activate Pro based on the browser redirect.
+This Worker uses the Firebase Auth session already present in PaliaAi. It validates ID tokens with Firebase Identity Toolkit, creates per-user Razorpay Payment Links with server-controlled INR amounts, verifies Razorpay webhook signatures, and stores successful payments/subscriptions in Cloudflare D1. A redirect never activates Pro.
 
-## Configure secrets (Cloudflare Worker > Settings > Variables and Secrets)
-Required secrets:
-- RAZORPAY_KEY_ID
-- RAZORPAY_KEY_SECRET
-- RAZORPAY_WEBHOOK_SECRET
-- SUPABASE_URL
-- SUPABASE_ANON_KEY
-- SUPABASE_SERVICE_ROLE_KEY (secret; server-side only)
+## Deploy
+1. From this folder run `npm install`.
+2. Create D1: `npx wrangler d1 create paliaai-payments`. Copy the returned database_id into `wrangler.jsonc` replacing `REPLACE_WITH_D1_DATABASE_ID`.
+3. Apply schema: `npx wrangler d1 migrations apply paliaai-payments --remote`.
+4. Set secrets with `npx wrangler secret put RAZORPAY_KEY_ID`, `RAZORPAY_KEY_SECRET`, `RAZORPAY_WEBHOOK_SECRET`, and `FIREBASE_WEB_API_KEY`. Never commit secret values.
+5. Deploy: `npx wrangler deploy`.
+6. In Razorpay Dashboard, add webhook URL `https://paliaai-payments.<your-subdomain>.workers.dev/webhooks/razorpay`, select `payment_link.paid`, and use the same webhook secret.
+7. In the PaliaAi GitHub repository, add Actions variable `VITE_PALIA_PAYMENTS_WORKER_URL` with the deployed Worker origin and rerun the Pages workflow.
 
-Optional variable:
-- APP_ORIGIN = https://shanpalia.github.io/PaliaAi/
+## Endpoints
+- `GET /health`: public health check.
+- `POST /checkout`: Firebase ID token in Authorization Bearer; JSON `{"plan":"monthly"}` or `{"plan":"yearly"}`. Amount is fixed server-side at ₹49 / ₹399.
+- `GET /subscription`: Firebase ID token in Authorization Bearer; returns active Pro status only when D1 records an unexpired, webhook-verified payment.
+- `POST /webhooks/razorpay`: verifies raw-body HMAC signature and captured INR payment, checks amount, and persists idempotently.
 
-## Setup
-1. Run `supabase/schema.sql` in Supabase SQL Editor.
-2. Deploy this directory as a Cloudflare Worker using `wrangler deploy`.
-3. Configure Razorpay webhook URL as `https://YOUR-WORKER.workers.dev/webhooks/razorpay`; subscribe to `payment_link.paid`. Copy the webhook secret to `RAZORPAY_WEBHOOK_SECRET`.
-4. Use `POST /checkout` with JSON `{"plan":"monthly"}` or `{"plan":"yearly"}` and `Authorization: Bearer <Supabase access token>`. The Worker creates a fresh payment link with a server-controlled amount and authenticated user UUID in reference_id.
-5. Use `GET /subscription` with the same Supabase access token to read verified Pro status.
-
-## Important integration requirements
-- The current PaliaAi frontend's authService is a mock/local implementation, not Supabase Auth. The checkout endpoint intentionally rejects it; do not pass a client-supplied user ID as proof of identity.
-- Before production, migrate the frontend login/signup to Supabase Auth, call this Worker's /checkout endpoint instead of hard-coded Razorpay links, and read /subscription on session load.
-- Existing manually created Razorpay short links do not contain a trusted per-user association and cannot safely grant Pro. The Worker creates per-user links using the exact ₹49/₹399 amounts.
-- Test webhook delivery and duplicate retries before launch. Only captured INR payments with matching configured amount activate a plan.
-- Do not put any secret in Vite env variables or frontend code.
+## Notes
+- The current hard-coded ₹49 and ₹399 Payment Links remain in Razorpay but are not used by the new secure checkout because they do not bind a payer to a signed-in user. Checkout creates a fresh Razorpay link for each authenticated user.
+- The Firebase Web API key is a public Firebase project identifier, but configure it as a Worker variable/secret to avoid hardcoding it in the Worker.
+- Only the server changes entitlement. The frontend's local profile is never accepted as proof of Pro.
