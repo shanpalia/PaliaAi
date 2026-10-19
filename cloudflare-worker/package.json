@@ -4,9 +4,7 @@
   "type": "module",
   "scripts": {
     "dev": "wrangler dev",
-    "deploy": "wrangler deploy",
-    "db:create": "wrangler d1 create paliaai-payments",
-    "db:migrate:remote": "wrangler d1 migrations apply paliaai-payments --remote"
+    "deploy": "wrangler deploy"
   },
   "devDependencies": {
     "wrangler": "^4.45.0"
