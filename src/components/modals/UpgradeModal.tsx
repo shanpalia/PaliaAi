@@ -1,21 +1,20 @@
-import React from 'react';
-import { X, Sparkles, Check, ShieldCheck, ExternalLink } from 'lucide-react';
+import React, { useState } from 'react';
+import { X, Sparkles, Check, ShieldCheck, ExternalLink, LoaderCircle } from 'lucide-react';
+import { authService } from '../../services/authService';
+import { PALIA_PAYMENTS_WORKER_URL } from '../../services/api';
 
 interface UpgradeModalProps {
   isOpen: boolean;
   onClose: () => void;
+  onAuthRequired?: () => void;
 }
-
-const monthlyLink = 'https://rzp.io/rzp/q5Ri26Kb';
-const yearlyLink = 'https://rzp.io/rzp/A086v2Tj';
 
 const plans = [
   {
-    id: 'monthly',
+    id: 'monthly' as const,
     name: 'Palia Pro Monthly',
     price: '₹49',
     period: '/ month',
-    link: monthlyLink,
     features: [
       'Higher AI chat usage (subject to service limits)',
       'Access to premium models when enabled',
@@ -24,11 +23,10 @@ const plans = [
     ],
   },
   {
-    id: 'yearly',
+    id: 'yearly' as const,
     name: 'Palia Pro Yearly',
     price: '₹399',
     period: '/ year',
-    link: yearlyLink,
     features: [
       'All Palia Pro benefits',
       'Lower cost than paying monthly for a year',
@@ -39,8 +37,39 @@ const plans = [
   },
 ];
 
-export const UpgradeModal: React.FC<UpgradeModalProps> = ({ isOpen, onClose }) => {
+export const UpgradeModal: React.FC<UpgradeModalProps> = ({ isOpen, onClose, onAuthRequired }) => {
+  const [loadingPlan, setLoadingPlan] = useState<string | null>(null);
+  const [error, setError] = useState('');
+
   if (!isOpen) return null;
+
+  const startCheckout = async (plan: 'monthly' | 'yearly') => {
+    setError('');
+    if (!PALIA_PAYMENTS_WORKER_URL) {
+      setError('Secure payment setup is not deployed yet. Please try again later.');
+      return;
+    }
+    const token = await authService.getIdToken();
+    if (!token) {
+      onClose();
+      onAuthRequired?.();
+      return;
+    }
+    setLoadingPlan(plan);
+    try {
+      const response = await fetch(PALIA_PAYMENTS_WORKER_URL + '/checkout', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json', authorization: 'Bearer ' + token },
+        body: JSON.stringify({ plan }),
+      });
+      const data = await response.json() as { checkout_url?: string; error?: string };
+      if (!response.ok || !data.checkout_url) throw new Error(data.error || 'Could not start secure checkout.');
+      window.location.assign(data.checkout_url);
+    } catch (e: any) {
+      setError(e?.message || 'Could not start payment. Please try again.');
+      setLoadingPlan(null);
+    }
+  };
 
   return (
     <div className="fixed inset-0 z-[120] flex items-center justify-center bg-slate-950/50 backdrop-blur-sm p-3 sm:p-5" role="dialog" aria-modal="true" aria-labelledby="upgrade-title">
@@ -61,7 +90,6 @@ export const UpgradeModal: React.FC<UpgradeModalProps> = ({ isOpen, onClose }) =
             <p className="font-semibold">Simple, affordable plans</p>
             <p className="mt-1 text-xs leading-relaxed text-emerald-900/80">Pro is designed for people who need more AI chat and productivity capacity. Image generation remains free for everyone.</p>
           </div>
-
           <div className="grid gap-4 sm:grid-cols-2">
             {plans.map((plan) => (
               <section key={plan.id} className={`relative flex flex-col rounded-2xl border p-5 ${plan.featured ? 'border-emerald-400 ring-2 ring-emerald-100' : 'border-slate-200'}`}>
@@ -71,22 +99,18 @@ export const UpgradeModal: React.FC<UpgradeModalProps> = ({ isOpen, onClose }) =
                 <ul className="my-5 flex-1 space-y-2.5">
                   {plan.features.map((feature) => <li key={feature} className="flex items-start gap-2 text-xs text-slate-600"><Check className="mt-0.5 h-4 w-4 shrink-0 text-emerald-600" /><span>{feature}</span></li>)}
                 </ul>
-                {plan.link ? (
-                  <a href={plan.link} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center gap-2 rounded-xl bg-slate-900 px-4 py-3 text-sm font-semibold text-white hover:bg-slate-700">
-                    Continue to Razorpay <ExternalLink className="h-4 w-4" />
-                  </a>
-                ) : (
-                  <button type="button" disabled className="rounded-xl bg-slate-100 px-4 py-3 text-sm font-semibold text-slate-400 cursor-not-allowed">Yearly payment link not configured</button>
-                )}
+                <button type="button" onClick={() => void startCheckout(plan.id)} disabled={loadingPlan !== null || !PALIA_PAYMENTS_WORKER_URL} className="flex items-center justify-center gap-2 rounded-xl bg-slate-900 px-4 py-3 text-sm font-semibold text-white hover:bg-slate-700 disabled:cursor-not-allowed disabled:bg-slate-300">
+                  {loadingPlan === plan.id ? <><LoaderCircle className="h-4 w-4 animate-spin" /> Creating secure checkout…</> : <>Continue to Razorpay <ExternalLink className="h-4 w-4" /></>}
+                </button>
               </section>
             ))}
           </div>
-
+          {error && <p role="alert" className="mt-4 rounded-xl border border-red-200 bg-red-50 p-3 text-xs text-red-700">{error}</p>}
+          {!PALIA_PAYMENTS_WORKER_URL && <p className="mt-4 rounded-xl border border-amber-200 bg-amber-50 p-3 text-xs text-amber-800">Secure checkout is not connected yet. The payment button is disabled to prevent unverified payments.</p>}
           <div className="mt-5 flex items-start gap-2 rounded-xl border border-slate-200 p-3 text-[11px] leading-relaxed text-slate-500">
             <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-slate-500" />
-            <p>Razorpay checkout opens separately. Premium access must only be activated after trusted server-side payment verification; this link alone does not activate an account's Pro plan. Confirm the Razorpay link is set to exactly ₹49 before sharing it.</p>
+            <p>Pro activates only after the server verifies a captured Razorpay payment through a signed webhook. A success redirect alone never grants access. Image generation stays free for everyone.</p>
           </div>
-          {!yearlyLink && <p className="mt-3 text-xs text-amber-700">Monthly and yearly Razorpay links are connected. Pro access still requires trusted server-side payment verification.</p>}
         </div>
       </div>
     </div>
