@@ -59,21 +59,30 @@ export default {
       const amount = Number(link.amount);
       const plan = amount === 4900 ? "monthly" : amount === 39900 ? "yearly" : null;
       if (!plan || Number(payment.amount) !== amount || payment.currency !== "INR") return json({ error: "Amount/currency does not match a configured plan" }, 400);
-      const lookup = await db(env, "/rest/v1/paliaai_payments?razorpay_payment_id=eq." + encodeURIComponent(payment.id) + "&select=id");
-      if (!lookup.ok) return json({ error: "Payment lookup failed" }, 500);
-      if (((await lookup.json()) as any[]).length) return json({ received: true, duplicate: true });
       const now = new Date();
-      const existingSubRes = await db(env, "/rest/v1/paliaai_subscriptions?user_id=eq." + encodeURIComponent(userId) + "&select=expires_at,status&limit=1");
-      if (!existingSubRes.ok) return json({ error: "Subscription lookup failed" }, 500);
-      const previous = ((await existingSubRes.json()) as any[])[0];
-      const base = previous?.status === "active" && Date.parse(previous.expires_at) > now.getTime() ? new Date(previous.expires_at) : now;
-      const expires = new Date(base);
-      if (plan === "monthly") expires.setMonth(expires.getMonth() + 1); else expires.setFullYear(expires.getFullYear() + 1);
-      const paymentSave = await db(env, "/rest/v1/paliaai_payments", { method: "POST", headers: { prefer: "return=minimal" }, body: JSON.stringify({ user_id: userId, razorpay_payment_id: payment.id, razorpay_payment_link_id: link.id, amount_paise: amount, plan, status: "paid", paid_at: now.toISOString(), expires_at: expires.toISOString() }) });
-      if (!paymentSave.ok) return json({ error: "Could not persist payment; webhook retry required" }, 500);
-      const subSave = await db(env, "/rest/v1/paliaai_subscriptions?on_conflict=user_id", { method: "POST", headers: { prefer: "resolution=merge-duplicates,return=minimal" }, body: JSON.stringify({ user_id: userId, plan, status: "active", starts_at: now.toISOString(), expires_at: expires.toISOString(), last_payment_id: payment.id, updated_at: now.toISOString() }) });
-      if (!subSave.ok) return json({ error: "Payment saved but subscription update failed; check and retry" }, 500);
-      return json({ received: true, activated: true });
+      const existingRes = await db(env, "/rest/v1/paliaai_payments?razorpay_payment_id=eq." + encodeURIComponent(payment.id) + "&select=user_id,plan,paid_at,expires_at&limit=1");
+      if (!existingRes.ok) return json({ error: "Payment lookup failed" }, 500);
+      const existing = ((await existingRes.json()) as Array<{ user_id: string; plan: "monthly" | "yearly"; paid_at: string; expires_at: string }>)[0];
+      if (existing && (existing.user_id !== userId || existing.plan !== plan)) return json({ error: "Payment ID association conflict" }, 409);
+      const subLookup = await db(env, "/rest/v1/paliaai_subscriptions?user_id=eq." + encodeURIComponent(userId) + "&select=expires_at,status&limit=1");
+      if (!subLookup.ok) return json({ error: "Subscription lookup failed" }, 500);
+      const previous = ((await subLookup.json()) as Array<{ expires_at: string; status: string }>)[0];
+      let startsAt = now.toISOString();
+      let expiresAt: string;
+      if (existing) {
+        startsAt = existing.paid_at;
+        expiresAt = existing.expires_at;
+      } else {
+        const base = previous?.status === "active" && Date.parse(previous.expires_at) > now.getTime() ? new Date(previous.expires_at) : now;
+        const expires = new Date(base);
+        if (plan === "monthly") expires.setMonth(expires.getMonth() + 1); else expires.setFullYear(expires.getFullYear() + 1);
+        expiresAt = expires.toISOString();
+        const paymentSave = await db(env, "/rest/v1/paliaai_payments", { method: "POST", headers: { prefer: "return=minimal" }, body: JSON.stringify({ user_id: userId, razorpay_payment_id: payment.id, razorpay_payment_link_id: link.id, amount_paise: amount, plan, status: "paid", paid_at: startsAt, expires_at: expiresAt }) });
+        if (!paymentSave.ok) return json({ error: "Could not persist payment; webhook retry required" }, 500);
+      }
+      const subSave = await db(env, "/rest/v1/paliaai_subscriptions?on_conflict=user_id", { method: "POST", headers: { prefer: "resolution=merge-duplicates,return=minimal" }, body: JSON.stringify({ user_id: userId, plan, status: "active", starts_at: startsAt, expires_at: expiresAt, last_payment_id: payment.id, updated_at: now.toISOString() }) });
+      if (!subSave.ok) return json({ error: "Payment saved but subscription update failed; retry webhook" }, 500);
+      return json({ received: true, activated: true, duplicate: Boolean(existing) });
     }
     if (url.pathname === "/checkout" && request.method === "POST") {
       const user = await firebaseUser(request, env);
