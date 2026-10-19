@@ -1,23 +1,31 @@
-# PaliaAi Razorpay Worker (Cloudflare + Firebase Auth + D1)
+# PaliaAi Razorpay Cloudflare Worker
 
-This Worker uses the Firebase Auth session already present in PaliaAi. It validates ID tokens with Firebase Identity Toolkit, creates per-user Razorpay Payment Links with server-controlled INR amounts, verifies Razorpay webhook signatures, and stores successful payments/subscriptions in Cloudflare D1. A redirect never activates Pro.
+This Worker uses the Firebase Authentication already present in PaliaAi, Razorpay Payment Links and Supabase tables for durable subscription state. Pro is never activated by the redirect page.
+
+## Secrets in Cloudflare Worker > Settings > Variables and Secrets
+- RAZORPAY_KEY_ID
+- RAZORPAY_KEY_SECRET
+- RAZORPAY_WEBHOOK_SECRET
+- FIREBASE_API_KEY (Firebase web API key from the existing app config; may be set as a Worker variable)
+- SUPABASE_URL
+- SUPABASE_SERVICE_ROLE_KEY (secret; server-side only)
+
+Optional variable: APP_ORIGIN = https://shanpalia.github.io/PaliaAi/
 
 ## Deploy
-1. From this folder run `npm install`.
-2. Create D1: `npx wrangler d1 create paliaai-payments`. Copy the returned database_id into `wrangler.jsonc` replacing `REPLACE_WITH_D1_DATABASE_ID`.
-3. Apply schema: `npx wrangler d1 migrations apply paliaai-payments --remote`.
-4. Set secrets with `npx wrangler secret put RAZORPAY_KEY_ID`, `RAZORPAY_KEY_SECRET`, `RAZORPAY_WEBHOOK_SECRET`, and `FIREBASE_WEB_API_KEY`. Never commit secret values.
-5. Deploy: `npx wrangler deploy`.
-6. In Razorpay Dashboard, add webhook URL `https://paliaai-payments.<your-subdomain>.workers.dev/webhooks/razorpay`, select `payment_link.paid`, and use the same webhook secret.
-7. In the PaliaAi GitHub repository, add Actions variable `VITE_PALIA_PAYMENTS_WORKER_URL` with the deployed Worker origin and rerun the Pages workflow.
+From this directory: `npx wrangler deploy`. Set secrets with `npx wrangler secret put NAME`. Use `wrangler.toml` to name the Worker and configure compatibility date.
 
-## Endpoints
-- `GET /health`: public health check.
-- `POST /checkout`: Firebase ID token in Authorization Bearer; JSON `{"plan":"monthly"}` or `{"plan":"yearly"}`. Amount is fixed server-side at ₹49 / ₹399.
-- `GET /subscription`: Firebase ID token in Authorization Bearer; returns active Pro status only when D1 records an unexpired, webhook-verified payment.
-- `POST /webhooks/razorpay`: verifies raw-body HMAC signature and captured INR payment, checks amount, and persists idempotently.
+## Database
+Run `supabase/schema.sql` in the Supabase SQL Editor. Firebase UIDs are stored as text; no Supabase Auth dependency is assumed.
 
-## Notes
-- The current hard-coded ₹49 and ₹399 Payment Links remain in Razorpay but are not used by the new secure checkout because they do not bind a payer to a signed-in user. Checkout creates a fresh Razorpay link for each authenticated user.
-- The Firebase Web API key is a public Firebase project identifier, but configure it as a Worker variable/secret to avoid hardcoding it in the Worker.
-- Only the server changes entitlement. The frontend's local profile is never accepted as proof of Pro.
+## Razorpay webhook
+Register `https://YOUR-WORKER.workers.dev/webhooks/razorpay`, subscribe to `payment_link.paid`, and use the webhook signing secret as `RAZORPAY_WEBHOOK_SECRET`. The handler verifies the HMAC against the exact raw body, validates captured INR payment and amount, and ignores duplicate payment IDs.
+
+## Frontend
+The Upgrade modal calls `POST /checkout` with the signed-in Firebase ID token. The Worker creates a per-user payment link for exactly ₹49 or ₹399. The success-return screen asks `GET /subscription`; it never trusts the query string to grant Pro.
+
+## Launch checklist
+- Configure all Worker secrets and deploy.
+- Run the SQL schema.
+- Register and test the Razorpay webhook.
+- Test monthly/yearly payments using Razorpay test mode first.
