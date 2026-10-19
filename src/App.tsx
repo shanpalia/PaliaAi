@@ -31,7 +31,6 @@ import { creditService } from './services/creditService';
 import { aiService } from './services/aiService';
 import { usageService } from './services/usageService';
 import { getFirebaseIdToken } from './services/authService';
-import { workerFetch } from './services/api';
 
 
 function preserveLiveAttachments(saved: Conversation[], current: Conversation[]): Conversation[] {
