@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { X, Sparkles, Check, ShieldCheck, ExternalLink, Loader2 } from 'lucide-react';
 import { authService, getFirebaseIdToken } from '../../services/authService';
-import { workerFetch } from '../../services/api';
+import { PALIA_PAYMENTS_WORKER_URL } from '../../services/api';
 
 interface UpgradeModalProps {
   isOpen: boolean;
@@ -22,6 +22,10 @@ export const UpgradeModal: React.FC<UpgradeModalProps> = ({ isOpen, onClose, onA
   const startCheckout = async (plan: string) => {
     setError('');
     const current = authService.getCurrentUser();
+    if (!PALIA_PAYMENTS_WORKER_URL) {
+      setError('Secure payment is not configured yet. Please try again later.');
+      return;
+    }
     const token = await getFirebaseIdToken();
     if (!token || !current || current.id === 'guest_user') {
       onClose();
@@ -30,7 +34,7 @@ export const UpgradeModal: React.FC<UpgradeModalProps> = ({ isOpen, onClose, onA
     }
     setLoadingPlan(plan);
     try {
-      const response = await workerFetch('/checkout', {
+      const response = await fetch(PALIA_PAYMENTS_WORKER_URL + '/checkout', {
         method: 'POST',
         headers: { 'content-type': 'application/json', authorization: 'Bearer ' + token },
         body: JSON.stringify({ plan }),
@@ -62,11 +66,12 @@ export const UpgradeModal: React.FC<UpgradeModalProps> = ({ isOpen, onClose, onA
               <h3 className="text-sm font-bold text-slate-900">{plan.name}</h3>
               <div className="mt-3 flex items-baseline gap-1"><span className="text-3xl font-extrabold tracking-tight text-slate-950">{plan.price}</span><span className="text-xs text-slate-500">{plan.period}</span></div>
               <ul className="my-5 flex-1 space-y-2.5">{plan.features.map((feature) => <li key={feature} className="flex items-start gap-2 text-xs text-slate-600"><Check className="mt-0.5 h-4 w-4 shrink-0 text-emerald-600" /><span>{feature}</span></li>)}</ul>
-              <button type="button" onClick={() => void startCheckout(plan.id)} disabled={loadingPlan !== null} className="flex items-center justify-center gap-2 rounded-xl bg-slate-900 px-4 py-3 text-sm font-semibold text-white hover:bg-slate-700 disabled:cursor-not-allowed disabled:opacity-60">
+              <button type="button" onClick={() => void startCheckout(plan.id)} disabled={loadingPlan !== null || !PALIA_PAYMENTS_WORKER_URL} className="flex items-center justify-center gap-2 rounded-xl bg-slate-900 px-4 py-3 text-sm font-semibold text-white hover:bg-slate-700 disabled:cursor-not-allowed disabled:opacity-60">
                 {loadingPlan === plan.id ? <><Loader2 className="h-4 w-4 animate-spin" /> Connecting to Razorpay…</> : <>Continue to Razorpay <ExternalLink className="h-4 w-4" /></>}
               </button>
             </section>)}
           </div>
+          {!PALIA_PAYMENTS_WORKER_URL && <p className="mt-4 rounded-xl border border-amber-200 bg-amber-50 p-3 text-xs text-amber-800">Secure checkout is not connected yet. The payment buttons are disabled to prevent unverified payments.</p>}
           {error && <p role="alert" className="mt-4 rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-700">{error}</p>}
           <div className="mt-5 flex items-start gap-2 rounded-xl border border-slate-200 p-3 text-[11px] leading-relaxed text-slate-500"><ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-slate-500" /><p>Pro is activated only after Razorpay sends a valid, verified payment webhook. Returning to this site alone never activates a plan.</p></div>
         </div>
