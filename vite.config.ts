@@ -6,7 +6,7 @@ import {defineConfig} from 'vite';
 export default defineConfig(() => {
   return {
     // The site remains hosted on GitHub Pages. Firebase is used only for authentication.
-    base: '/PaliaAi/',
+    base: process.env.CF_PAGES ? '/' : '/PaliaAi/',
     plugins: [react(), tailwindcss()],
     resolve: {
       alias: {
