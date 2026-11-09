@@ -1,20 +1,19 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Palia AI monogram icon">
-<defs>
- <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#f0fdfa"/><stop offset="1" stop-color="#ccfbf1"/></linearGradient>
- <linearGradient id="p" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#2dd4bf"/><stop offset=".52" stop-color="#10b981"/><stop offset="1" stop-color="#0e7490"/></linearGradient>
- <linearGradient id="face" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#173b4a"/><stop offset="1" stop-color="#071827"/></linearGradient>
- <filter id="s" x="-30%" y="-30%" width="160%" height="160%"><feDropShadow dx="0" dy="12" stdDeviation="12" flood-color="#0f766e" flood-opacity=".18"/></filter>
-</defs>
-<rect x="12" y="12" width="488" height="488" rx="132" fill="url(#bg)"/>
-<circle cx="256" cy="256" r="202" fill="none" stroke="#99f6e4" stroke-width="3"/>
-<g filter="url(#s)">
- <path d="M132 410V126c0-17 13-30 30-30h119c88 0 142 48 142 126 0 77-55 126-142 126h-55v62z" fill="url(#p)"/>
- <path d="M226 176h50c35 0 55 17 55 47s-20 47-55 47h-50z" fill="url(#face)" stroke="#d1fae5" stroke-width="8" stroke-linejoin="round"/>
- <path d="M241 215c6-12 17-12 23 0M278 215c6-12 17-12 23 0" fill="none" stroke="#5eead4" stroke-width="8" stroke-linecap="round"/>
- <path d="M251 235c10 8 20 8 30 0" fill="none" stroke="#34d399" stroke-width="6" stroke-linecap="round"/>
- <path d="M166 123c-5-28 8-48 34-57 8 27-3 47-34 57z" fill="#059669"/>
- <path d="M181 113c14-25 35-32 57-22-13 22-32 30-57 22z" fill="#5eead4"/>
-</g>
-<path d="M377 363l9 18 20 3-14 14 3 20-18-10-18 10 4-20-15-14 20-3z" fill="#0d9488"/>
-<circle cx="119" cy="341" r="8" fill="#2dd4bf"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Palia AI pink neon atom chip icon">
+ <defs>
+  <radialGradient id="bg"><stop stop-color="#390020"/><stop offset=".62" stop-color="#210014"/><stop offset="1" stop-color="#10000c"/></radialGradient>
+  <linearGradient id="pink" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#ffd6f2"/><stop offset=".35" stop-color="#ff42b5"/><stop offset=".72" stop-color="#ff008e"/><stop offset="1" stop-color="#ff9ae0"/></linearGradient>
+  <filter id="glow" x="-80%" y="-80%" width="260%" height="260%"><feGaussianBlur stdDeviation="7" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+ </defs>
+ <rect x="10" y="10" width="492" height="492" rx="116" fill="url(#bg)" stroke="#ff4bb7" stroke-width="4" filter="url(#glow)"/>
+ <g fill="none" stroke="url(#pink)" stroke-width="10" stroke-linecap="round" filter="url(#glow)">
+  <ellipse cx="256" cy="196" rx="157" ry="58" transform="rotate(30 256 196)"/>
+  <ellipse cx="256" cy="196" rx="157" ry="58" transform="rotate(-30 256 196)"/>
+ </g>
+ <g filter="url(#glow)" stroke="#ffe6f7" stroke-width="5" stroke-linecap="round" fill="none">
+  <rect x="226" y="164" width="60" height="64" rx="4" stroke="#ff8bd4" stroke-width="7"/>
+  <path d="M235 154v10m14-10v10m14-10v10m14-10v10m14-10v10M235 228v10m14-10v10m14-10v10m14-10v10m14-10v10M216 174h10m-10 14h10m-10 14h10m-10 14h10m60-42h10m-10 14h10m-10 14h10m-10 14h10"/>
+ </g>
+ <g fill="#fff1fa" filter="url(#glow)"><circle cx="241" cy="180" r="3.5"/><circle cx="271" cy="180" r="3.5"/><circle cx="241" cy="212" r="3.5"/><circle cx="271" cy="212" r="3.5"/></g>
+ <text x="256" y="355" text-anchor="middle" font-family="Arial,sans-serif" font-size="69" font-weight="800" letter-spacing="-3" fill="#fff8fd">Palia <tspan fill="#ff36ad">AI</tspan></text>
+ <path d="M150 384c62 20 150 20 212-2" fill="none" stroke="url(#pink)" stroke-width="6" stroke-linecap="round" filter="url(#glow)"/>
 </svg>
