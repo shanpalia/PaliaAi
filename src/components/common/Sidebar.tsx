@@ -365,7 +365,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 />
               ) : (
                 <div className="w-8 h-8 rounded-full bg-[#162B25] text-white font-bold text-xs border border-[#D6E9DF] flex items-center justify-center flex-shrink-0 shadow-xs">
-                  {user && user.id !== 'guest_user' ? (user.name?.trim() || user.email?.split('@')[0] || 'User').split(/[\\s._-]+/).filter(Boolean).slice(0, 2).map(part => part.charAt(0).toUpperCase()).join('') || 'U' : '↗'}
+                  {user && user.id !== 'guest_user' ? (user.name?.trim() || user.email?.split('@')[0] || 'User').split(/[\s._-]+/).filter(Boolean).slice(0, 2).map(part => part.charAt(0).toUpperCase()).join('') || 'U' : '↗'}
                 </div>
               )}
               <div className={collapsed ? "lg:hidden flex-1 min-w-0" : "flex-1 min-w-0"}>
