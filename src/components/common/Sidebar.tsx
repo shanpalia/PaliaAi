@@ -364,8 +364,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   className="w-8 h-8 rounded-full bg-slate-200 border border-slate-300 object-cover flex-shrink-0"
                 />
               ) : (
-                <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-emerald-500 to-teal-600 text-white font-bold text-xs flex items-center justify-center flex-shrink-0 shadow-xs">
-                  {user && user.id !== 'guest_user' ? (user.name?.charAt(0).toUpperCase() || user.email?.charAt(0).toUpperCase() || 'U') : '↗'}
+                <div className="w-8 h-8 rounded-full bg-[#162B25] text-white font-bold text-xs border border-[#D6E9DF] flex items-center justify-center flex-shrink-0 shadow-xs">
+                  {user && user.id !== 'guest_user' ? (user.name?.trim() || user.email?.split('@')[0] || 'User').split(/[\\s._-]+/).filter(Boolean).slice(0, 2).map(part => part.charAt(0).toUpperCase()).join('') || 'U' : '↗'}
                 </div>
               )}
               <div className={collapsed ? "lg:hidden flex-1 min-w-0" : "flex-1 min-w-0"}>
