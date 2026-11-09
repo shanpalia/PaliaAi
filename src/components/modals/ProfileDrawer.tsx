@@ -108,10 +108,12 @@ export const ProfileDrawer: React.FC<ProfileDrawerProps> = ({
     ? usage.formatted_remaining.replace(' today', '')
     : '2h 00m remaining';
 
-  const userInitial =
-    user?.name?.charAt(0).toUpperCase() ||
-    user?.email?.charAt(0).toUpperCase() ||
-    'P';
+  const userInitials = (user?.name?.trim() || user?.email?.split('@')[0] || 'Palia')
+    .split(/[\\s._-]+/)
+    .filter(Boolean)
+    .slice(0, 2)
+    .map(part => part.charAt(0).toUpperCase())
+    .join('') || 'P';
 
   const isGuest = !user || user.id === 'guest_user';
 
@@ -168,8 +170,8 @@ export const ProfileDrawer: React.FC<ProfileDrawerProps> = ({
                     className="w-12 h-12 rounded-full border-2 border-white/20 object-cover flex-shrink-0"
                   />
                 ) : (
-                  <div className="w-12 h-12 rounded-full bg-gradient-to-tr from-blue-500 to-indigo-600 border-2 border-white/20 text-white font-bold text-lg flex items-center justify-center flex-shrink-0 shadow-inner">
-                    {userInitial}
+                  <div className="w-12 h-12 rounded-full bg-[#162B25] border-2 border-white/25 text-white font-bold text-sm flex items-center justify-center flex-shrink-0 shadow-inner">
+                    {userInitials}
                   </div>
                 )}
 
