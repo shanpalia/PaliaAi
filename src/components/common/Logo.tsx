@@ -23,8 +23,8 @@ export const Logo: React.FC<LogoProps> = ({
     lg: 'text-xl',
   };
 
-  const logoUrl = `${import.meta.env.BASE_URL}palia-ai-logo.svg`;
-  const iconUrl = `${import.meta.env.BASE_URL}palia-ai-icon.svg`;
+  const logoUrl = `${import.meta.env.BASE_URL}palia-ai-logo.svg?v=4`;
+  const iconUrl = `${import.meta.env.BASE_URL}palia-ai-icon.svg?v=4`;
 
   return (
     <div id="palia-ai-logo" className={`flex items-center gap-3 select-none ${className}`}>
