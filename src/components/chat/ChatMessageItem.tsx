@@ -79,8 +79,8 @@ export const ChatMessageItem: React.FC<ChatMessageItemProps> = ({
           {isAssistant ? (
             <img src={`${import.meta.env.BASE_URL}palia-ai-icon.svg?v=4`} alt="Palia AI" className="w-8 h-8 rounded-xl object-cover shadow-sm" />
           ) : (
-            <div className="w-8 h-8 rounded-xl bg-slate-200 text-slate-700 flex items-center justify-center shadow-sm">
-              <User className="w-4 h-4" />
+            <div className="w-9 h-9 rounded-full bg-gradient-to-br from-[#0FAF88] to-[#087A78] text-white flex items-center justify-center shadow-sm ring-2 ring-[#D9F5EC]">
+              <User className="w-[18px] h-[18px] stroke-[2.2]" />
             </div>
           )}
         </div>
