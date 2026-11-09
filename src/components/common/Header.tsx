@@ -23,21 +23,12 @@ export const Header: React.FC<HeaderProps> = ({
   onNewChat,
   onToggleSidebar,
   onOpenSettings,
-  onOpenProfile,
   onOpenShare,
   onUpgrade,
   user,
   activeConversationTitle,
 }) => {
   const [showMenu, setShowMenu] = useState(false);
-  const userName = user?.name?.trim() || '';
-  const userEmail = user?.email?.trim() || '';
-  const userInitials = (userName || userEmail.split('@')[0] || 'Palia')
-    .split(/[\\s._-]+/)
-    .filter(Boolean)
-    .slice(0, 2)
-    .map(part => part.charAt(0).toUpperCase())
-    .join('') || 'P';
 
   return (
     <header id="palia-header" className="h-[56px] border-b border-slate-200/70 bg-white px-3 sm:px-4 flex items-center justify-between sticky top-0 z-50">
@@ -88,18 +79,6 @@ export const Header: React.FC<HeaderProps> = ({
         >
           <Crown className="h-4 w-4" />
           <span>Upgrade</span>
-        </button>
-
-        <button
-          id="btn-header-profile"
-          onClick={onOpenProfile}
-          className="w-9 h-9 rounded-full flex items-center justify-center bg-[#162B25] text-white text-xs font-bold border-2 border-[#D6E9DF] shadow-sm hover:opacity-90 transition"
-          title={userName || userEmail || 'Profile'}
-          aria-label="Open profile"
-        >
-          {user?.avatarUrl?.trim() ? (
-            <img src={user.avatarUrl} alt="" className="w-full h-full rounded-full object-cover" />
-          ) : userInitials}
         </button>
 
         <div className="relative">
