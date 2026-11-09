@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Palia AI neon brain chip app icon">
+ <defs>
+  <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#06152e"/><stop offset=".55" stop-color="#071d3b"/><stop offset="1" stop-color="#10103a"/></linearGradient>
+  <linearGradient id="neon" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#5cffc8"/><stop offset=".48" stop-color="#21c9ff"/><stop offset="1" stop-color="#a56bff"/></linearGradient>
+  <filter id="glow" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation="8" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+  <filter id="soft" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="18"/></filter>
+ </defs>
+ <rect x="10" y="10" width="492" height="492" rx="132" fill="url(#bg)" stroke="#1d8bb4" stroke-width="5"/>
+ <ellipse cx="256" cy="258" rx="174" ry="168" fill="#00d9d0" opacity=".12" filter="url(#soft)"/>
+ <g fill="none" stroke="url(#neon)" stroke-width="13" stroke-linecap="round" stroke-linejoin="round" filter="url(#glow)">
+  <path d="M246 153c-24-48-85-38-91 12-46-4-72 42-49 79-39 34-20 92 27 100 9 49 66 63 101 29l22-22V153z"/>
+  <path d="M266 153c24-48 85-38 91 12 46-4 72 42 49 79 39 34 20 92-27 100-9 49-66 63-101 29l-22-22V153z"/>
+  <path d="M256 151v210M151 207h62l24 24M126 281h77l29-24M158 342h54l27-26M361 207h-62l-24 24M386 281h-77l-29-24M354 342h-54l-27-26"/>
+ </g>
+ <g fill="#dfffff" stroke="url(#neon)" stroke-width="7" filter="url(#glow)">
+  <circle cx="151" cy="207" r="10"/><circle cx="126" cy="281" r="10"/><circle cx="158" cy="342" r="10"/>
+  <circle cx="361" cy="207" r="10"/><circle cx="386" cy="281" r="10"/><circle cx="354" cy="342" r="10"/>
+ </g>
+ <rect x="193" y="204" width="126" height="112" rx="29" fill="#071a35" stroke="url(#neon)" stroke-width="8" filter="url(#glow)"/>
+ <text x="256" y="278" text-anchor="middle" font-family="Arial,sans-serif" font-size="55" font-weight="800" fill="#eaffff">AI</text>
+ <path d="M91 349c35 65 114 95 202 77 52-11 94-40 123-82" fill="none" stroke="url(#neon)" stroke-width="9" stroke-linecap="round" filter="url(#glow)"/>
+ <path d="M400 94l12 25 27 4-20 19 5 27-24-13-24 13 5-27-20-19 27-4z" fill="#dfffff" filter="url(#glow)"/>
+ <circle cx="104" cy="130" r="5" fill="#65ffe1"/><circle cx="406" cy="381" r="6" fill="#64dfff"/>
+</svg>
