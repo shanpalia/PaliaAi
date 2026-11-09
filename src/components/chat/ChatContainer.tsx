@@ -192,16 +192,14 @@ export const ChatContainer: React.FC<ChatContainerProps> = ({
                 className="py-4 sm:py-6 px-4 sm:px-6 bg-slate-50/70 border-t border-slate-100"
               >
                 <div className="max-w-3xl mx-auto flex gap-3 sm:gap-4 items-center">
-                  <div className="w-8 h-8 rounded-xl bg-blue-600 text-white flex items-center justify-center shadow-sm shadow-blue-200 animate-pulse">
-                    <Sparkles className="w-4 h-4" />
-                  </div>
+                  <img src={`${import.meta.env.BASE_URL}palia-ai-icon.svg?v=4`} alt="Palia AI" className="w-8 h-8 rounded-xl object-cover shadow-sm animate-pulse" />
                   <div className="flex items-center gap-2">
                     <div className="flex items-center gap-1">
-                      <span className="w-2 h-2 rounded-full bg-blue-600 animate-bounce [animation-delay:-0.3s]" />
-                      <span className="w-2 h-2 rounded-full bg-blue-500 animate-bounce [animation-delay:-0.15s]" />
-                      <span className="w-2 h-2 rounded-full bg-blue-400 animate-bounce" />
+                      <span className="w-2 h-2 rounded-full bg-fuchsia-600 animate-bounce [animation-delay:-0.3s]" />
+                      <span className="w-2 h-2 rounded-full bg-pink-500 animate-bounce [animation-delay:-0.15s]" />
+                      <span className="w-2 h-2 rounded-full bg-violet-400 animate-bounce" />
                     </div>
-                    <span className="text-xs font-medium text-slate-500">
+                    <span className="text-xs font-medium text-fuchsia-700">
                       Palia AI is thinking...
                     </span>
                   </div>
