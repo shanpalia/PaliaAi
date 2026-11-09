@@ -53,7 +53,7 @@ export const Header: React.FC<HeaderProps> = ({
           className="flex items-center gap-2.5 min-w-0 rounded-xl px-2 py-1.5 hover:bg-slate-50 transition-all"
           aria-label="Palia AI By ShanPalia home"
         >
-          <img src={`${import.meta.env.BASE_URL}palia-ai-icon.svg`} alt="Palia AI By PaliaAPK HUB" className="w-9 h-9 rounded-[12px] object-contain" />
+          <img src={`${import.meta.env.BASE_URL}palia-ai-icon.svg?v=4`} alt="Palia AI By PaliaAPK HUB" className="w-9 h-9 rounded-[12px] object-contain" />
           <div className="min-w-0 text-left">
             <div className="font-bold text-[15px] text-slate-950 leading-tight truncate max-w-[42vw]">
               PaliaAi
