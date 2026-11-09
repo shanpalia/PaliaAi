@@ -77,9 +77,7 @@ export const ChatMessageItem: React.FC<ChatMessageItemProps> = ({
         {/* Avatar */}
         <div className="flex-shrink-0 pt-0.5">
           {isAssistant ? (
-            <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-indigo-600 to-blue-500 text-white flex items-center justify-center shadow-sm">
-              <Sparkles className="w-4 h-4" />
-            </div>
+            <img src={`${import.meta.env.BASE_URL}palia-ai-icon.svg?v=4`} alt="Palia AI" className="w-8 h-8 rounded-xl object-cover shadow-sm" />
           ) : (
             <div className="w-8 h-8 rounded-xl bg-slate-200 text-slate-700 flex items-center justify-center shadow-sm">
               <User className="w-4 h-4" />
