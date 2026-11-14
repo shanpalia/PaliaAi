@@ -363,6 +363,7 @@ export const aiService = {
     aspectRatio?: string;
     style?: string;
     imageDataUrl?: string;
+    imageDataUrls?: string[];
     operation?: 'enhance' | 'remove_bg' | 'upscale' | 'custom';
   }): Promise<{
     success: boolean;
@@ -373,7 +374,8 @@ export const aiService = {
   }> {
     try {
       const meta = getRequestMeta();
-      const isEdit = Boolean(params.imageDataUrl);
+      const imageDataUrls = (params.imageDataUrls || (params.imageDataUrl ? [params.imageDataUrl] : [])).filter(Boolean).slice(0, 2);
+      const isEdit = imageDataUrls.length > 0;
       const prompt = [
         params.prompt.trim(),
         params.style ? `Style: ${params.style}` : '',
@@ -393,12 +395,12 @@ export const aiService = {
             : isEdit ? 'image_edit' : 'image_generate',
           operation: params.operation,
           generateImage: true,
-          attachments: isEdit ? [{
-            name: 'uploaded-image',
+          attachments: imageDataUrls.map((dataUrl, index) => ({
+            name: index === 0 ? 'reference-image-1-main-subject' : 'reference-image-2-style-pose',
             type: 'image',
-            mimeType: params.imageDataUrl?.match(/^data:([^;]+)/)?.[1] || 'image/png',
-            dataUrl: params.imageDataUrl,
-          }] : [],
+            mimeType: dataUrl.match(/^data:([^;]+)/)?.[1] || 'image/png',
+            dataUrl,
+          })),
         }),
       });
 
