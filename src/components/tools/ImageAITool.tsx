@@ -49,11 +49,13 @@ export const ImageAITool: React.FC<ImageAIToolProps> = ({ onSendToChat }) => {
   const [description, setDescription] = useState('');
   const [copied, setCopied] = useState(false);
   const [uploadedBaseImg, setUploadedBaseImg] = useState<string | null>(null);
+  const [uploadedReferenceImg, setUploadedReferenceImg] = useState<string | null>(null);
   const [editOperation, setEditOperation] = useState<'enhance' | 'remove_bg' | 'upscale' | 'custom'>('enhance');
   const [outputResolution, setOutputResolution] = useState<'hd' | '2k' | '4k'>('2k');
   const [comparisonPosition, setComparisonPosition] = useState(50);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const referenceInputRef = useRef<HTMLInputElement>(null);
 
   const samplePrompts = [
     'Futuristic electric sports car navigating a neon-lit rain highway at night',
@@ -76,9 +78,13 @@ export const ImageAITool: React.FC<ImageAIToolProps> = ({ onSendToChat }) => {
       upscale: 'Upscale and improve image clarity and detail while preserving the original subject and identity.',
       custom: prompt.trim(),
     };
-    const finalPrompt = activeTab === 'edit'
-      ? (editPrompts[editOperation] || prompt.trim())
-      : prompt.trim();
+    const referenceGuidance = uploadedReferenceImg
+      ? 'Use reference image 1 as the primary subject and preserve that person\'s facial identity, facial structure, skin tone and recognizable features. Use reference image 2 only as the guide for pose, clothing, styling, composition and/or background as requested. Create one coherent new image; do not blend the two faces or replace the primary subject with the person in reference image 2.'
+      : '';
+    const finalPrompt = [
+      activeTab === 'edit' ? (editPrompts[editOperation] || prompt.trim()) : prompt.trim(),
+      referenceGuidance,
+    ].filter(Boolean).join('\n\n');
 
     setIsLoading(true);
     try {
@@ -87,6 +93,7 @@ export const ImageAITool: React.FC<ImageAIToolProps> = ({ onSendToChat }) => {
         aspectRatio,
         style: activeTab === 'generate' ? selectedStyle : undefined,
         imageDataUrl: activeTab === 'edit' ? uploadedBaseImg || undefined : undefined,
+        imageDataUrls: activeTab === 'edit' ? [uploadedBaseImg, uploadedReferenceImg].filter((value): value is string => Boolean(value)) : undefined,
         operation: activeTab === 'edit' ? editOperation : undefined,
       });
 
@@ -153,7 +160,7 @@ export const ImageAITool: React.FC<ImageAIToolProps> = ({ onSendToChat }) => {
     }
   };
 
-  const handleUploadImage = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleUploadImage = (e: React.ChangeEvent<HTMLInputElement>, slot: 'primary' | 'reference' = 'primary') => {
     const file = e.target.files?.[0];
     // Allow only browser-readable image formats and keep the upload small enough
     // for the Worker request limits. The original file never leaves the browser.
@@ -201,7 +208,8 @@ export const ImageAITool: React.FC<ImageAIToolProps> = ({ onSendToChat }) => {
           alert('Image अभी भी बहुत बड़ी है। कृपया छोटी image चुनें।');
           return;
         }
-        setUploadedBaseImg(dataUrl);
+        if (slot === 'reference') setUploadedReferenceImg(dataUrl);
+        else setUploadedBaseImg(dataUrl);
       };
       image.src = String(reader.result || '');
     };
@@ -379,40 +387,39 @@ export const ImageAITool: React.FC<ImageAIToolProps> = ({ onSendToChat }) => {
             ) : (
               /* Edit & Enhance Form */
               <div className="rounded-2xl border border-slate-200 bg-white p-5 space-y-4 shadow-2xs">
-                <div className="space-y-1.5">
-                  <label className="text-xs font-semibold text-slate-900">Source Image</label>
-                  <input
-                    ref={fileInputRef}
-                    type="file"
-                    accept="image/*"
-                    className="hidden"
-                    onChange={handleUploadImage}
-                  />
-                  {uploadedBaseImg ? (
-                    <div className="relative rounded-xl overflow-hidden border border-slate-200 bg-slate-100 group">
-                      <img
-                        src={uploadedBaseImg}
-                        alt="Uploaded preview"
-                        className="w-full h-40 object-cover"
-                      />
-                      <button
-                        onClick={() => setUploadedBaseImg(null)}
-                        className="absolute top-2 right-2 p-1.5 rounded-lg bg-slate-900/70 text-white hover:bg-rose-600 transition-colors"
-                        title="Remove image"
-                      >
-                        <Trash2 className="w-3.5 h-3.5" />
-                      </button>
+                <div className="space-y-2">
+                  <label className="text-xs font-semibold text-slate-900">Reference Images (up to 2)</label>
+                  <input ref={fileInputRef} type="file" accept="image/jpeg,image/png,image/webp" className="hidden" onChange={(e) => { handleUploadImage(e, 'primary'); e.currentTarget.value = ''; }} />
+                  <input ref={referenceInputRef} type="file" accept="image/jpeg,image/png,image/webp" className="hidden" onChange={(e) => { handleUploadImage(e, 'reference'); e.currentTarget.value = ''; }} />
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="space-y-1">
+                      <p className="text-[11px] font-semibold text-slate-600">Photo 1 · Main subject</p>
+                      {uploadedBaseImg ? (
+                        <div className="relative rounded-xl overflow-hidden border border-purple-200 bg-slate-100">
+                          <img src={uploadedBaseImg} alt="First reference preview" className="w-full h-36 object-contain" />
+                          <button type="button" onClick={() => setUploadedBaseImg(null)} className="absolute top-2 right-2 p-1.5 rounded-lg bg-slate-900/75 text-white hover:bg-rose-600" title="Remove first image"><Trash2 className="w-3.5 h-3.5" /></button>
+                        </div>
+                      ) : (
+                        <button type="button" onClick={() => fileInputRef.current?.click()} className="w-full h-36 border-2 border-dashed border-slate-200 rounded-xl p-3 text-center hover:border-purple-300 hover:bg-purple-50/30">
+                          <UploadCloud className="w-7 h-7 text-slate-400 mx-auto mb-2" /><span className="text-xs font-medium text-slate-700">Add first photo</span>
+                        </button>
+                      )}
                     </div>
-                  ) : (
-                    <div
-                      onClick={() => fileInputRef.current?.click()}
-                      className="border-2 border-dashed border-slate-200 rounded-xl p-6 text-center hover:border-purple-300 hover:bg-purple-50/20 cursor-pointer transition-all space-y-2"
-                    >
-                      <UploadCloud className="w-8 h-8 text-slate-400 mx-auto" />
-                      <p className="text-xs font-medium text-slate-700">Click or drag image here</p>
-                      <p className="text-[10px] text-slate-400">JPG, PNG, WEBP up to 10MB</p>
+                    <div className="space-y-1">
+                      <p className="text-[11px] font-semibold text-slate-600">Photo 2 · Style / pose</p>
+                      {uploadedReferenceImg ? (
+                        <div className="relative rounded-xl overflow-hidden border border-purple-200 bg-slate-100">
+                          <img src={uploadedReferenceImg} alt="Second reference preview" className="w-full h-36 object-contain" />
+                          <button type="button" onClick={() => setUploadedReferenceImg(null)} className="absolute top-2 right-2 p-1.5 rounded-lg bg-slate-900/75 text-white hover:bg-rose-600" title="Remove second image"><Trash2 className="w-3.5 h-3.5" /></button>
+                        </div>
+                      ) : (
+                        <button type="button" onClick={() => referenceInputRef.current?.click()} className="w-full h-36 border-2 border-dashed border-slate-200 rounded-xl p-3 text-center hover:border-purple-300 hover:bg-purple-50/30">
+                          <UploadCloud className="w-7 h-7 text-slate-400 mx-auto mb-2" /><span className="text-xs font-medium text-slate-700">Add second photo</span>
+                        </button>
+                      )}
                     </div>
-                  )}
+                  </div>
+                  <p className="text-[10px] text-slate-500">JPG, PNG or WEBP · Max 10MB each. Both previews appear before you generate.</p>
                 </div>
 
                 {/* Edit Operations */}
