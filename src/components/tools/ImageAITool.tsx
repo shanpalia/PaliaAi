@@ -78,9 +78,13 @@ export const ImageAITool: React.FC<ImageAIToolProps> = ({ onSendToChat }) => {
       upscale: 'Upscale and improve image clarity and detail while preserving the original subject and identity.',
       custom: prompt.trim(),
     };
-    const finalPrompt = activeTab === 'edit'
-      ? (editPrompts[editOperation] || prompt.trim())
-      : prompt.trim();
+    const referenceGuidance = uploadedReferenceImg
+      ? 'Use reference image 1 as the primary subject and preserve that person\'s facial identity, facial structure, skin tone and recognizable features. Use reference image 2 only as the guide for pose, clothing, styling, composition and/or background as requested. Create one coherent new image; do not blend the two faces or replace the primary subject with the person in reference image 2.'
+      : '';
+    const finalPrompt = [
+      activeTab === 'edit' ? (editPrompts[editOperation] || prompt.trim()) : prompt.trim(),
+      referenceGuidance,
+    ].filter(Boolean).join('\n\n');
 
     setIsLoading(true);
     try {
